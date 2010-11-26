@@ -28,7 +28,6 @@ class ACauchyFormula : public ARefractiveIndex {
   ACauchyFormula();
   ACauchyFormula(Double_t A, Double_t B, Double_t C = 0.);
   ACauchyFormula(const Double_t* p);
-  virtual ~ACauchyFormula();
 
   virtual Double_t GetIndex(Double_t lambda) const;
 

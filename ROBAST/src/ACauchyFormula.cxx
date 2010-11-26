@@ -44,12 +44,6 @@ ACauchyFormula::ACauchyFormula(const Double_t* p)
 }
 
 //_____________________________________________________________________________
-ACauchyFormula::~ACauchyFormula()
-{
-  // do nothing
-}
-
-//_____________________________________________________________________________
 Double_t ACauchyFormula::GetIndex(Double_t lambda) const
 {
   // Calculate the refractive index at wavelength = lambda (m)
