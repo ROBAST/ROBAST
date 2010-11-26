@@ -14,6 +14,7 @@
 // ACauchyFormula
 //
 // Cauchy's formula for calculation of refractive index
+// See http://en.wikipedia.org/wiki/Cauchy's_equation
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -21,15 +22,15 @@
 
 class ACauchyFormula : public ARefractiveIndex {
  private:
-  Double_t         fPar[3]; // Parameters
+  Double_t fPar[3]; // Parameters
 
  public:
   ACauchyFormula();
-  ACauchyFormula(Double_t p0, Double_t p1, Double_t p2);
+  ACauchyFormula(Double_t A, Double_t B, Double_t C = 0.);
   ACauchyFormula(const Double_t* p);
   virtual ~ACauchyFormula();
 
-  virtual Double_t GetIndex(Double_t lambda /*[cm]*/) const;
+  virtual Double_t GetIndex(Double_t lambda) const;
 
   ClassDef(ACauchyFormula, 1)
 };

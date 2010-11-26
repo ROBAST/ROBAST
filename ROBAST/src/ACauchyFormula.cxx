@@ -11,6 +11,7 @@
 // ACauchyFormula
 //
 // Cauchy's formula for calculation of refractive index
+// See http://en.wikipedia.org/wiki/Cauchy's_equation
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,11 +26,13 @@ ACauchyFormula::ACauchyFormula()
 }
 
 //_____________________________________________________________________________
-ACauchyFormula::ACauchyFormula(Double_t p0, Double_t p1, Double_t p2)
+ACauchyFormula::ACauchyFormula(Double_t A, Double_t B, Double_t C)
 {
-  fPar[0] = p0;
-  fPar[1] = p1;
-  fPar[2] = p2;
+  // n(lambda) = A + B/lambda^2 + C/lambda^4
+  // where lambda is measured in (um)
+  fPar[0] = A;
+  fPar[1] = B;
+  fPar[2] = C;
 }
 
 //_____________________________________________________________________________
@@ -43,11 +46,13 @@ ACauchyFormula::ACauchyFormula(const Double_t* p)
 //_____________________________________________________________________________
 ACauchyFormula::~ACauchyFormula()
 {
+  // do nothing
 }
 
 //_____________________________________________________________________________
 Double_t ACauchyFormula::GetIndex(Double_t lambda) const
 {
+  // Calculate the refractive index at wavelength = lambda (m)
   lambda /= AOpticsManager::um(); // Convert (m) to (um)
   return fPar[0] + fPar[1]*TMath::Power(lambda, -2) + fPar[2]*TMath::Power(lambda, -4);
 }
