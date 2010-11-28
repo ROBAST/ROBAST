@@ -10,7 +10,8 @@
 //
 // ASchottFormula
 //
-// SCHOTT's formula for calculation of refractive index
+// SCHOTT's formula for calculation of refractive index. SCHOTT does not use
+// this formula in its catalog any more. Sellmeier's formula is used instead.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,16 +26,16 @@ ASchottFormula::ASchottFormula() : ARefractiveIndex()
 }
 
 //_____________________________________________________________________________
-ASchottFormula::ASchottFormula(Double_t p0, Double_t p1, Double_t p2,
-                               Double_t p3, Double_t p4, Double_t p5)
+ASchottFormula::ASchottFormula(Double_t A0, Double_t A1, Double_t A2,
+                               Double_t A3, Double_t A4, Double_t A5)
   : ARefractiveIndex()
 {
-  fPar[0] = p0;
-  fPar[1] = p1;
-  fPar[2] = p2;
-  fPar[3] = p3;
-  fPar[4] = p4;
-  fPar[5] = p5;
+  fPar[0] = A0;
+  fPar[1] = A1;
+  fPar[2] = A2;
+  fPar[3] = A3;
+  fPar[4] = A4;
+  fPar[5] = A5;
 }
 
 //_____________________________________________________________________________
@@ -43,11 +44,6 @@ ASchottFormula::ASchottFormula(const Double_t* p)
   for(Int_t i = 0; i < 6; i++){
     fPar[i] = p[i];
   } // i
-}
-
-//_____________________________________________________________________________
-ASchottFormula::~ASchottFormula()
-{
 }
 
 //_____________________________________________________________________________
