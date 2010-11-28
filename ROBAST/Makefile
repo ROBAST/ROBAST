@@ -14,7 +14,7 @@ DEPEND	:=	libCore libGeom libGeomPainter libPhysics libGraf libGraf3d
 EXTLIBS	:=	
 
 SRCDIR	:=	src
-INCDIR	:=	inc
+INCDIR	:=	include
 
 DICT	:=	$(NAME)Dict
 DICTS	:=	$(SRCDIR)/$(NAME)Dict.$(SrcSuf)
