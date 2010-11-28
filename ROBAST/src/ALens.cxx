@@ -43,12 +43,10 @@ ALens::~ALens()
 //_____________________________________________________________________________
 Double_t ALens::GetRefractiveIndex(Double_t lambda)
 {
-  Double_t ret;
+  Double_t ret = fConstantIndex;
 
   if(fIndex){
     ret = fIndex->GetIndex(lambda);
-  } else {
-    ret = fConstantIndex;
   } // if
 
   return ret;

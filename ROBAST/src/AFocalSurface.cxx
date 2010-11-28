@@ -10,7 +10,7 @@
 //
 // AFocalSurface
 //
-// FocalSurface class
+// Focal surface
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -26,13 +26,9 @@ AFocalSurface::AFocalSurface()
 
 //_____________________________________________________________________________
 AFocalSurface::AFocalSurface(const char* name, const TGeoShape* shape,
-			   const TGeoMedium* med)
+                             const TGeoMedium* med)
   : AOpticalComponent(name, shape, med)
 {
+  // Constructor
   SetLineColor(2);
-}
-
-//_____________________________________________________________________________
-AFocalSurface::~AFocalSurface()
-{
 }
