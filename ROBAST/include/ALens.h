@@ -1,4 +1,4 @@
-// $Id: ALens.h,v 1.2 2008/03/26 05:50:47 oxon Exp $
+// $Id: ALens.h 3 2010-11-26 17:17:31Z oxon $
 // Author: Akira Okumura 2007/09/24
 
 /******************************************************************************
@@ -17,10 +17,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef A_OPTICAL_COMPONENT_H
 #include "AOpticalComponent.h"
+#endif
+#ifndef A_REFRACTIVE_INDEX_H
 #include "ARefractiveIndex.h"
-
-#include "TGraph.h"
+#endif
 
 class ALens : public AOpticalComponent {
  private:

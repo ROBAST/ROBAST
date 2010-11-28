@@ -1,4 +1,4 @@
-// $Id: AOpticalComponent.h,v 1.2 2008/03/26 05:50:47 oxon Exp $
+// $Id: AOpticalComponent.h 3 2010-11-26 17:17:31Z oxon $
 // Author: Akira Okumura 2007/09/24
 
 /******************************************************************************
@@ -17,7 +17,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef ROOT_TGeoVolume
 #include "TGeoVolume.h"
+#endif
 
 class AOpticalComponent : public TGeoVolume {
  private:

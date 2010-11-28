@@ -1,4 +1,4 @@
-// $Id: ARayShooter.h,v 1.2 2008/03/26 05:50:47 oxon Exp $
+// $Id: ARayShooter.h 3 2010-11-26 17:17:31Z oxon $
 // Author: Akira Okumura 2007/10/02
 
 /******************************************************************************
@@ -17,9 +17,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "ARayArray.h"
+#ifndef ROOT_TMath
 #include "TMath.h"
+#endif
+#ifndef ROOT_TGeoMatrix
 #include "TGeoMatrix.h"
+#endif
+
+#ifndef A_RAY_ARRAY_H
+#include "ARayArray.h"
+#endif
 
 class ARayShooter : public TObject {
  private:
@@ -34,9 +41,6 @@ class ARayShooter : public TObject {
   static ARayArray* Rectangle(Double_t lambda, Double_t dx, Double_t dy,
                               Int_t nx, Int_t ny, TGeoRotation* rot = 0,
                               TGeoTranslation* tr = 0);
-  static ARayArray* Sphere(Double_t lambda, Double_t theta, Int_t nr,
-                           Int_t ntheta, TGeoRotation* rot = 0,
-                           TGeoTranslation* tr = 0);
   static ARayArray* Square(Double_t lambda, Double_t d, Int_t n,
                            TGeoRotation* rot = 0, TGeoTranslation* tr = 0);
 

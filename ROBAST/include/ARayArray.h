@@ -1,4 +1,4 @@
-// $Id: ARayArray.h,v 1.3 2008/03/26 05:50:47 oxon Exp $
+// $Id: ARayArray.h 3 2010-11-26 17:17:31Z oxon $
 // Author: Akira Okumura 2007/10/02
 
 /******************************************************************************
@@ -17,8 +17,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef A_RAY_H
 #include "ARay.h"
+#endif
+#ifndef ROOT_TObjArray
 #include "TObjArray.h"
+#endif
 
 class ARayArray : public TObject {
  private:

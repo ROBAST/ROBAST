@@ -1,4 +1,4 @@
-// $Id: AFocalSurface.h,v 1.2 2008/03/26 05:50:47 oxon Exp $
+// $Id: AFocalSurface.h 3 2010-11-26 17:17:31Z oxon $
 // Author: Akira Okumura 2007/10/01
 
 /******************************************************************************
@@ -13,11 +13,13 @@
 //
 // AFocalSurface
 //
-// Focal surface class
+// Focal surface
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef A_OPTICAL_COMPONENT_H
 #include "AOpticalComponent.h"
+#endif
 
 class AFocalSurface : public AOpticalComponent {
  private:
@@ -25,7 +27,6 @@ class AFocalSurface : public AOpticalComponent {
  public:
   AFocalSurface();
   AFocalSurface(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
-  virtual ~AFocalSurface();
 
   ClassDef(AFocalSurface, 1)
 };

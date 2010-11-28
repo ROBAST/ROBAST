@@ -1,4 +1,4 @@
-// $Id: ARay.h,v 1.3 2008/03/26 05:50:47 oxon Exp $
+// $Id: ARay.h 3 2010-11-26 17:17:31Z oxon $
 // Author: Akira Okumura 2007/09/24
 
 /******************************************************************************
@@ -17,9 +17,15 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef ROOT_TGeoTrack
 #include "TGeoTrack.h"
+#endif
+#ifndef ROOT_TPolyLine3D
 #include "TPolyLine3D.h"
+#endif
+#ifndef ROOT_TVector3
 #include "TVector3.h"
+#endif
 
 class ARay : public TGeoTrack {
  private:

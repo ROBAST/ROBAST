@@ -1,4 +1,4 @@
-// $Id: ACauchyFormula.h,v 1.2 2008/03/26 05:50:47 oxon Exp $
+// $Id: ACauchyFormula.h 5 2010-11-26 17:30:46Z oxon $
 // Author: Akira Okumura 2007/09/24
 
 /******************************************************************************
@@ -14,22 +14,24 @@
 // ACauchyFormula
 //
 // Cauchy's formula for calculation of refractive index
+// See http://en.wikipedia.org/wiki/Cauchy's_equation
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef A_REFRACTIVE_INDEX_H
 #include "ARefractiveIndex.h"
+#endif
 
 class ACauchyFormula : public ARefractiveIndex {
  private:
-  Double_t         fPar[3]; // Parameters
+  Double_t fPar[3]; // Parameters
 
  public:
   ACauchyFormula();
-  ACauchyFormula(Double_t p0, Double_t p1, Double_t p2);
+  ACauchyFormula(Double_t A, Double_t B, Double_t C = 0.);
   ACauchyFormula(const Double_t* p);
-  virtual ~ACauchyFormula();
 
-  virtual Double_t GetIndex(Double_t lambda /*[cm]*/) const;
+  virtual Double_t GetIndex(Double_t lambda) const;
 
   ClassDef(ACauchyFormula, 1)
 };

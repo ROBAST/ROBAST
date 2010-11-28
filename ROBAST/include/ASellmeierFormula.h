@@ -1,4 +1,4 @@
-// $Id: ASellmeierFormula.h,v 1.2 2008/03/26 05:50:47 oxon Exp $
+// $Id: ASellmeierFormula.h 6 2010-11-26 17:33:15Z oxon $
 // Author: Akira Okumura 2007/10/01
 
 /******************************************************************************
@@ -14,21 +14,23 @@
 // ASellmeierFormula
 //
 // Sellmeier formula for calculation of refractive index
+// See http://en.wikipedia.org/wiki/Sellmeier_equation
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef A_REFRACTIVE_INDEX_H
 #include "ARefractiveIndex.h"
+#endif
 
 class ASellmeierFormula : public ARefractiveIndex {
  private:
-  Double_t         fPar[6]; // Parameters
+  Double_t fPar[6]; // Parameters
 
  public:
   ASellmeierFormula();
-  ASellmeierFormula(Double_t b1, Double_t b2, Double_t b3,
-		    Double_t c1, Double_t c2, Double_t c3);
+  ASellmeierFormula(Double_t B1, Double_t B2, Double_t B3,
+                    Double_t C1, Double_t C2, Double_t C3);
   ASellmeierFormula(const Double_t* p);
-  virtual ~ASellmeierFormula();
 
   virtual Double_t GetIndex(Double_t lambda) const;
 
