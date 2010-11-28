@@ -1,0 +1,30 @@
+$Id$
+ROBAST (ROot-BAsed Simulator for ray Tracing)
+
+1. About
+ROBAST is a non-sequential ray trace program which utilizes ROOT's 3D geometry library. Since the ROOT library includes most of functions which are needed for ray tracing, code written by the author in this program is very small.
+
+Commercial software is optimized for optics design, but it is not flexible when being combined with other UN*X software such as CORSIKA. The author had been using ZEMAX to design a cosmic-ray telescope. However it was difficault to use ZEMAX to propagate Cherenkov light emitted by very-high-energy cosmi-ray air showersin CORSIKA simulations. That's why he developed ROBAST.
+
+The biggest advantages in using ROOT are;
+- Implementation of complex telescop structure is easy by using TGeo* classes.
+- Direct analysis of ray trace results in ROOT scripts
+- Scriptable C++
+
+If you are familiar with Geant4, you would think "Why not Geant4 optical?". The answer is simple. Geant4 is too hard to learn for standard ROOT users. If you have an experience in using Geant4, especially in Geant4 optical, you can opt Geant4 which has some advanced features (roughness of surfaces, absorption, ...).
+
+2. Author
+Akira Okumura (ISAS/JAXA)
+oxon@astro.isas.jaxa.jp
+
+3. License
+LGPL
+
+4. Install
+$ tar zxvf robast_1.0.0.tgz
+$ cd robast_1.0.0
+$ make
+$ export LD_LIBRARY_PATH=../robast_1.0.0
+
+If you would like to read HTML document, generate it by yourself.
+$ make htmldoc
