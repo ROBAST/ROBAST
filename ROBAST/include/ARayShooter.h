@@ -17,11 +17,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef ROOT_TGeoMatrix
+#include "TGeoMatrix.h"
+#endif
 #ifndef ROOT_TMath
 #include "TMath.h"
 #endif
-#ifndef ROOT_TGeoMatrix
-#include "TGeoMatrix.h"
+#ifndef ROOT_TVector3
+#include "TVector3.h"
 #endif
 
 #ifndef A_RAY_ARRAY_H
@@ -37,12 +40,12 @@ class ARayShooter : public TObject {
 
   static ARayArray* Circle(Double_t lambda, Double_t rmax, Int_t nr,
                            Int_t nphi, TGeoRotation* rot = 0,
-                           TGeoTranslation* tr = 0);
+                           TGeoTranslation* tr = 0, TVector3* v = 0);
   static ARayArray* Rectangle(Double_t lambda, Double_t dx, Double_t dy,
                               Int_t nx, Int_t ny, TGeoRotation* rot = 0,
-                              TGeoTranslation* tr = 0);
+                              TGeoTranslation* tr = 0, TVector3* v = 0);
   static ARayArray* Square(Double_t lambda, Double_t d, Int_t n,
-                           TGeoRotation* rot = 0, TGeoTranslation* tr = 0);
+                           TGeoRotation* rot = 0, TGeoTranslation* tr = 0, TVector3* v = 0);
 
   ClassDef(ARayShooter, 1)
 };

@@ -92,7 +92,7 @@ ARayShooter::~ARayShooter()
 //_____________________________________________________________________________
 ARayArray* ARayShooter::Circle(Double_t lambda, Double_t rmax, Int_t nr,
                                Int_t nphi, TGeoRotation* rot,
-                               TGeoTranslation* tr)
+                               TGeoTranslation* tr, TVector3* v)
 {
   // Create initial photons aligned in concentric circles
   ARayArray* array = new ARayArray;
@@ -104,6 +104,11 @@ ARayArray* ARayShooter::Circle(Double_t lambda, Double_t rmax, Int_t nr,
   Double_t position[3] = {0, 0, 0};
   Double_t new_pos[3];
   Double_t dir[3] = {0, 0, 1};
+  if(v){
+    dir[0] = v->X();
+    dir[1] = v->Y();
+    dir[2] = v->Z();
+  } // if
   Double_t new_dir[3];
 
   if(rot){
@@ -152,7 +157,7 @@ ARayArray* ARayShooter::Circle(Double_t lambda, Double_t rmax, Int_t nr,
 //_____________________________________________________________________________
 ARayArray* ARayShooter::Rectangle(Double_t lambda, Double_t dx, Double_t dy,
                                   Int_t nx, Int_t ny, TGeoRotation* rot,
-                                  TGeoTranslation* tr)
+                                  TGeoTranslation* tr, TVector3* v)
 {
   // Create initial photons aligned in rectangles
   ARayArray* array = new ARayArray;
@@ -162,6 +167,11 @@ ARayArray* ARayShooter::Rectangle(Double_t lambda, Double_t dx, Double_t dy,
   } // if
 
   Double_t dir[3] = {0, 0, 1};
+  if(v){
+    dir[0] = v->X();
+    dir[1] = v->Y();
+    dir[2] = v->Z();
+  } // if
   Double_t new_dir[3];
 
   if(rot){
@@ -201,8 +211,9 @@ ARayArray* ARayShooter::Rectangle(Double_t lambda, Double_t dx, Double_t dy,
 
 //_____________________________________________________________________________
 ARayArray* ARayShooter::Square(Double_t lambda, Double_t d, Int_t n,
-                               TGeoRotation* rot, TGeoTranslation* tr)
+                               TGeoRotation* rot, TGeoTranslation* tr,
+                               TVector3* v)
 {
   // Create initial photons aligned in squares
-  return Rectangle(lambda, d, d, n, n, rot, tr);
+  return Rectangle(lambda, d, d, n, n, rot, tr, v);
 }
