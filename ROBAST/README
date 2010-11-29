@@ -14,8 +14,8 @@ The biggest advantages in using ROOT are;
 If you are familiar with Geant4, you would think "Why not Geant4 optical?". The answer is simple. Geant4 is too hard to learn for standard ROOT users. If you have an experience in using Geant4, especially in Geant4 optical, you can opt Geant4 which has some advanced features (roughness of surfaces, absorption, ...).
 
 2. Author
-Akira Okumura (ISAS/JAXA)
-oxon@astro.isas.jaxa.jp
+Akira Okumura (ISAS/JAXA and SLAC)
+oxon@astro.isas.jaxa.jp, oxon@stanford.edu
 
 3. License
 LGPL
@@ -28,3 +28,15 @@ $ export LD_LIBRARY_PATH=../robast_1.0.0
 
 If you would like to read HTML document, generate it by yourself.
 $ make htmldoc
+
+5. Tutorials
+Try e.g.
+$ cd robast_1.0.0/tutorial
+$ root
+root [0] .x SC.C
+
+You will see some plots and beatiful 3D image
+
+- SC.C
+Schwarzschild-Couder optical system for AGIS proposed in
+Vassiliev, et al. (2007) Astropart. Phys. 28 10-27
