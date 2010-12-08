@@ -41,6 +41,8 @@ class ARayShooter : public TObject {
   static ARayArray* Circle(Double_t lambda, Double_t rmax, Int_t nr,
                            Int_t nphi, TGeoRotation* rot = 0,
                            TGeoTranslation* tr = 0, TVector3* v = 0);
+  static ARayArray* RandomCone(Double_t lambda, Double_t r, Double_t d, Int_t n,
+                               TGeoRotation* rot = 0, TGeoTranslation* tr = 0);
   static ARayArray* Rectangle(Double_t lambda, Double_t dx, Double_t dy,
                               Int_t nx, Int_t ny, TGeoRotation* rot = 0,
                               TGeoTranslation* tr = 0, TVector3* v = 0);

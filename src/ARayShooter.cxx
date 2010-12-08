@@ -6,6 +6,8 @@
  * All rights reserved.                                                       *
  *****************************************************************************/
 
+#include "TRandom.h"
+
 #include "ARayShooter.h"
 
 ClassImp(ARayShooter)
@@ -64,14 +66,46 @@ Begin_Macro(source)
     square->SetPoint(i, p[0], p[1]);
   } // i
 
-  TCanvas* can = new TCanvas("can", "can", 400, 1200);
-  can->Divide(1, 3);
+  AOpticsManager* manager = new AOpticsManager("manager", "manager");
+  // Make the world
+  TGeoBBox* worldbox = new TGeoBBox("worldbox", 100*m, 100*m, 100*m);
+  AOpticalComponent* world = new AOpticalComponent("world", worldbox);
+  manager->SetTopVolume(world);
+
+  // Top volume
+  TGeoBBox* topbox = new TGeoBBox("topbox", 100*m, 100*m, 100*m);
+  AOpticalComponent* top = new AOpticalComponent("top", topbox);
+
+  TGeoBBox* focal_box = new TGeoBBox("focal_box",45*m, 45*m, 1*m);
+  AFocalSurface* focal = new AFocalSurface("focal", focal_box);
+  top->AddNode(focal, 1, new TGeoTranslation(0, 0, 11*m));
+  world->AddNode(top, 1);
+  manager->CloseGeometry();
+
+  array = ARayShooter::RandomCone(400*nm, 45*m, 10*m, 1000, 0);
+  TGraph* cone = new TGraph;
+  cone->SetTitle("RandomCone(400*nm, 45*m, 10*m, 1000, 0, 0);X (m);Y (m)");
+  manager->TraceNonSequential(*array);
+  running = array->GetFocused();
+
+  for(Int_t i = 0; i <= running->GetLast(); i++){
+    ARay* ray = (ARay*)(*running)[i];
+    if(!ray) continue;
+    Double_t p[4];
+    ray->GetLastPoint(p);
+    cone->SetPoint(i, p[0], p[1]);
+  } // i
+
+  TCanvas* can = new TCanvas("can", "can", 400, 1600);
+  can->Divide(1, 4, 1e-10, 1e-10);
   can->cd(1);
   circle->Draw("ap");
   can->cd(2);
   rectangle->Draw("ap");
   can->cd(3);
   square->Draw("ap");
+  can->cd(4);
+  cone->Draw("ap");
 
   return can;
 }
@@ -149,6 +183,54 @@ ARayArray* ARayShooter::Circle(Double_t lambda, Double_t rmax, Int_t nr,
                            new_dir[0], new_dir[1], new_dir[2]);
       array->Add(ray);
     } // j
+  } // i
+
+  return array;
+}
+
+//_____________________________________________________________________________
+ARayArray* ARayShooter::RandomCone(Double_t lambda, Double_t r, Double_t d, Int_t n,
+                                   TGeoRotation* rot, TGeoTranslation* tr)
+{
+  // Create initial photons aligned in a cone. Direction is random
+  // Start position is at the origin.
+  // Arrival position is inside the circle of radius r at z = d
+  ARayArray* array = new ARayArray;
+
+  for(Int_t i = 0; i < n; i++){
+    // random (x, y) inside a circle
+    Double_t x = gRandom->Uniform(-r, r);
+    Double_t y = gRandom->Uniform(-r, r);
+    if(x*x + y*y > r*r){
+      i--;
+      continue;
+    } // if
+
+    Double_t goal_pos[3] = {x, y, d};
+    Double_t tmp_pos[3];
+    if(rot){
+      rot->LocalToMaster(goal_pos, tmp_pos);
+    } else {
+        memcpy(tmp_pos, goal_pos, 3*sizeof(Double_t));
+    } // if
+
+    Double_t start_pos[3] = {0, 0, 0};
+
+    if(tr) {
+      tr->LocalToMaster(tmp_pos, goal_pos);
+      tr->LocalToMaster(start_pos, tmp_pos);
+    } else {
+      memcpy(goal_pos, tmp_pos, 3*sizeof(Double_t));
+      memcpy(tmp_pos, start_pos, 3*sizeof(Double_t));
+    } // if
+
+    TVector3 start(tmp_pos);
+    TVector3 goal(goal_pos);
+    TVector3 dir = goal - start;
+
+    ARay* ray = new ARay(0, lambda, start.X(), start.Y(), start.Z(), 0,
+                         dir.X(), dir.Y(), dir.Z());
+    array->Add(ray);
   } // i
 
   return array;
