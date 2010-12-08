@@ -75,7 +75,7 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
     else if(IsOpticalComponent(endnode)) type2 = kOpt;
     else if(    IsFocalSurface(endnode)) type2 = kFocus;
     else                                 type2 = kOther;
-    step += type2 == kMirror ? -0.01*nm() : 0.01*nm(); // small enough value
+    step += type2 == kMirror ? -lambda/100 : lambda/100; // small enough value
 
     if((type1 == kNull or type1 == kOpt or type1 == kLens or type1 == kOther)
        and type2 == kMirror){
