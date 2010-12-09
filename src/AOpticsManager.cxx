@@ -21,6 +21,7 @@ ClassImp(AOpticsManager)
 //_____________________________________________________________________________
 AOpticsManager::AOpticsManager() : TGeoManager()
 {
+  fLimit = 100;
 }
 
 //_____________________________________________________________________________
@@ -75,7 +76,10 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
     else if(IsOpticalComponent(endnode)) type2 = kOpt;
     else if(    IsFocalSurface(endnode)) type2 = kFocus;
     else                                 type2 = kOther;
-    step += type2 == kMirror ? -lambda/100 : lambda/100; // small enough value
+    if(type2 == kMirror){
+      Double_t epsilon = 1e-6; // Fixed in TGeoNavigator.cxx (equiv to 1e-6 cm)
+      step -= epsilon*2; // stop the step before reaching the mirror
+    } // if
 
     if((type1 == kNull or type1 == kOpt or type1 == kLens or type1 == kOther)
        and type2 == kMirror){
@@ -89,10 +93,10 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
 
       // step (m), c (m/s)
       if (type1 == kLens){
-        Double_t speed = TMath::C()/((ALens*)startnode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
+        Double_t speed = (TMath::C()*m())/((ALens*)startnode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
         ray.AddPoint(nx[0], nx[1], nx[2], x[3] + step/speed);
       } else {
-        ray.AddPoint(nx[0], nx[1], nx[2], x[3] + step/TMath::C());
+        ray.AddPoint(nx[0], nx[1], nx[2], x[3] + step/(TMath::C()*m()));
       } // if
       ray.SetDirection(d2); // reflected
 
