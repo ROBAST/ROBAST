@@ -52,11 +52,12 @@ class AOpticsManager : public TGeoManager {
   AOpticsManager(const char* name, const char* title);
   virtual ~AOpticsManager();
 
-  static Double_t  m() { return 100.;};
+  static Double_t km() { return 1e3*m();};
+  static Double_t  m() { return 1e2*cm();};
   static Double_t cm() { return 1;};
-  static Double_t mm() { return 1e-1;};
-  static Double_t um() { return 1e-4;};
-  static Double_t nm() { return 1e-7;};
+  static Double_t mm() { return 1e-3*m();};
+  static Double_t um() { return 1e-6*m();};
+  static Double_t nm() { return 1e-9*m();};
 
   Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == AFocalSurface::Class();};
   Bool_t IsLens(TGeoNode* node) const { return node->GetVolume()->IsA() == ALens::Class();};
