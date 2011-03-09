@@ -64,7 +64,7 @@ public:
    virtual void        GetMeshNumbers(Int_t& nvert, Int_t& nsegs, Int_t& npols) const;
    virtual Int_t       GetNmeshVertices() const;
    virtual void        InspectShape() const;
-   virtual Bool_t      IsCylType() const {return kTRUE;}
+   virtual Bool_t      IsCylType() const {return kFALSE;}
    virtual TBuffer3D*  MakeBuffer3D() const;
    virtual Double_t    Safety(Double_t* point, Bool_t in = kTRUE) const;
    virtual void        SavePrimitive(ostream& out, Option_t* option = "");
