@@ -78,4 +78,4 @@ public:
    ClassDef(AGeoWinstonCone2D, 1)
 };
 
-#endif // A_GEO_ASPHERIC_DISK_H
+#endif // A_GEO_WINSTON_CONE_2D_H
