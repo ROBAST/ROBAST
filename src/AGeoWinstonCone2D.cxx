@@ -205,7 +205,7 @@ Int_t AGeoWinstonCone2D::DistancetoPrimitive(Int_t px, Int_t py)
   // compute closest distance from point px,py to each corner
   Int_t n = gGeoManager->GetNsegments();
 
-  Int_t numPoints = 4*n*(n + 1);
+  Int_t numPoints = 4*(n + 1);
 
   return ShapeDistancetoPrimitive(numPoints, px, py);
 }
@@ -225,12 +225,13 @@ Double_t AGeoWinstonCone2D::DistFromInside(Double_t* point, Double_t* dir,
   } // if
   
   // calculate distance
-  Double_t d[3];
+  Double_t d[4];
   d[0] = DistToXY(point, dir);
   d[1] = DistToXZ(point, dir);
-  d[2] = DistToParabola(point, dir);
+  d[2] = DistToParabola(point, dir, 0., TMath::Pi());
+  d[3] = DistToParabola(point, dir, TMath::Pi(), TMath::Pi());
 
-  return d[TMath::LocMin(3, d)];
+  return d[TMath::LocMin(4, d)];
 }
 
 //_____________________________________________________________________________
@@ -248,22 +249,23 @@ Double_t AGeoWinstonCone2D::DistFromOutside(Double_t* point, Double_t* dir,
   } // if
 
   // calculate distance
-  Double_t d[3];
+  Double_t d[4];
   d[0] = DistToXY(point, dir);
   d[1] = DistToXZ(point, dir);
-  d[2] = DistToParabola(point, dir);
-  
-  return d[TMath::LocMin(3, d)];
+  d[2] = DistToParabola(point, dir, 0., TMath::Pi());
+  d[3] = DistToParabola(point, dir, TMath::Pi(), TMath::Pi());
+
+  return d[TMath::LocMin(4, d)];
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir) const
+Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir, Double_t phi, Double_t open) const
 {
-  Double_t x = point[0];
-  Double_t y = point[1];
+  Double_t x = TMath::Cos(phi)*point[0] + TMath::Sin(phi)*point[1];
+  Double_t y =-TMath::Sin(phi)*point[0] + TMath::Cos(phi)*point[1];
   Double_t z = point[2];
-  Double_t px = dir[0];
-  Double_t py = dir[1];
+  Double_t px = TMath::Cos(phi)*dir[0] + TMath::Sin(phi)*dir[1];
+  Double_t py =-TMath::Sin(phi)*dir[0] + TMath::Cos(phi)*dir[1];
   Double_t pz = dir[2];
 
   if(px == 0 and pz == 0){
@@ -280,7 +282,7 @@ Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir) const
   Double_t ALPHA = alpha - fTheta; // inclination in the X-Z plane
   Double_t tanA = TMath::Tan(ALPHA);
 
-  Double_t dist[4];
+  Double_t dist[2];
 
   Double_t tmp = tanA*tanA - (X*tanA - Z)/fF;
   if(tmp < 0){
@@ -305,10 +307,10 @@ Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir) const
       Double_t dx = x_cross_p - x;
       Double_t dz = z_cross_p - z;
       Double_t dy = px == 0 ? dz*py/pz : dx*py/px;
-      if(TMath::Abs(y + dy) > fDY){
-        dist[0] = TGeoShape::Big();
-      } else {
+      if(TMath::Abs(TMath::ATan2(y_cross_p, x_cross_p)) <= open/2.){
         dist[0] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
+      } else {
+        dist[0] = TGeoShape::Big();
       } // if
     } // if
 
@@ -320,70 +322,15 @@ Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir) const
       Double_t dx = x_cross_m - x;
       Double_t dz = z_cross_m - z;
       Double_t dy = px == 0 ? dz*py/pz : dx*py/px;
-      if(TMath::Abs(y + dy) > fDY){
-        dist[1] = TGeoShape::Big();
-      } else {
+      if(TMath::Abs(TMath::ATan2(y_cross_m, x_cross_m)) <= open/2.){
         dist[1] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
+      } else {
+        dist[1] = TGeoShape::Big();
       } // if
     } // if
   } // if
 
-  x = -point[0];
-  px = -dir[0];
-
-  X = cost*(x + fR2) + (z + fDZ)*sint;
-  Z = -sint*(x + fR2) + (z + fDZ)*cost + fF;
-  alpha = TMath::ATan2(pz, px); // inclination in the x-z plane
-  ALPHA = alpha - fTheta; // inclination in the X-Z plane
-  tanA = TMath::Tan(ALPHA);
-
-  tmp = tanA*tanA - (X*tanA - Z)/fF;
-  if(tmp < 0){
-    dist[2] = TGeoShape::Big();
-    dist[3] = TGeoShape::Big();
-  } else {
-    Double_t X_cross_p = 2*fF*(tanA + TMath::Sqrt(tmp));
-    Double_t X_cross_m = 2*fF*(tanA - TMath::Sqrt(tmp));
-    Double_t Z_cross_p = X_cross_p*X_cross_p/4./fF;
-    Double_t Z_cross_m = X_cross_m*X_cross_m/4./fF;
-
-    Double_t x_cross_p = cost*X_cross_p - sint*(Z_cross_p - fF) - fR2;
-    Double_t x_cross_m = cost*X_cross_m - sint*(Z_cross_m - fF) - fR2;
-    Double_t z_cross_p = sint*X_cross_p + cost*(Z_cross_p - fF) - fDZ;
-    Double_t z_cross_m = sint*X_cross_m + cost*(Z_cross_m - fF) - fDZ;
-
-    if(x_cross_p < fR2 or fR1 < x_cross_p or
-        z_cross_p < -fDZ or fDZ < z_cross_p or
-        (x_cross_p - x)*px + (z_cross_p - z)*pz < 0){
-      dist[2] = TGeoShape::Big();
-    } else {
-      Double_t dx = x_cross_p - x;
-      Double_t dz = z_cross_p - z;
-      Double_t dy = px == 0 ? dz*py/pz : dx*py/px;
-      if(TMath::Abs(y + dy) > fDY){
-        dist[2] = TGeoShape::Big();
-      } else {
-        dist[2] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
-      } // if
-    } // if
-
-    if(x_cross_m < fR2 or fR1 < x_cross_m or
-        z_cross_m < -fDZ or fDZ < z_cross_m or
-        (x_cross_m - x)*px + (z_cross_m - z)*pz < 0){
-      dist[3] = TGeoShape::Big();
-    } else {
-      Double_t dx = x_cross_m - x;
-      Double_t dz = z_cross_m - z;
-      Double_t dy = px == 0 ? dz*py/pz : dx*py/px;
-      if(TMath::Abs(y + dy) > fDY){
-        dist[3] = TGeoShape::Big();
-      } else {
-        dist[3] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
-      } // if
-    } // if
-  } // if
-
-  return dist[TMath::LocMin(4, dist)];
+  return TMath::Min(dist[0], dist[1]);
 }
 
 //_____________________________________________________________________________
