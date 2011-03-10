@@ -225,9 +225,23 @@ Double_t AGeoWinstonCone2D::DistFromInside(Double_t* point, Double_t* dir,
   } // if
   
   // calculate distance
+  Double_t dz = TGeoShape::Big();
+  if(dir[2] < 0){
+    dz = -(point[2] + fDZ)/dir[2];
+  } else if (dir[2] > 0) {
+    dz = (fDZ - point[2])/dir[2];
+  } // if
+
+  Double_t dy = TGeoShape::Big();
+  if(dir[1] < 0){
+    dy = -(point[1] + fDY)/dir[1];
+  } else if (dir[1] > 0) {
+    dy = (fDY - point[1])/dir[1];
+  } // if
+
   Double_t d[4];
-  d[0] = DistToXY(point, dir);
-  d[1] = DistToXZ(point, dir);
+  d[0] = dz;
+  d[1] = dy;
   d[2] = DistToParabola(point, dir, 0., TMath::Pi());
   d[3] = DistToParabola(point, dir, TMath::Pi(), TMath::Pi());
 
@@ -249,13 +263,73 @@ Double_t AGeoWinstonCone2D::DistFromOutside(Double_t* point, Double_t* dir,
   } // if
 
   // calculate distance
-  Double_t d[4];
-  d[0] = DistToXY(point, dir);
-  d[1] = DistToXZ(point, dir);
-  d[2] = DistToParabola(point, dir, 0., TMath::Pi());
-  d[3] = DistToParabola(point, dir, TMath::Pi(), TMath::Pi());
 
-  return d[TMath::LocMin(4, d)];
+  if(point[2] <= -fDZ) {
+    if(dir[2] <= 0){
+      return TGeoShape::Big();
+    } // if
+    Double_t snxt = -(fDZ + point[2])/dir[2];
+    // find extrapolated X and Y
+    Double_t xnew = point[0] + snxt*dir[0];
+    Double_t ynew = point[1] + snxt*dir[1];
+    if(TMath::Abs(xnew) <= fR2 and TMath::Abs(ynew) <= fDY){
+      return snxt;
+    } // if
+  } else if(point[2] >= fDZ){
+    if(dir[2] >= 0){
+      return TGeoShape::Big();
+    } // if
+    Double_t snxt = (fDZ - point[2])/dir[2];
+    // find extrapolated X and Y
+    Double_t xnew = point[0] + snxt*dir[0];
+    Double_t ynew = point[1] + snxt*dir[1];
+    if(TMath::Abs(xnew) <= fR1 and TMath::Abs(ynew) <= fDY){
+      return snxt;
+    } // if
+  } // if
+
+  if(point[1] <= -fDY) {
+    if(dir[1] <= 0){
+      return TGeoShape::Big();
+    } // if
+    Double_t snxt = -(fDY + point[1])/dir[1];
+    // find extrapolated X and Y
+    Double_t xnew = point[0] + snxt*dir[0];
+    Double_t znew = point[2] + snxt*dir[2];
+    if(TMath::Abs(znew) <= fDZ and TMath::Abs(xnew) <= CalcR(znew)){
+      return snxt;
+    } // if
+  } else if(point[1] >= fDY){
+    if(dir[1] >= 0){
+      return TGeoShape::Big();
+    } // if
+    Double_t snxt = (fDY - point[1])/dir[1];
+    // find extrapolated X and Y
+    Double_t xnew = point[0] + snxt*dir[0];
+    Double_t znew = point[2] + snxt*dir[2];
+    if(TMath::Abs(znew) <= fDZ and TMath::Abs(xnew) <= CalcR(znew)){
+      return snxt;
+    } // if
+  } // if
+
+  Double_t d[2];
+  Double_t snxt = DistToParabola(point, dir, 0., TMath::Pi());
+  Double_t ynew = point[1] + snxt*dir[1];
+  if(TMath::Abs(ynew) <= fDY){
+    d[0] = snxt;
+  } else {
+    d[0] = TGeoShape::Big();
+  } // if
+
+  snxt = DistToParabola(point, dir, TMath::Pi(), TMath::Pi());
+  ynew = point[1] + snxt*dir[1];
+  if(TMath::Abs(ynew) <= fDY){
+    d[1] = snxt;
+  } else {
+    d[1] = TGeoShape::Big();
+  } // if
+
+  return TMath::Min(d[0], d[1]);
 }
 
 //_____________________________________________________________________________
@@ -298,15 +372,18 @@ Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir, Doubl
     Double_t x_cross_m = cost*X_cross_m - sint*(Z_cross_m - fF) - fR2;
     Double_t z_cross_p = sint*X_cross_p + cost*(Z_cross_p - fF) - fDZ;
     Double_t z_cross_m = sint*X_cross_m + cost*(Z_cross_m - fF) - fDZ;
+    Double_t y_cross_p = y + (px == 0 ? (z_cross_p - z)*py/pz : (x_cross_p - x)*py/px);
+    Double_t y_cross_m = y + (px == 0 ? (z_cross_m - z)*py/pz : (x_cross_m - x)*py/px);
+
+    Double_t dx = x_cross_p - x;
+    Double_t dy = y_cross_p - y;
+    Double_t dz = z_cross_p - z;
 
     if(x_cross_p < fR2 or fR1 < x_cross_p or
         z_cross_p < -fDZ or fDZ < z_cross_p or
-        (x_cross_p - x)*px + (z_cross_p - z)*pz < 0){
+        dx*px + dz*pz < 0){
       dist[0] = TGeoShape::Big();
     } else {
-      Double_t dx = x_cross_p - x;
-      Double_t dz = z_cross_p - z;
-      Double_t dy = px == 0 ? dz*py/pz : dx*py/px;
       if(TMath::Abs(TMath::ATan2(y_cross_p, x_cross_p)) <= open/2.){
         dist[0] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
       } else {
@@ -314,110 +391,21 @@ Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir, Doubl
       } // if
     } // if
 
+    dx = x_cross_m - x;
+    dy = y_cross_m - y;
+    dz = z_cross_m - z;
+
     if(x_cross_m < fR2 or fR1 < x_cross_m or
         z_cross_m < -fDZ or fDZ < z_cross_m or
-        (x_cross_m - x)*px + (z_cross_m - z)*pz < 0){
+        dx*px + dz*pz < 0){
       dist[1] = TGeoShape::Big();
     } else {
-      Double_t dx = x_cross_m - x;
-      Double_t dz = z_cross_m - z;
-      Double_t dy = px == 0 ? dz*py/pz : dx*py/px;
       if(TMath::Abs(TMath::ATan2(y_cross_m, x_cross_m)) <= open/2.){
         dist[1] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
       } else {
         dist[1] = TGeoShape::Big();
       } // if
     } // if
-  } // if
-
-  return TMath::Min(dist[0], dist[1]);
-}
-
-//_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistToXY(Double_t* point, Double_t* dir) const
-{
-  Double_t x = point[0];
-  Double_t y = point[1];
-  Double_t z = point[2];
-  Double_t px = dir[0];
-  Double_t py = dir[1];
-  Double_t pz = dir[2];
-
-  if(pz == 0){
-    return TGeoShape::Big();
-  } // if
-
-  Double_t dist[2];
-
-  // distance to the upper plane
-  Double_t dz = fDZ - z;
-  Double_t dx = dz*px/pz;
-  Double_t dy = dz*py/pz;
-  Double_t x1 = x + dx;
-  Double_t y1 = y + dy;
-
-  if(dz*pz < 0 or TMath::Abs(x1) > fR1 or TMath::Abs(y1) > fDY){
-    dist[0] = TGeoShape::Big();
-  } else {
-    dist[0] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
-  } // if
-
-  // distance to the lower plane
-  dz = -fDZ - z;
-  dx = dz*px/pz;
-  dy = dz*py/pz;
-  x1 = x + dx;
-  y1 = y + dy;
-
-  if(dz*pz < 0 or TMath::Abs(x1) > fR2 or TMath::Abs(y1) > fDY){
-    dist[1] = TGeoShape::Big();
-  } else {
-    dist[1] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
-  } // if
-
-  return TMath::Min(dist[0], dist[1]);
-}
-
-//_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistToXZ(Double_t* point, Double_t* dir) const
-{
-  Double_t x = point[0];
-  Double_t y = point[1];
-  Double_t z = point[2];
-  Double_t px = dir[0];
-  Double_t py = dir[1];
-  Double_t pz = dir[2];
-
-  if(py == 0){
-    return TGeoShape::Big();
-  } // if
-
-  Double_t dist[2];
-
-  // distance to the upper plane
-  Double_t dy = fDY - y;
-  Double_t dx = dy*px/py;
-  Double_t dz = dy*pz/py;
-  Double_t x1 = x + dx;
-  Double_t z1 = z + dz;
-
-  if(dy*py < 0 or TMath::Abs(z1) > fDZ or TMath::Abs(x1) > CalcR(z1)){
-    dist[0] = TGeoShape::Big();
-  } else {
-    dist[0] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
-  } // if
-
-  // distance to the lower plane
-  dy = -fDY - y;
-  dx = dy*px/py;
-  dz = dy*pz/py;
-  x1 = x + dx;
-  z1 = z + dz;
-
-  if(dy*py < 0 or TMath::Abs(z1) > fDZ or TMath::Abs(x1) > CalcR(z1)){
-    dist[1] = TGeoShape::Big();
-  } else {
-    dist[1] = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
   } // if
 
   return TMath::Min(dist[0], dist[1]);

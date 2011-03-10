@@ -51,9 +51,7 @@ public:
                                        Int_t iact = 1,
                                        Double_t step = TGeoShape::Big(),
                                        Double_t* safe = 0) const;
-   virtual Double_t    DistToParabola(Double_t* point, Double_t* dir) const;
-   virtual Double_t    DistToXY(Double_t* point, Double_t* dir) const;
-   virtual Double_t    DistToXZ(Double_t* point, Double_t* dir) const;
+   virtual Double_t    DistToParabola(Double_t* point, Double_t* dir, Double_t phi, Double_t open) const;
    virtual TGeoVolume* Divide(TGeoVolume* voldiv, const char* divname,
                               Int_t iaxis, Int_t ndiv, Double_t start,
                               Double_t step);
