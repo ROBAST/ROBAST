@@ -84,9 +84,12 @@ void AGeoWinstonConePoly::ComputeNormal(Double_t* point, Double_t* dir,
 
   Double_t saf[2];
   saf[0] = TMath::Abs(TMath::Abs(fDZ) - TMath::Abs(z));
-  Double_t phi = TMath::Abs(TMath::ATan2(y, x));
+  Double_t phi = TMath::ATan2(y, x);
   while(phi > TMath::Pi()/fPolyN){
     phi -= TMath::TwoPi()/fPolyN;
+  } // while
+  while(phi < -TMath::Pi()/fPolyN){
+    phi += TMath::TwoPi()/fPolyN;
   } // while
   try {
     saf[1] = TMath::Abs(CalcR(z) - TMath::Sqrt(x*x + y*y)*TMath::Cos(phi));
@@ -101,8 +104,8 @@ void AGeoWinstonConePoly::ComputeNormal(Double_t* point, Double_t* dir,
     norm[1] = 0;
     norm[2] = 1;
   } else {
-    phi = TMath::Abs(TMath::ATan2(y, x));
-    if(phi < 0){
+    phi = TMath::ATan2(y, x);
+    if(phi < -TMath::Pi()/fPolyN){
       phi += TMath::TwoPi();
     } // if
     Int_t n = TMath::Floor((phi + TMath::Pi()/fPolyN)/(TMath::TwoPi()/fPolyN));
