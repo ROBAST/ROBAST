@@ -408,7 +408,7 @@ void AGeoWinstonConePoly::SetPoints(Double_t* points) const
       // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
       Double_t t = 2.*fDZ*i/n;
       Double_t z = -fDZ + t;
-      Double_t r = CalcR(z)*2/TMath::Sqrt(3);
+      Double_t r = CalcR(z)/TMath::Cos(TMath::Pi()/fPolyN);
 
       for(Int_t j = 0; j < fPolyN; j++){
         Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
@@ -444,7 +444,7 @@ void AGeoWinstonConePoly::SetPoints(Float_t* points) const
       // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
       Double_t t = 2.*fDZ*i/n;
       Double_t z = -fDZ + t;
-      Double_t r = CalcR(z);
+      Double_t r = CalcR(z)/TMath::Cos(TMath::TwoPi()/fPolyN);;
 
       for(Int_t j = 0; j < fPolyN; j++){
         Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
