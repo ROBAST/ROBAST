@@ -107,6 +107,20 @@ Bool_t ARay::IsSuspended() const
 }
 
 //_____________________________________________________________________________
+TPolyLine3D* ARay::MakePolyLine3D() const
+{
+  TPolyLine3D* pol = new TPolyLine3D;
+
+  for(Int_t i = 0; i < GetNpoints(); i++){
+    Double_t x, y, z, t;
+    GetPoint(i, x, y, z, t);
+    pol->SetPoint(i, x, y, z);
+  } // i
+
+  return pol;
+}
+
+//_____________________________________________________________________________
 void ARay::SetDirection(Double_t* d)
 {
   Double_t mag = TMath::Sqrt(d[0]*d[0] + d[1]*d[1] +d[2]*d[2]);
