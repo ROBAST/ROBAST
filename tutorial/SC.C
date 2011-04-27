@@ -126,7 +126,10 @@ void SC()
       Double_t p[4];    
       ray->GetLastPoint(p);
       ray->SetLineWidth(1);
-      //      if((p[3] - (3.2*kZs - kZf)/TMath::C())/1e-9 < -10) ray->Draw(); // high CPU load!
+      /* uncomment here if you want to draw all photon trajectories
+      TPolyLine3D* pol = ray->MakePolyLine3D();
+      pol->Draw();
+      */
       Double_t x = deg*10*cm;
       hist[n]->Fill((p[0] - x)/(10*cm)*60, p[1]/(10*cm)*60);
       histT[n]->Fill((p[3] - (3.2*kZs - kZf)/TMath::C())/1e-9); // ns
