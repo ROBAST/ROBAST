@@ -32,6 +32,7 @@ ALens::ALens(const char* name, const TGeoShape* shape,
 {
   fIndex = 0;
   fConstantIndex = 1;
+  fConstantAbsorptionLength = -1;
   SetLineColor(7);
 }
 
@@ -41,7 +42,7 @@ ALens::~ALens()
 }
 
 //_____________________________________________________________________________
-Double_t ALens::GetRefractiveIndex(Double_t lambda)
+Double_t ALens::GetRefractiveIndex(Double_t lambda) const
 {
   Double_t ret = fConstantIndex;
 
