@@ -14,6 +14,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TRandom.h"
+
 #include "AOpticsManager.h"
 
 ClassImp(AOpticsManager)
@@ -79,6 +81,19 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
     if(type2 == kMirror){
       Double_t epsilon = 1e-6; // Fixed in TGeoNavigator.cxx (equiv to 1e-6 cm)
       step -= epsilon*2; // stop the step before reaching the mirror
+    } // if
+
+    if(type1 == kLens){
+      Double_t abs = ((ALens*)startnode->GetVolume())->GetAbsorptionLength(lambda);
+      if(abs > 0){
+        Double_t abs_step = gRandom->Exp(abs);
+        if(abs_step < step){
+          Double_t speed = (TMath::C()*m())/((ALens*)startnode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
+          ray.AddPoint(x[0] + d1[0]*abs_step, x[1] + d1[1]*abs_step, x[2] + d1[2]*abs_step, x[3] + step/speed);
+          ray.Stop();
+          continue;
+        } // if
+      } // if
     } // if
 
     if((type1 == kNull or type1 == kOpt or type1 == kLens or type1 == kOther)
