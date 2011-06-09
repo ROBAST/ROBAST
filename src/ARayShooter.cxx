@@ -237,6 +237,56 @@ ARayArray* ARayShooter::RandomCone(Double_t lambda, Double_t r, Double_t d, Int_
 }
 
 //_____________________________________________________________________________
+ARayArray* ARayShooter::RandomRectangle(Double_t lambda, Double_t dx, Double_t dy,
+                                        Int_t n, TGeoRotation* rot,
+                                        TGeoTranslation* tr, TVector3* v)
+{
+  // Create initial photons randomly distributed in a rectangle
+  ARayArray* array = new ARayArray;
+
+  if(dx < 0 or dy < 0 or n < 1){
+    return array;
+  } // if
+
+  Double_t dir[3] = {0, 0, 1};
+  if(v){
+    dir[0] = v->X();
+    dir[1] = v->Y();
+    dir[2] = v->Z();
+  } // if
+  Double_t new_dir[3];
+
+  if(rot){
+    rot->LocalToMaster(dir, new_dir);
+  } else {
+    memcpy(new_dir, dir, 3*sizeof(Double_t));
+  } // if
+
+  for(Int_t i = 0; i < n; i++){
+    Double_t new_pos[3];
+    Double_t x[3] = {gRandom->Uniform(-dx/2., dx/2.), gRandom->Uniform(-dy/2., dy/2.), 0};
+
+    if(rot){
+      rot->LocalToMaster(x, new_pos);
+    } else {
+      memcpy(new_pos, x, 3*sizeof(Double_t));
+    } // if
+
+    if(tr) {
+      tr->LocalToMaster(new_pos, x);
+    } else {
+      memcpy(x, new_pos, 3*sizeof(Double_t));
+    } // if
+
+    ARay* ray = new ARay(0, lambda, x[0], x[1], x[2], 0,
+                         new_dir[0], new_dir[1], new_dir[2]);
+    array->Add(ray);
+  } // i
+
+  return array;
+}
+
+//_____________________________________________________________________________
 ARayArray* ARayShooter::RandomSphere(Double_t lambda, Int_t n, TGeoTranslation* tr)
 {
   ARayArray* array = new ARayArray;
@@ -267,6 +317,14 @@ ARayArray* ARayShooter::RandomSphere(Double_t lambda, Int_t n, TGeoTranslation* 
   } // i
 
   return array;
+}
+
+//_____________________________________________________________________________
+ARayArray* ARayShooter::RandomSquare(Double_t lambda, Double_t d,
+                                     Int_t n, TGeoRotation* rot,
+                                     TGeoTranslation* tr, TVector3* v)
+{
+  return RandomRectangle(lambda, d, d, n, rot, tr, v);
 }
 
 //_____________________________________________________________________________
