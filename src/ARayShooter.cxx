@@ -291,17 +291,8 @@ ARayArray* ARayShooter::RandomSphere(Double_t lambda, Int_t n, TGeoTranslation* 
 {
   ARayArray* array = new ARayArray;
   for(Int_t i = 0; i < n; i++){
-    Double_t x = gRandom->Uniform(-1, 1);
-    Double_t y = gRandom->Uniform(-1, 1);
-    Double_t z = gRandom->Uniform(-1, 1);
-    Double_t r2 = x*x + y*y + z*z;
-    if(r2 > 1){
-      i--;
-      continue;
-    } // if
-
-    Double_t r = TMath::Sqrt(r2);
-    Double_t dir[3] = {x/r, y/r, z/r};
+    Double_t dir[3];
+    gRandom->Sphere(dir[0], dir[1], dir[2], 1);
 
     Double_t p[3] = {0, 0, 0};
     Double_t new_pos[3];
