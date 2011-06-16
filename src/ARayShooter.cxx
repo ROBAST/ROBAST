@@ -311,6 +311,40 @@ ARayArray* ARayShooter::RandomSphere(Double_t lambda, Int_t n, TGeoTranslation* 
 }
 
 //_____________________________________________________________________________
+ARayArray* ARayShooter::RandomSphericalCone(Double_t lambda, Int_t n, Double_t theta, TGeoRotation* rot, TGeoTranslation* tr)
+{
+  ARayArray* array = new ARayArray;
+  for(Int_t i = 0; i < n; i++){
+    Double_t dir[3];
+    Double_t ran = gRandom->Uniform(TMath::Cos(theta*TMath::DegToRad()), 1);
+    Double_t theta_ = TMath::ACos(ran);
+    Double_t phi = gRandom->Uniform(0, TMath::TwoPi());
+    dir[0] = TMath::Sin(theta_)*TMath::Cos(phi);
+    dir[1] = TMath::Sin(theta_)*TMath::Sin(phi);
+    dir[2] = TMath::Cos(theta_);
+
+    Double_t new_dir[3];
+    if(rot){
+      rot->LocalToMaster(dir, new_dir);
+    } else {
+      memcpy(new_dir, dir, 3*sizeof(Double_t));
+    } // if
+
+    Double_t p[3] = {0, 0, 0};
+    Double_t new_pos[3] = {0, 0, 0};
+    if(tr){
+      tr->LocalToMaster(p, new_pos);
+    } // if
+
+    ARay* ray = new ARay(0, lambda, new_pos[0], new_pos[1], new_pos[2], 0,
+                         new_dir[0], new_dir[1], new_dir[2]);
+    array->Add(ray);
+  } // i
+
+  return array;
+}
+
+//_____________________________________________________________________________
 ARayArray* ARayShooter::RandomSquare(Double_t lambda, Double_t d,
                                      Int_t n, TGeoRotation* rot,
                                      TGeoTranslation* tr, TVector3* v)
