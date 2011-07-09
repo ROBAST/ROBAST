@@ -15,7 +15,9 @@
 #pragma link C++ class ACauchyFormula;
 #pragma link C++ class AFocalSurface;
 #pragma link C++ class AGeoAsphericDisk;
+#pragma link C++ class AGeoBezierPgon;
 #pragma link C++ class AGeoWinstonCone2D;
+//#pragma link C++ class AGeoWinstonCone3D;
 #pragma link C++ class AGeoWinstonConePoly;
 #pragma link C++ class AGlassCatalog;
 #pragma link C++ class ALens;
