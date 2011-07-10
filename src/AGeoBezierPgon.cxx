@@ -109,6 +109,5 @@ void AGeoBezierPgon::SetSections()
     Double_t r, z;
     Bezier(t, r, z);
     DefineSection(i, z, 0, r);
-    Error("SetSections", "%d %f %f %f", i, t, z, r);
   } // i
 }
