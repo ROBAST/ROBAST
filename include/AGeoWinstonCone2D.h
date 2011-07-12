@@ -61,6 +61,7 @@ public:
    virtual TGeoShape*  GetMakeRuntimeShape(TGeoShape*, TGeoMatrix*) const {return 0;}
    virtual void        GetMeshNumbers(Int_t& nvert, Int_t& nsegs, Int_t& npols) const;
    virtual Int_t       GetNmeshVertices() const;
+   virtual Double_t    GetTheta() const {return fTheta;}
    virtual void        InspectShape() const;
    virtual Bool_t      IsCylType() const {return kFALSE;}
    virtual TBuffer3D*  MakeBuffer3D() const;
