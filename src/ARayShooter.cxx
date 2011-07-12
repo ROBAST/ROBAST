@@ -189,6 +189,63 @@ ARayArray* ARayShooter::Circle(Double_t lambda, Double_t rmax, Int_t nr,
 }
 
 //_____________________________________________________________________________
+ARayArray* ARayShooter::RandomCircle(Double_t lambda, Double_t rmax, Int_t n,
+                                     TGeoRotation* rot,
+                                     TGeoTranslation* tr, TVector3* v)
+{
+  ARayArray* array = new ARayArray;
+
+  if(0 > rmax){
+    return array;
+  } // if
+
+  Double_t position[3] = {0, 0, 0};
+  Double_t new_pos[3];
+  Double_t dir[3] = {0, 0, 1};
+  if(v){
+    dir[0] = v->X();
+    dir[1] = v->Y();
+    dir[2] = v->Z();
+  } // if
+  Double_t new_dir[3];
+
+  if(rot){
+    rot->LocalToMaster(dir, new_dir);
+  } else {
+    memcpy(new_dir, dir, 3*sizeof(Double_t));
+  } // if
+
+  if(tr) {
+    tr->LocalToMaster(position, new_pos);
+  } else {
+    memcpy(new_pos, position, 3*sizeof(Double_t));
+  } // if
+
+  for(Int_t i = 0; i < n; i++){
+    Double_t x[3] = {0, 0, 0};
+    gRandom->Circle(x[0], x[1], rmax);
+
+    if(rot){
+      rot->LocalToMaster(x, new_pos);
+    } else {
+      memcpy(new_pos, x, 3*sizeof(Double_t));
+    } //   if
+
+    if(tr) {
+      tr->LocalToMaster(new_pos, x);
+    } else {
+      memcpy(x, new_pos, 3*sizeof(Double_t));
+    } // if
+
+    ARay* ray = new ARay(0, lambda, x[0], x[1], x[2], 0,
+                         new_dir[0], new_dir[1], new_dir[2]);
+    array->Add(ray);
+  } // i
+
+  return array;
+}
+
+//_____________________________________________________________________________
 ARayArray* ARayShooter::RandomCone(Double_t lambda, Double_t r, Double_t d, Int_t n,
                                    TGeoRotation* rot, TGeoTranslation* tr)
 {
