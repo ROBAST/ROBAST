@@ -15,8 +15,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "TRandom.h"
+#include "RVersion.h"
 
 #include "AOpticsManager.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,32,0)
+#define MULTI_THREAD_NAVIGATION
+#endif
+#endif
 
 ClassImp(AOpticsManager)
 
@@ -24,6 +32,10 @@ ClassImp(AOpticsManager)
 AOpticsManager::AOpticsManager() : TGeoManager()
 {
   fLimit = 100;
+  fNThreads = 1;
+#ifdef MULTI_THREAD_NAVIGATION
+  SetMultiThread(kTRUE);
+#endif
 }
 
 //_____________________________________________________________________________
@@ -31,6 +43,10 @@ AOpticsManager::AOpticsManager(const char* name, const char* title)
  : TGeoManager(name, title)
 {
   fLimit = 100;
+  fNThreads = 1;
+#ifdef MULTI_THREAD_NAVIGATION
+  SetMultiThread(kTRUE);
+#endif
 }
 
 //_____________________________________________________________________________
@@ -182,6 +198,10 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
     } // if
 
     if(type2 == kNull){
+      for(Int_t i = 0; i < 3; i++){
+        nx[i] = x[i] + step*d1[i];
+      } // i
+      ray.AddPoint(nx[0], nx[1], nx[2], x[3] + step/TMath::C());
       ray.Exit();
     } else if(type1 == kFocus or type1 == kObs or type1 == kMirror or type2 == kObs){
       ray.Stop();
@@ -201,6 +221,11 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
 {
   TObjArray* running = array.GetRunning();
 
+#ifdef MULTI_THREAD_NAVIGATION
+  omp_set_num_threads(fNThreads);
+#pragma omp parallel
+#pragma omp parallel for
+#endif
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(*running)[i];
     if(!ray) continue;

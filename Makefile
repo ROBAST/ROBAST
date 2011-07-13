@@ -53,6 +53,9 @@ else
 endif
 		@echo "$@ done"
 
+CXXFLAGS += -fopenmp
+LDFLAGS += -lgomp
+
 $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 		@echo "Compiling" $<
 		$(CXX) $(CXXFLAGS) -Wall -g -I$(INCDIR) -c $< -o $@

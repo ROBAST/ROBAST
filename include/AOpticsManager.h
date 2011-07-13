@@ -46,6 +46,7 @@
 class AOpticsManager : public TGeoManager {
  private:
   Int_t fLimit; // Maximum number of crossing calculations
+  UInt_t fNThreads;
 
  public:
   AOpticsManager();
