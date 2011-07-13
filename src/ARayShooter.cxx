@@ -199,7 +199,6 @@ ARayArray* ARayShooter::RandomCircle(Double_t lambda, Double_t rmax, Int_t n,
     return array;
   } // if
 
-  Double_t position[3] = {0, 0, 0};
   Double_t new_pos[3];
   Double_t dir[3] = {0, 0, 1};
   if(v){
@@ -213,12 +212,6 @@ ARayArray* ARayShooter::RandomCircle(Double_t lambda, Double_t rmax, Int_t n,
     rot->LocalToMaster(dir, new_dir);
   } else {
     memcpy(new_dir, dir, 3*sizeof(Double_t));
-  } // if
-
-  if(tr) {
-    tr->LocalToMaster(position, new_pos);
-  } else {
-    memcpy(new_pos, position, 3*sizeof(Double_t));
   } // if
 
   for(Int_t i = 0; i < n; i++){
