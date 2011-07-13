@@ -178,7 +178,7 @@ Double_t AGeoWinstonConePoly::DistFromInside(Double_t* point, Double_t* dir,
   } // if
 
   for(Int_t i = 0; i < fPolyN; i++){
-    d[1 + i] = DistToParabola(point, dir, i*TMath::TwoPi()/fPolyN, TMath::TwoPi()/fPolyN);
+    d[1 + i] = DistToParabola(point, dir, i*TMath::TwoPi()/fPolyN, TMath::Pi());
   } // i
 
   return d[TMath::LocMin(1 + fPolyN, d)];
