@@ -372,8 +372,22 @@ Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir, Doubl
     Double_t x_cross_m = cost*X_cross_m - sint*(Z_cross_m - fF) - fR2;
     Double_t z_cross_p = sint*X_cross_p + cost*(Z_cross_p - fF) - fDZ;
     Double_t z_cross_m = sint*X_cross_m + cost*(Z_cross_m - fF) - fDZ;
-    Double_t y_cross_p = y + (px == 0 ? (z_cross_p - z)*py/pz : (x_cross_p - x)*py/px);
-    Double_t y_cross_m = y + (px == 0 ? (z_cross_m - z)*py/pz : (x_cross_m - x)*py/px);
+    Double_t y_cross_p;
+    Double_t y_cross_m;
+
+    // Avoid using meaningless values
+    // such as py/pz when |py| << 1 and |pz| << 1
+    // and py/px when |py| << 1 and |px| << 1
+    if(TMath::Abs(px) <= TMath::Abs(pz) and TMath::Abs(py) <= TMath::Abs(pz)){
+      y_cross_p = y + (z_cross_p - z)*py/pz;
+      y_cross_m = y + (z_cross_m - z)*py/pz;
+    } else if(TMath::Abs(py) <= TMath::Abs(px) and TMath::Abs(pz) <= TMath::Abs(px)){
+      y_cross_p = y + (x_cross_p - x)*py/px;
+      y_cross_m = y + (x_cross_m - x)*py/px;
+    } else {
+      y_cross_p = y + (px == 0 ? (z_cross_p - z)*py/pz : (x_cross_p - x)*py/px);
+      y_cross_m = y + (px == 0 ? (z_cross_m - z)*py/pz : (x_cross_m - x)*py/px);
+    } // if
 
     Double_t dx = x_cross_p - x;
     Double_t dy = y_cross_p - y;
