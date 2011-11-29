@@ -6,7 +6,7 @@
 #  All rights reserved.                                                       #
 ###############################################################################
 
-include $(ROOTSYS)/test/Makefile.arch
+include $(wildcard $(ROOTSYS)/*/Makefile.arch)
 
 NAME	:=	ROBAST
 DEPEND	:=	libCore libGeom libGeomPainter libPhysics libGraf libGraf3d
