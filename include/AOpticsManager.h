@@ -47,6 +47,13 @@ class AOpticsManager : public TGeoManager {
  private:
   Int_t fLimit; // Maximum number of crossing calculations
   UInt_t fNThreads;
+  Bool_t fDisableFresnelReflection; // disable Fresnel reflection
+
+  Double_t fStep; //!
+  Double_t fD1[3]; //! start direction to be shared among methods
+  Double_t fD2[3]; //! end direction to be shared among methods
+  Double_t fX1[4]; //! start point to be shared among methods
+  Double_t fX2[4]; //! end point to be shared among methods
 
  public:
   AOpticsManager();
@@ -60,6 +67,9 @@ class AOpticsManager : public TGeoManager {
   static Double_t um() { return 1e-6*m();};
   static Double_t nm() { return 1e-9*m();};
 
+  void   DisableFresnelReflection(Bool_t disable) {fDisableFresnelReflection = disable;}
+  void   DoFresnel(Double_t n1, Double_t n2, ARay& ray);
+  void   DoReflection(Double_t n1, ARay& ray);
   Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == AFocalSurface::Class();};
   Bool_t IsLens(TGeoNode* node) const { return node->GetVolume()->IsA() == ALens::Class();};
   Bool_t IsMirror(TGeoNode* node) const { return node->GetVolume()->IsA() == AMirror::Class();};
