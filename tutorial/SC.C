@@ -132,7 +132,7 @@ void SC()
       */
       Double_t x = deg*10*cm;
       hist[n]->Fill((p[0] - x)/(10*cm)*60, p[1]/(10*cm)*60);
-      histT[n]->Fill((p[3] - (3.2*kZs - kZf)/TMath::C())/1e-9); // ns
+      histT[n]->Fill((p[3] - (3.2*kZs - kZf)/(TMath::C()*m))/1e-9); // ns
     } // j
 
     graAeff->SetPoint(graAeff->GetN(), deg, Aeff);
