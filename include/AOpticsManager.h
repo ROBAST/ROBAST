@@ -49,13 +49,19 @@ class AOpticsManager : public TGeoManager {
   UInt_t fNThreads;
   Bool_t fDisableFresnelReflection; // disable Fresnel reflection
 
-  Double_t fStep; //!
-  Double_t fD1[3]; //! start direction to be shared among methods
-  Double_t fD2[3]; //! end direction to be shared among methods
-  Double_t fX1[4]; //! start point to be shared among methods
-  Double_t fX2[4]; //! end point to be shared among methods
+  Double_t  fStep; //!
+  Double_t  fD1[3]; //! start direction to be shared among methods
+  Double_t  fD2[3]; //! end direction to be shared among methods
+  Double_t  fX1[4]; //! start point to be shared among methods
+  Double_t  fX2[4]; //! end point to be shared among methods
+  TGeoNode* fEndNode; //! end node
+  TGeoNode* fStartNode; //! start node
+  Int_t     fTypeEnd; //! type of end node
+  Int_t     fTypeStart; //! type of start node
 
  public:
+  enum {kLens, kObs, kMirror, kFocus, kOpt, kOther, kNull};
+
   AOpticsManager();
   AOpticsManager(const char* name, const char* title);
   virtual ~AOpticsManager();

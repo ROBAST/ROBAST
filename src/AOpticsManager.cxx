@@ -105,11 +105,26 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
 {
   Double_t* n = FindNormal(); // normal vect perpendicular to the surface
   Double_t cosi = fD1[0]*n[0] + fD1[1]*n[1] + fD1[2]*n[2];
+
+  Bool_t absorbed = kFALSE;
+
+  if(fTypeEnd == kMirror){
+    Double_t angle = TMath::ACos(cosi)*TMath::RadToDeg();
+    Double_t lambda = ray.GetLambda();
+    Double_t ref = ((AMirror*)fEndNode->GetVolume())->GetReflectivity(lambda, angle);
+    if(ref < gRandom->Uniform(1)){
+      absorbed = kTRUE;
+      ray.Absorb();
+    } // if
+  } // if
+
   for(Int_t i = 0; i < 3; i++){ // d2 = d1 - 2n*(d1*n)
     fX2[i] = fX1[i] + fStep*fD1[i];
     fD2[i] = fD1[i] - 2*n[i]*cosi;
   } // i
-  ray.SetDirection(fD2);
+  if(not absorbed){
+    ray.SetDirection(fD2);
+  } // if
 
   // step (m), c (m/s)
   Double_t speed = TMath::C()*m()/n1;
@@ -129,71 +144,69 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
     ray.GetLastPoint(fX1);
     ray.GetDirection(fD1);
 
-    TGeoNode* startnode = InitTrack(fX1, fD1); // start node
+    fStartNode = InitTrack(fX1, fD1); // start node
     if(IsOutside()){ // if the current position is outside of top volume
-      startnode = 0;
+      fStartNode = 0;
     } // if
 
-    TGeoNode* endnode = FindNextBoundaryAndStep();
-    enum {kLens, kObs, kMirror, kFocus, kOpt, kOther, kNull};
-    Int_t type1, type2;
+    fEndNode = FindNextBoundaryAndStep();
 
     // Check type of start node
-    if     (                  !startnode)  type1 = kNull;
-    else if(            IsLens(startnode)) type1 = kLens;
-    else if(     IsObscuration(startnode)) type1 = kObs;
-    else if(          IsMirror(startnode)) type1 = kMirror;
-    else if(IsOpticalComponent(startnode)) type1 = kOpt;
-    else if(    IsFocalSurface(startnode)) type1 = kFocus;
-    else                                   type1 = kOther;
+    if     (                  !fStartNode)  fTypeStart = kNull;
+    else if(            IsLens(fStartNode)) fTypeStart = kLens;
+    else if(     IsObscuration(fStartNode)) fTypeStart = kObs;
+    else if(          IsMirror(fStartNode)) fTypeStart = kMirror;
+    else if(IsOpticalComponent(fStartNode)) fTypeStart = kOpt;
+    else if(    IsFocalSurface(fStartNode)) fTypeStart = kFocus;
+    else                                    fTypeStart = kOther;
     
     // Check type of end node
-    if     (                  !endnode)  type2 = kNull;
-    else if(            IsLens(endnode)) type2 = kLens;
-    else if(     IsObscuration(endnode)) type2 = kObs;
-    else if(          IsMirror(endnode)) type2 = kMirror;
-    else if(IsOpticalComponent(endnode)) type2 = kOpt;
-    else if(    IsFocalSurface(endnode)) type2 = kFocus;
-    else                                 type2 = kOther;
+    if     (                  !fEndNode)  fTypeEnd = kNull;
+    else if(            IsLens(fEndNode)) fTypeEnd = kLens;
+    else if(     IsObscuration(fEndNode)) fTypeEnd = kObs;
+    else if(          IsMirror(fEndNode)) fTypeEnd = kMirror;
+    else if(IsOpticalComponent(fEndNode)) fTypeEnd = kOpt;
+    else if(    IsFocalSurface(fEndNode)) fTypeEnd = kFocus;
+    else                                  fTypeEnd = kOther;
 
     fStep = GetStep(); // distance to the next boundary
-    if(type2 == kMirror){
+    if(fTypeEnd == kMirror){
       fStep -= kEpsilon; // make sure that the photon do NOT cross the boundary
     } else {
       fStep += kEpsilon; // make sure that the photon crosses the boundary
     } // if
 
-    if(type1 == kLens){
-      Double_t abs = ((ALens*)startnode->GetVolume())->GetAbsorptionLength(lambda);
+    if(fTypeStart == kLens){
+      Double_t abs = ((ALens*)fStartNode->GetVolume())->GetAbsorptionLength(lambda);
       if(abs > 0){
         Double_t abs_step = gRandom->Exp(abs);
         if(abs_step < fStep){
-          Double_t n1 = ((ALens*)startnode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
+          Double_t n1 = ((ALens*)fStartNode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
           Double_t speed = TMath::C()*m()/n1;
           ray.AddPoint(fX1[0] + fD1[0]*abs_step, fX1[1] + fD1[1]*abs_step, fX1[2] + fD1[2]*abs_step, fX1[3] + abs_step/speed);
-          ray.Stop();
+          ray.Absorb();
           continue;
         } // if
       } // if
     } // if
 
-    if((type1 == kNull or type1 == kOpt or type1 == kLens or type1 == kOther)
-       and type2 == kMirror){
-      Double_t n1 = type1 == kLens ? ((ALens*)startnode->GetVolume())->GetRefractiveIndex(ray.GetLambda()) : 1.;
+    if((fTypeStart == kNull or fTypeStart == kOpt or fTypeStart == kLens or fTypeStart == kOther)
+       and fTypeEnd == kMirror){
+      Double_t n1 = fTypeStart == kLens ? ((ALens*)fStartNode->GetVolume())->GetRefractiveIndex(ray.GetLambda()) : 1.;
       DoReflection(n1, ray);
-    } else if((type1 == kNull or type1 == kOpt or type1 == kOther)
-               and type2 == kLens){
+    } else if((fTypeStart == kNull or fTypeStart == kOpt or fTypeStart == kOther)
+               and fTypeEnd == kLens){
       Double_t n1 = 1; // Assume refractive index equals 1 (= vacuum)
-      Double_t n2 = ((ALens*)endnode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
+      Double_t n2 = ((ALens*)fEndNode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
       DoFresnel(n1, n2, ray);
-    } else if((type1 == kNull or type1 == kLens or type1 == kOpt or type1 == kOther)
-               and (type2 == kObs or type2 == kFocus)){
+    } else if((fTypeStart == kNull or fTypeStart == kLens or fTypeStart == kOpt or fTypeStart == kOther)
+               and (fTypeEnd == kObs or fTypeEnd == kFocus)){
 
       for(Int_t i = 0; i < 3; i++){
         fX2[i] = fX1[i] + fStep*fD1[i];
       } // i
-      if (type1 == kLens){
-        Double_t n1 = ((ALens*)startnode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
+      if (fTypeStart == kLens){
+        Double_t n1 = ((ALens*)fStartNode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
         Double_t speed = TMath::C()*m()/n1;
         fX2[3] = fX1[3] + fStep/speed;
       } else {
@@ -201,8 +214,8 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
         fX2[3] = fX1[3] + fStep/speed;
       } // if
       ray.AddPoint(fX2[0], fX2[1], fX2[2], fX2[3]);
-    } else if((type1 == kNull or type1 == kOpt or type1 == kOther)
-               and (type2 == kOther or type2 == kOpt)){
+    } else if((fTypeStart == kNull or fTypeStart == kOpt or fTypeStart == kOther)
+               and (fTypeEnd == kOther or fTypeEnd == kOpt)){
 
       for(Int_t i = 0; i < 3; i++){
         fX2[i] = fX1[i] + fStep*fD1[i];
@@ -210,18 +223,18 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
       Double_t speed = TMath::C()*m();
       fX2[3] = fX1[3] + fStep/speed;
       ray.AddPoint(fX2[0], fX2[1], fX2[2], fX2[3]);
-    } else if(type1 == kLens and type2 == kLens){
-      Double_t n1 = ((ALens*)startnode->GetVolume())->GetRefractiveIndex(lambda);
-      Double_t n2 = ((ALens*)endnode->GetVolume())->GetRefractiveIndex(lambda);
+    } else if(fTypeStart == kLens and fTypeEnd == kLens){
+      Double_t n1 = ((ALens*)fStartNode->GetVolume())->GetRefractiveIndex(lambda);
+      Double_t n2 = ((ALens*)fEndNode->GetVolume())->GetRefractiveIndex(lambda);
       DoFresnel(n1, n2, ray);
-    } else if(type1 == kLens and
-              (type2 == kNull or type2 == kOpt or type2 == kOther)){
-      Double_t n1 = ((ALens*)startnode->GetVolume())->GetRefractiveIndex(lambda);
+    } else if(fTypeStart == kLens and
+              (fTypeEnd == kNull or fTypeEnd == kOpt or fTypeEnd == kOther)){
+      Double_t n1 = ((ALens*)fStartNode->GetVolume())->GetRefractiveIndex(lambda);
       Double_t n2 = 1; // Assume refractive index equals 1 (= vacuum)
       DoFresnel(n1, n2, ray);
     } // if
 
-    if(type2 == kNull){
+    if(fTypeEnd == kNull){
       for(Int_t i = 0; i < 3; i++){
         fX2[i] = fX1[i] + fStep*fD1[i];
       } // i
@@ -229,9 +242,9 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
       fX2[3] = fX1[3] + fStep/speed;
       ray.AddPoint(fX2[0], fX2[1], fX2[2], fX2[3]);
       ray.Exit();
-    } else if(type1 == kFocus or type1 == kObs or type1 == kMirror or type2 == kObs){
+    } else if(fTypeStart == kFocus or fTypeStart == kObs or fTypeStart == kMirror or fTypeEnd == kObs){
       ray.Stop();
-    } else if(type2 == kFocus){
+    } else if(fTypeEnd == kFocus){
       ray.Focus();
     } // if
 
