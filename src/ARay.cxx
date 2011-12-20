@@ -57,6 +57,16 @@ void ARay::GetLastPoint(Double_t* x) const
 }
 
 //_____________________________________________________________________________
+Bool_t ARay::IsAbsorbed() const
+{
+  if(fStatus == kAbsorb){
+    return kTRUE;
+  } // if
+
+  return kFALSE;
+}
+
+//_____________________________________________________________________________
 Bool_t ARay::IsExited() const
 {
   if(fStatus == kExit){

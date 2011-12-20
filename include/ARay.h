@@ -29,7 +29,7 @@
 
 class ARay : public TGeoTrack {
  private:
-  enum {kRun, kStop, kExit, kFocus, kSuspend};
+  enum {kRun, kStop, kExit, kFocus, kSuspend, kAbsorb};
   Double_t     fLambda;     // Wavelength
   TVector3     fDirection;  // Current direction vector
   Int_t        fStatus;     // status of ray
@@ -40,11 +40,13 @@ class ARay : public TGeoTrack {
        Double_t t, Double_t dx, Double_t dy, Double_t dz);
   virtual ~ARay();
 
-  void         Exit() { fStatus = kExit;}
-  void         Focus() { fStatus = kFocus;}
+  void         Absorb() {fStatus = kAbsorb;}
+  void         Exit() {fStatus = kExit;}
+  void         Focus() {fStatus = kFocus;}
   void         GetDirection(Double_t* d) const;
-  Double_t     GetLambda() const { return fLambda;}
+  Double_t     GetLambda() const {return fLambda;}
   void         GetLastPoint(Double_t* x) const;
+  Bool_t       IsAbsorbed() const;
   Bool_t       IsExited() const;
   Bool_t       IsFocused() const;
   Bool_t       IsRunning() const;
@@ -53,9 +55,9 @@ class ARay : public TGeoTrack {
   TPolyLine3D* MakePolyLine3D() const;
   void         SetDirection(Double_t dx, Double_t dy, Double_t dz);
   void         SetDirection(Double_t* d);
-  void         SetLambda(Double_t lambda) { fLambda = lambda;}
-  void         Stop() { fStatus = kStop;}
-  void         Suspend() { fStatus = kSuspend;}
+  void         SetLambda(Double_t lambda) {fLambda = lambda;}
+  void         Stop() {fStatus = kStop;}
+  void         Suspend() {fStatus = kSuspend;}
 
   ClassDef(ARay, 1)
 };
