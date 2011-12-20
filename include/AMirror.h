@@ -30,17 +30,17 @@
 
 class AMirror : public AOpticalComponent {
  private:
-  TGraph*   fReflectance1D; // Reflectance data (ref v.s. wavelength)
-  TGraph2D* fReflectance2D; // Reflectance data (ref v.s. angle v.s. wavelength)
+  TGraph*   fReflectivity1D; // Reflectivity data (ref v.s. wavelength)
+  TGraph2D* fReflectivity2D; // Reflectivity data (ref v.s. angle v.s. wavelength)
 
  public:
   AMirror();
   AMirror(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
   virtual ~AMirror();
 
-  virtual Double_t GetReflectance(Double_t lambda, Double_t angle /*(deg)*/);
-  virtual void     SetReflectance(TGraph* ref) {fReflectance1D = ref;}
-  virtual void     SetReflectance(TGraph2D* ref) {fReflectance2D = ref;}
+  virtual Double_t GetReflectivity(Double_t lambda, Double_t angle /*(deg)*/);
+  virtual void     SetReflectivity(TGraph* ref) {fReflectivity1D = ref;}
+  virtual void     SetReflectivity(TGraph2D* ref) {fReflectivity2D = ref;}
 
   ClassDef(AMirror, 1)
 };
