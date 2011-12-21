@@ -21,7 +21,7 @@
 
 #ifdef _OPENMP
 #include <omp.h>
-#if ROOT_VERSION_CODE >= ROOT_VERSION(5,32,0)
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,0)
 #define MULTI_THREAD_NAVIGATION
 #endif
 #endif
