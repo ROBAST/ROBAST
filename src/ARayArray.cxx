@@ -28,6 +28,7 @@ ARayArray::ARayArray() : TObject()
 ARayArray::~ARayArray()
 {
   // Destructor
+  fAbsorbed.Delete();
   fExited.Delete();
   fFocused.Delete();
   fRunning.Delete();
@@ -38,7 +39,8 @@ ARayArray::~ARayArray()
 //_____________________________________________________________________________
 void ARayArray::Add(ARay* ray)
 {
-  if     (ray->IsExited()   )    fExited.Add(ray);
+  if     (ray->IsAbsorbed() )    fAbsorbed.Add(ray);
+  else if(ray->IsExited()   )    fExited.Add(ray);
   else if(ray->IsFocused()  )   fFocused.Add(ray);
   else if(ray->IsRunning()  )   fRunning.Add(ray);
   else if(ray->IsStopped()  )   fStopped.Add(ray);

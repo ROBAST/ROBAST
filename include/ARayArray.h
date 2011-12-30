@@ -26,6 +26,7 @@
 
 class ARayArray : public TObject {
  private:
+  TObjArray fAbsorbed;  // Array of absorbed rays
   TObjArray fExited;    // Array of exited rays
   TObjArray fFocused;   // Array of focused rays
   TObjArray fRunning;   // Array of running rays
@@ -37,6 +38,7 @@ class ARayArray : public TObject {
   virtual ~ARayArray();
 
   virtual void       Add(ARay* ray);
+  virtual TObjArray* GetAbsorbed() { return &fAbsorbed;};
   virtual TObjArray* GetExited() { return &fExited;};
   virtual TObjArray* GetFocused() { return &fFocused;};
   virtual TObjArray* GetRunning() { return &fRunning;};
