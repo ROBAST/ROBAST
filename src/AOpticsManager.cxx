@@ -18,14 +18,14 @@
 #include "RVersion.h"
 
 #include "AOpticsManager.h"
-
+/*
 #ifdef _OPENMP
 #include <omp.h>
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,0)
 #define MULTI_THREAD_NAVIGATION
 #endif
 #endif
-
+*/
 static const Double_t kEpsilon = 1e-6; // Fixed in TGeoNavigator.cxx (equiv to 1e-6 cm)
 
 ClassImp(AOpticsManager)

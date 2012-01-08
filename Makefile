@@ -40,9 +40,10 @@ OBJS	:=	$(patsubst %.$(SrcSuf),%.$(ObjSuf),$(SRCS)) $(DICTO)
 
 LIB	=	lib$(NAME).$(DllSuf)
 
-CXXFLAGS	+= -fopenmp
+#CXXFLAGS	+= -fopenmp
 ifneq ($(EXPLLINKLIBS), )
-EXPLLINKLIBS	+= -lgomp -lGeom -lGeomPainter
+#EXPLLINKLIBS	+= -lgomp -lGeom -lGeomPainter
+EXPLLINKLIBS	+= -lGeom -lGeomPainter
 endif
 
 RMAP	=	lib$(NAME).rootmap
