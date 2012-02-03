@@ -77,8 +77,7 @@ AGeoAsphericDisk::AGeoAsphericDisk(const char *name,
 AGeoAsphericDisk::~AGeoAsphericDisk()
 {
   // Destructor
-  SafeDelete(fK1);
-  SafeDelete(fK2);
+  DeleteArrays();
 }
 
 //_____________________________________________________________________________
@@ -789,11 +788,9 @@ Double_t AGeoAsphericDisk::Safety(Double_t* point, Bool_t in) const
     try { f2rmax = CalcF2(fRmax);} catch (...) { f2rmax =  TGeoShape::Big();}
     try { f2rmin = CalcF2(fRmin);} catch (...) { f2rmin =  TGeoShape::Big();}
     
-    if(rad < fRmin and
-       (f1rmin < point[2] or point[2] < f2rmin)){
+    if(rad < fRmin and (f1rmin < point[2] or point[2] < f2rmin)){
       return fRmin - rad;
-    } else if(rad > fRmax and 
-	      f1rmax < point[2] or point[2] < f2rmax){
+    } else if(rad > fRmax and (f1rmax < point[2] or point[2] < f2rmax)){
       return rad - fRmax;
     } // if
   } // if
@@ -1121,8 +1118,7 @@ void AGeoAsphericDisk::SetPoints(Float_t* points) const
 void AGeoAsphericDisk::SetPolynomials(Int_t n1, const Double_t* k1,
                                       Int_t n2, const Double_t* k2)
 {
-  SafeDelete(fK1);
-  SafeDelete(fK2);
+  DeleteArrays();
   fNPol1 = n1;
   fNPol2 = n2;
 
