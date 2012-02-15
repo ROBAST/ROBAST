@@ -52,7 +52,8 @@ ASellmeierFormula::ASellmeierFormula(const Double_t* p)
 Double_t ASellmeierFormula::GetIndex(Double_t lambda) const
 {
   // Calculate the refractive index at wavelength = lambda (m)
-  lambda /= AOpticsManager::um(); // Convert (m) to (um)
+  // Use AOpticsManager::m() to get the unit length in (m)
+  lambda /= AOpticsManager::um(); // Convert (nm) to (um)
   Double_t lambda2 = lambda*lambda;
   return TMath::Sqrt(1 + fPar[0]*lambda2/(lambda2 - fPar[3])
                        + fPar[1]*lambda2/(lambda2 - fPar[4])

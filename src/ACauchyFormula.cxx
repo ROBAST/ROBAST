@@ -47,6 +47,7 @@ ACauchyFormula::ACauchyFormula(const Double_t* p)
 Double_t ACauchyFormula::GetIndex(Double_t lambda) const
 {
   // Calculate the refractive index at wavelength = lambda (m)
+  // Use AOpticsManager::m() to get the unit length in (m)
   lambda /= AOpticsManager::um(); // Convert (m) to (um)
   return fPar[0] + fPar[1]*TMath::Power(lambda, -2) + fPar[2]*TMath::Power(lambda, -4);
 }

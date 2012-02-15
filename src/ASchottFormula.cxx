@@ -49,9 +49,12 @@ ASchottFormula::ASchottFormula(const Double_t* p)
 //_____________________________________________________________________________
 Double_t ASchottFormula::GetIndex(Double_t lambda) const
 {
+  // Calculate the refractive index at wavelength = lambda (m)
+  // Use AOpticsManager::m() to get the unit length in (m)
+  //
   // n(lambda)^2 = A0 + A1*lamda^2 + A2*lamda^-2 + A3*lamda^-4 + A4*lamda^-6 + A5*lamda^-8
   // where lambda is measured in (um)
-  lambda /= AOpticsManager::um(); // Convert (m) to (um)
+  lambda /= AOpticsManager::um(); // Convert (nm) to (um)
   return TMath::Sqrt(fPar[0]                         +
                      fPar[1]*TMath::Power(lambda,  2.) +
                      fPar[2]*TMath::Power(lambda, -2.) +

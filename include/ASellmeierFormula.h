@@ -32,7 +32,7 @@ class ASellmeierFormula : public ARefractiveIndex {
                     Double_t C1, Double_t C2, Double_t C3);
   ASellmeierFormula(const Double_t* p);
 
-  virtual Double_t GetIndex(Double_t lambda) const;
+  virtual Double_t GetIndex(Double_t lambda /* (m) */) const;
 
   ClassDef(ASellmeierFormula, 1)
 };

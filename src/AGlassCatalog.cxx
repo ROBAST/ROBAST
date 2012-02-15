@@ -28,7 +28,7 @@ const Double_t AGlassCatalog::kParSchott[kNSchott][6] = {};
 const Double_t AGlassCatalog::kParSellmeier[kNSellmeier][6] =
 // B1 B2 B3 C1 C2 C3
 // data from "Optical Glass Data Sheets" by SCHOTT
-// http://www.us.schott.com/optics_devices/english/download/datasheet_all_us.pdf
+// http://www.us.schott.com/advanced_optics/english/download/schott_optical_glass_collection_datasheets_dec_2011_us.pdf
   {{1.03961212e0,  2.31792344e-1, 1.01046945e0,
     6.00069867e-3, 2.00179144e-2, 1.03560653e2}, // N-BK7
    {1.72448482e0,  3.90104889e-1, 1.04572858e0,

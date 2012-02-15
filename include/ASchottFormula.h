@@ -32,7 +32,7 @@ class ASchottFormula : public ARefractiveIndex {
                  Double_t A4, Double_t A5);
   ASchottFormula(const Double_t* p);
 
-  virtual Double_t GetIndex(Double_t lambda) const;
+  virtual Double_t GetIndex(Double_t lambda /* (m) */) const;
 
   ClassDef(ASchottFormula, 1)
 };
