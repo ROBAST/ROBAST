@@ -17,6 +17,7 @@
 #include "TRandom.h"
 #include "RVersion.h"
 
+#include "ABorderSurfaceCondition.h"
 #include "AOpticsManager.h"
 /*
 #ifdef _OPENMP
@@ -63,7 +64,8 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
   // http://en.wikipedia.org/wiki/Fresnel_equations
   // theta_i = incident angle
   // theta_t = transmission angle
-  Double_t* n = FindNormal(); // normal vect perpendicular to the surface
+  // Double_t* n = FindNormal(); // normal vect perpendicular to the surface
+  TVector3 n = GetFacetNormal(); // normal vect perpendicular to the surface
   Double_t cosi = fD1[0]*n[0] + fD1[1]*n[1] + fD1[2]*n[2]; // cos(theta_i)
   Double_t sini = TMath::Sqrt(1 - cosi*cosi);
   Double_t sint = n1*sini/n2; // Snell's law
@@ -103,7 +105,8 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
 //_____________________________________________________________________________
 void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
 {
-  Double_t* n = FindNormal(); // normal vect perpendicular to the surface
+  //Double_t* n = FindNormal(); // normal vect perpendicular to the surface
+  TVector3 n = GetFacetNormal(); // normal vect perpendicular to the surface
   Double_t cosi = fD1[0]*n[0] + fD1[1]*n[1] + fD1[2]*n[2];
 
   Bool_t absorbed = kFALSE;
@@ -130,6 +133,53 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
   Double_t speed = TMath::C()*m()/n1;
   fX2[3] = fX1[3] + fStep/speed;
   ray.AddPoint(fX2[0], fX2[1], fX2[2], fX2[3]);
+}
+
+//_____________________________________________________________________________
+TVector3 AOpticsManager::GetFacetNormal()
+{
+  TGeoVolume* volume1 = fStartNode->GetVolume();
+  TGeoVolume* volume2 = fEndNode->GetVolume();
+
+  TVector3 normal(FindNormal());
+  TVector3 momentum(fD1);
+
+  ABorderSurfaceCondition* condition = ABorderSurfaceCondition::GetSurfaceCondition(volume1, volume2);
+
+  if(condition and condition->GetGaussianRoughness() != 0){
+    // The following method is based on G4OpBoundaryProcess::GetFacetNormal in
+    // Geant4 optics
+    TVector3 facetNormal;
+    Double_t alpha;
+    Double_t sigma_alpha = condition->GetGaussianRoughness();
+    Double_t f_max = TMath::Min(1., 4.*sigma_alpha);
+
+    do {
+      do {
+        alpha = gRandom->Gaus(0, sigma_alpha);
+      } while (gRandom->Uniform(f_max) > TMath::Sin(alpha) || alpha >= TMath::PiOver2());
+
+      Double_t phi = gRandom->Uniform(TMath::TwoPi());
+
+      Double_t SinAlpha = TMath::Sin(alpha);
+      Double_t CosAlpha = TMath::Cos(alpha);
+      Double_t SinPhi = TMath::Sin(phi);
+      Double_t CosPhi = TMath::Cos(phi);
+
+      Double_t unit_x = SinAlpha * CosPhi;
+      Double_t unit_y = SinAlpha * SinPhi;
+      Double_t unit_z = CosAlpha;
+
+      facetNormal.SetXYZ(unit_x, unit_y, unit_z);
+
+      TVector3 tmpNormal = normal;
+
+      facetNormal.RotateUz(tmpNormal);
+    } while (momentum * facetNormal <= 0.0);
+    normal = facetNormal;
+  } // if
+
+  return normal;
 }
 
 //_____________________________________________________________________________

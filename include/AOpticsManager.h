@@ -81,6 +81,7 @@ class AOpticsManager : public TGeoManager {
   Bool_t IsMirror(TGeoNode* node) const { return node->GetVolume()->IsA() == AMirror::Class();};
   Bool_t IsObscuration(TGeoNode* node) const { return node->GetVolume()->IsA() == AObscuration::Class();};
   Bool_t IsOpticalComponent(TGeoNode* node) const { return node->GetVolume()->IsA() == AOpticalComponent::Class();};
+  TVector3 GetFacetNormal();
   void SetLimit(Int_t n);
   void TraceNonSequential(ARay& ray);
   void TraceNonSequential(ARayArray& array);
