@@ -15,6 +15,9 @@ void NT49665()
   // Aspherized achromatic lens.
   // http://www.edmundoptics.com/optics/optical-lenses/aspheric-lenses/aspherized-achromatic-lenses/2953
 
+  // ZEMAX data is available at
+  // http://www.edmundoptics.jp/techsupport/resource_center/product_docs/zmax_49665.zmx
+
   AOpticsManager* manager = new AOpticsManager("NT49665", "NT49665");
 
   // Make the world
