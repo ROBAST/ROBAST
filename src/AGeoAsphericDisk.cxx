@@ -504,6 +504,11 @@ Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, Double_t* point, Double_t* dir
     return TGeoShape::Big();
   } // if
 
+  Double_t dist_to_zaxis = TMath::Power(npoint[0]*npoint[0] + npoint[1]*npoint[1], 0.5);
+  if(dist_to_zaxis < fRmin or dist_to_zaxis > fRmax){
+    return TGeoShape::Big();
+  }
+
   return TMath::Sqrt(TMath::Power(npoint[0] - point[0], 2) +
                      TMath::Power(npoint[1] - point[1], 2) +
                      TMath::Power(npoint[2] - point[2], 2));
