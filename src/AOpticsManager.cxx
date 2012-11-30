@@ -139,7 +139,7 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
 TVector3 AOpticsManager::GetFacetNormal()
 {
   TGeoVolume* volume1 = fStartNode->GetVolume();
-  TGeoVolume* volume2 = fEndNode->GetVolume();
+  TGeoVolume* volume2 = fEndNode ? fEndNode->GetVolume() : 0;
 
   TVector3 normal(FindNormal());
   TVector3 momentum(fD1);
