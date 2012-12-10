@@ -46,3 +46,21 @@ void ARayArray::Add(ARay* ray)
   else if(ray->IsStopped()  )   fStopped.Add(ray);
   else if(ray->IsSuspended()) fSuspended.Add(ray);
 }
+
+//_____________________________________________________________________________
+void ARayArray::Merge(ARayArray* array)
+{
+  TObjArray* objs[6] = {array->GetAbsorbed(), array->GetExited(),
+                        array->GetFocused(),  array->GetRunning(),
+                        array->GetStopped(),  array->GetSuspended()};
+
+  for(Int_t j = 0; j < 6; j++){
+    for(Int_t i = 0; i <= objs[j]->GetLast(); i++){
+      ARay* ray = (ARay*)(*objs[j])[i];
+      if(!ray) continue;
+
+      ray = (ARay*)objs[j]->RemoveAt(i);
+      Add(ray);
+    } // i
+  } // j
+}
