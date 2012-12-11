@@ -39,6 +39,8 @@ ARayArray::~ARayArray()
 //_____________________________________________________________________________
 void ARayArray::Add(ARay* ray)
 {
+  if(!ray) return;
+
   if     (ray->IsAbsorbed() )    fAbsorbed.Add(ray);
   else if(ray->IsExited()   )    fExited.Add(ray);
   else if(ray->IsFocused()  )   fFocused.Add(ray);
@@ -50,6 +52,8 @@ void ARayArray::Add(ARay* ray)
 //_____________________________________________________________________________
 void ARayArray::Merge(ARayArray* array)
 {
+  if(!array) return;
+
   TObjArray* objs[6] = {array->GetAbsorbed(), array->GetExited(),
                         array->GetFocused(),  array->GetRunning(),
                         array->GetStopped(),  array->GetSuspended()};
