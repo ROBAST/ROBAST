@@ -60,10 +60,8 @@ void ARayArray::Merge(ARayArray* array)
 
   for(Int_t j = 0; j < 6; j++){
     for(Int_t i = 0; i <= objs[j]->GetLast(); i++){
-      ARay* ray = (ARay*)(*objs[j])[i];
+      ARay* ray = ray = (ARay*)objs[j]->RemoveAt(i);
       if(!ray) continue;
-
-      ray = (ARay*)objs[j]->RemoveAt(i);
       Add(ray);
     } // i
   } // j
