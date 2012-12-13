@@ -868,42 +868,42 @@ Double_t AGeoAsphericDisk::Safety(Double_t* point, Bool_t in) const
 }
 
 //_____________________________________________________________________________
-void AGeoAsphericDisk::SavePrimitive(ostream& out, Option_t* )
+void AGeoAsphericDisk::SavePrimitive(std::ostream& out, Option_t* )
 {
   // Save a primitive as a C++ statement(s) on output stream "out".
   if (TObject::TestBit(kGeoSavePrimitive)) return;
 
-  out << "   // Shape: " << GetName() << " type: " << ClassName() << endl;
-  out << "   rmin   = " << fRmin << ";" << endl;
-  out << "   rmax   = " << fRmax << ";" << endl;
-  out << "   curve1 = " << fCurve1<< ";" << endl;
-  out << "   curve2 = " << fCurve2 << ";" << endl;
-  out << "   z1     = " << fZ1 << ";" << endl;
-  out << "   z2     = " << fZ2 << ";" << endl;
-  out << "   AGeoAsphericDisk* asph = new AGeoAsphericDisk(\"" << GetName() << "\",z1, curve1, z2, curve2, rmax, rmin);" << endl;
+  out << "   // Shape: " << GetName() << " type: " << ClassName() << std::endl;
+  out << "   rmin   = " << fRmin << ";" << std::endl;
+  out << "   rmax   = " << fRmax << ";" << std::endl;
+  out << "   curve1 = " << fCurve1<< ";" << std::endl;
+  out << "   curve2 = " << fCurve2 << ";" << std::endl;
+  out << "   z1     = " << fZ1 << ";" << std::endl;
+  out << "   z2     = " << fZ2 << ";" << std::endl;
+  out << "   AGeoAsphericDisk* asph = new AGeoAsphericDisk(\"" << GetName() << "\",z1, curve1, z2, curve2, rmax, rmin);" << std::endl;
 
   if(fNPol1 > 0){
     out << "double k1[" << fNPol1 << "] = {";
     for(Int_t i = 0; i < fNPol1; i++){
       out << fK1[i];
-      cout << (i != fNPol1 - 1 ? "," : "};") << endl;
+      out << (i != fNPol1 - 1 ? "," : "};") << std::endl;
     } // i
   } // if
   if(fNPol2 > 0){
     out << "double k2[" << fNPol2 << "] = {";
     for(Int_t i = 0; i < fNPol2; i++){
       out << fK2[i];
-      cout << (i != fNPol2 - 1 ? "," : "};") << endl;
+      out << (i != fNPol2 - 1 ? "," : "};") << std::endl;
     } // i
   } // if
   if(fNPol1 > 0 and fNPol2 > 0){
-    out << "asph->SetPolynomials(" << fNPol1 << ", k1, " << fNPol2 << ", k2);" << endl;
+    out << "asph->SetPolynomials(" << fNPol1 << ", k1, " << fNPol2 << ", k2);" << std::endl;
   } else if(fNPol1 == 0 and fNPol2 > 0){
-    out << "asph->SetPolynomials(" << fNPol1 << ", 0, " << fNPol2 << ", k2);" << endl;
+    out << "asph->SetPolynomials(" << fNPol1 << ", 0, " << fNPol2 << ", k2);" << std::endl;
   } else if(fNPol1 > 0 and fNPol2 == 0){
-    out << "asph->SetPolynomials(" << fNPol1 << ", k1, " << fNPol2 << ", 0);" << endl;
+    out << "asph->SetPolynomials(" << fNPol1 << ", k1, " << fNPol2 << ", 0);" << std::endl;
   } // if
-  out << "   TGeoShape* " << GetPointerName() << " = asph;" << endl;
+  out << "   TGeoShape* " << GetPointerName() << " = asph;" << std::endl;
   TObject::SetBit(TGeoShape::kGeoSavePrimitive);
 }
 

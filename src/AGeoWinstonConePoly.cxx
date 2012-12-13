@@ -345,18 +345,18 @@ TBuffer3D* AGeoWinstonConePoly::MakeBuffer3D() const
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonConePoly::SavePrimitive(ostream& out, Option_t* )
+void AGeoWinstonConePoly::SavePrimitive(std::ostream& out, Option_t* )
 {
   // Save a primitive as a C++ statement(s) on output stream "out".
   if (TObject::TestBit(kGeoSavePrimitive)) return;
 
-  out << "   // Shape: " << GetName() << " type: " << ClassName() << endl;
-  out << "   r1 = " << fR1 << ";" << endl;
-  out << "   r2 = " << fR2 << ";" << endl;
-  out << "   n  = " << fPolyN << ";" << endl;
-  out << "   AGeoWinstonConePoly* cone = new AGeoWinstonConePoly(\"" << GetName() << "\", r1, r2, n);" << endl;
+  out << "   // Shape: " << GetName() << " type: " << ClassName() << std::endl;
+  out << "   r1 = " << fR1 << ";" << std::endl;
+  out << "   r2 = " << fR2 << ";" << std::endl;
+  out << "   n  = " << fPolyN << ";" << std::endl;
+  out << "   AGeoWinstonConePoly* cone = new AGeoWinstonConePoly(\"" << GetName() << "\", r1, r2, n);" << std::endl;
 
-  out << "   TGeoShape* " << GetPointerName() << " = cone;" << endl;
+  out << "   TGeoShape* " << GetPointerName() << " = cone;" << std::endl;
   TObject::SetBit(TGeoShape::kGeoSavePrimitive);
 }
 

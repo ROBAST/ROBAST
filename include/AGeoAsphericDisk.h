@@ -90,7 +90,7 @@ public:
   virtual void        InspectShape() const;
   virtual Bool_t      IsCylType() const {return kTRUE;}
   virtual TBuffer3D*  MakeBuffer3D() const;
-  virtual void        SavePrimitive(ostream& out, Option_t* option = "");
+  virtual void        SavePrimitive(std::ostream& out, Option_t* option = "");
   virtual Double_t    Safety(Double_t* point, Bool_t in=kTRUE) const;
   virtual void        SetAsphDimensions(Double_t x1, Double_t curve1,
                                         Double_t x2, Double_t curve2,

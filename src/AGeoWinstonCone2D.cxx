@@ -535,18 +535,18 @@ Double_t AGeoWinstonCone2D::Safety(Double_t* point, Bool_t in) const
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonCone2D::SavePrimitive(ostream& out, Option_t* )
+void AGeoWinstonCone2D::SavePrimitive(std::ostream& out, Option_t* )
 {
   // Save a primitive as a C++ statement(s) on output stream "out".
   if (TObject::TestBit(kGeoSavePrimitive)) return;
 
-  out << "   // Shape: " << GetName() << " type: " << ClassName() << endl;
-  out << "   r1 = " << fR1 << ";" << endl;
-  out << "   r2 = " << fR2 << ";" << endl;
-  out << "   dy = " << fDY << ";" << endl;
-  out << "   AGeoWinstonCone2D* cone = new AGeoWinstonCone2D(\"" << GetName() << "\", r1, r2, dy);" << endl;
+  out << "   // Shape: " << GetName() << " type: " << ClassName() << std::endl;
+  out << "   r1 = " << fR1 << ";" << std::endl;
+  out << "   r2 = " << fR2 << ";" << std::endl;
+  out << "   dy = " << fDY << ";" << std::endl;
+  out << "   AGeoWinstonCone2D* cone = new AGeoWinstonCone2D(\"" << GetName() << "\", r1, r2, dy);" << std::endl;
 
-  out << "   TGeoShape* " << GetPointerName() << " = cone;" << endl;
+  out << "   TGeoShape* " << GetPointerName() << " = cone;" << std::endl;
   TObject::SetBit(TGeoShape::kGeoSavePrimitive);
 }
 

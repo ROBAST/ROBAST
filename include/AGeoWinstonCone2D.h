@@ -66,7 +66,7 @@ public:
    virtual Bool_t      IsCylType() const {return kFALSE;}
    virtual TBuffer3D*  MakeBuffer3D() const;
    virtual Double_t    Safety(Double_t* point, Bool_t in = kTRUE) const;
-   virtual void        SavePrimitive(ostream& out, Option_t* option = "");
+   virtual void        SavePrimitive(std::ostream& out, Option_t* option = "");
    virtual void        SetWinstonDimensions(Double_t r1, Double_t r2, Double_t y);
    virtual void        SetDimensions(Double_t* param);
    virtual void        SetPoints(Double_t* points) const;

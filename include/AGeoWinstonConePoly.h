@@ -51,7 +51,7 @@ public:
    virtual Bool_t      InsidePolygon(Double_t x, Double_t y, Double_t r) const;
    virtual void        InspectShape() const;
    virtual TBuffer3D*  MakeBuffer3D() const;
-   virtual void        SavePrimitive(ostream& out, Option_t* option = "");
+   virtual void        SavePrimitive(std::ostream& out, Option_t* option = "");
    virtual void        SetWinstonDimensions(Double_t r1, Double_t r2, Int_t n);
    virtual void        SetDimensions(Double_t* param);
    virtual void        SetPoints(Double_t* points) const;
