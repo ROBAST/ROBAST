@@ -21,7 +21,15 @@ ifeq ($(MAKEARCH), )
 MAKEARCH	:=	$(shell find $(ROOTSYS)/etc -name Makefile.arch)
 endif
 
+ifeq ($(MAKEARCH), )
+MAKEARCH	:=	$(wildcard $(shell $(RC) --etcdir)/Makefile.arch)
+endif
+
 include $(MAKEARCH)
+
+ifeq ($(ROOTCLING),)
+ROOTCLING	:=	$(ROOTCINT)
+endif
 
 NAME	:=	ROBAST
 DEPEND	:=	libCore libGeom libGeomPainter libPhysics libGraf libGraf3d
@@ -89,7 +97,7 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
-		$(ROOTCINT) -f $@ -c -p $^
+		$(ROOTCLING) -f $@ -c -p $^
 
 $(DICTO):	$(DICTS)
 		@echo "Compiling" $<
