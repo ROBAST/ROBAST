@@ -1,21 +1,24 @@
-$Id$
-ROBAST (ROot-BAsed Simulator for ray Tracing)
+ROot-BAsed Simulator for ray Tracing (ROBAST)
 
 1. About
-ROBAST is a non-sequential ray trace program which utilizes ROOT's 3D geometry library. Since the ROOT library includes most of functions which are needed for ray tracing, code written by the author in this program is very small.
+ROBAST is a non-sequential ray-tracing simulator program which is based on the ROOT framework. ROBAST fully utilizes its 3D geometry library to offer several functionalities required for ray-tracing simulations of cosmic-ray telescopes. 
 
-Commercial software is optimized for optics design, but it is not flexible when being combined with other UN*X software such as CORSIKA. The author had been using ZEMAX to design a cosmic-ray telescope. However it was difficault to use ZEMAX to propagate Cherenkov light emitted by very-high-energy cosmi-ray air showersin CORSIKA simulations. That's why he developed ROBAST.
+The advantages of using ROBAST are
+- Easy to build complex telescope geometries using TGeo* and AGeo* classes
+- Runs on both OS X and Linux
+- Scriptable in C++ and Python
+- Easy to learn even if you could not be a Geant4 expert
+- Direct analysis of simulation results in ROOT
 
-The biggest advantages in using ROOT are;
-- Implementation of complex telescop structure is easy by using TGeo* classes.
-- Direct analysis of ray trace results in ROOT scripts
-- Scriptable C++
-
-If you are familiar with Geant4, you would think "Why not Geant4 optical?". The answer is simple. Geant4 is too hard to learn for standard ROOT users. If you have an experience in using Geant4, especially in Geant4 optical, you can opt Geant4 which has some advanced features (roughness of surfaces, absorption, ...).
+For more details, read the following papers.
+[1] A. Okumura et al. (2011) "Development of Non-sequential Ray-tracing Software for Cosmic-ray Telescopes"
+    http://arxiv.org/abs/1110.4448
+[2] A. Okumura (2012) "Optimization of the Collection Efficiency of a Hexagonal Light Collector using Quadratic and Cubic BŽzier Curves"
+    http://arxiv.org/abs/1205.3968
 
 2. Author
-Akira Okumura (ISAS/JAXA and SLAC)
-oxon@astro.isas.jaxa.jp, oxon@stanford.edu
+Akira Okumura (Solar-Terrestrial Environment Laboratory, Nagoya University)
+oxon@mac.com
 
 3. License
 LGPL
@@ -24,9 +27,9 @@ LGPL
 $ tar zxvf robast_1.0.0.tgz
 $ cd robast_1.0.0
 $ make
-$ export LD_LIBRARY_PATH=../robast_1.0.0
+$ export LD_LIBRARY_PATH=../robast_1.0.0:$LD_LIBRARY_PATH
 
-If you would like to read HTML document, generate it by yourself.
+If you would like to read HTML document, generate it yourself.
 $ make htmldoc
 
 5. Tutorials
@@ -35,7 +38,7 @@ $ cd robast_1.0.0/tutorial
 $ root
 root [0] .x SC.C
 
-You will see some plots and beatiful 3D image
+You will see some plots and beautiful 3D images
 
 - SC.C
 Schwarzschild-Couder optical system for AGIS proposed in
