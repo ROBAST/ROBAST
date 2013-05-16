@@ -14,6 +14,9 @@
 
 #pragma link C++ class ABorderSurfaceCondition;
 #pragma link C++ class ACauchyFormula;
+#pragma link C++ class ACorsikaIACTEventHeader;
+#pragma link C++ class ACorsikaIACTFile;
+#pragma link C++ class ACorsikaIACTRunHeader;
 #pragma link C++ class AFocalSurface;
 #pragma link C++ class AGeoAsphericDisk;
 #pragma link C++ class AGeoBezierPcon;

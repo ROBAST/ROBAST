@@ -36,6 +36,7 @@ DEPEND	:=	libCore libGeom libGeomPainter libPhysics libGraf libGraf3d
 
 SRCDIR	:=	src
 INCDIR	:=	include
+BINCDIR	:=	$(INCDIR)/bernlohr
 
 DICT	:=	$(NAME)Dict
 DICTS	:=	$(SRCDIR)/$(NAME)Dict.$(SrcSuf)
@@ -45,6 +46,17 @@ DICTO	:=	$(SRCDIR)/$(NAME)Dict.$(ObjSuf)
 INCS	:=	$(filter-out $(INCDIR)/LinkDef.h,$(wildcard $(INCDIR)/*.h))
 SRCS	:=	$(filter-out $(SRCDIR)/$(DICT).%,$(wildcard $(SRCDIR)/*.$(SrcSuf)))
 OBJS	:=	$(patsubst %.$(SrcSuf),%.$(ObjSuf),$(SRCS)) $(DICTO)
+
+ORG1	:=	$(SRCDIR)/bernlohr/fileopen.c
+ORG2	:=	$(SRCDIR)/bernlohr/io_simtel.c
+ORG3	:=	$(SRCDIR)/bernlohr/warning.c
+ORGS	:=	$(ORG1) $(ORG2) $(ORG3)
+MOD1	:=	$(patsubst %.c,%_mod.c,$(ORG1))
+MOD2	:=	$(patsubst %.c,%_mod.c,$(ORG2))
+MOD3	:=	$(patsubst %.c,%_mod.c,$(ORG3))
+MODS	:=	$(MOD1) $(MOD2) $(MOD3)
+BSRCS	:=	$(filter-out $(ORGS),$(wildcard $(SRCDIR)/bernlohr/*.c)) $(MODS)
+BOBJS	:=	$(patsubst %.c,%.$(ObjSuf),$(BSRCS))
 
 LIB	=	lib$(NAME).$(DllSuf)
 
@@ -63,7 +75,22 @@ UNITTEST:= $(wildcard unittest/*.py)
 
 all:		$(RMAP)
 
-$(LIB):		$(OBJS)
+$(MOD1): $(ORG1)
+		sed -e 's/s = malloc(/s = (char\*)malloc(/g' $< | \
+		sed -e 's/root_path = calloc(/root_path = (incpath\*)calloc(/g' | \
+		sed -e 's/last->next = calloc(/last->next = (incpath\*)calloc(/g' > $@
+
+$(MOD2): $(ORG2)
+		sed -e 's/xl->text = malloc(/xl->text = (char\*)malloc(/g' $< | \
+		sed -e 's/xln->text = malloc(/xln->text = (char\*)malloc(/g' | \
+		sed -e 's/ep->iparam = calloc(/ep->iparam = (int\*)calloc(/g' | \
+		sed -e 's/ep->fparam = calloc(/ep->fparam = (int\*)calloc(/g' | \
+		sed -e 's/xln = calloc(/xln = (linked_string\*)calloc(/g' > $@
+
+$(MOD3): $(ORG3)
+		sed -e 's/struct warn_specific_data \*wt = get_warn_specific();/struct warn_specific_data \*wt = (warn_specific_data\*)get_warn_specific();/g' $< > $@
+
+$(LIB):		$(OBJS) $(BOBJS)
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
 		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
@@ -95,6 +122,10 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 		@echo "Compiling" $<
 		$(CXX) $(CXXFLAGS) -Wall -g -I$(INCDIR) -c $< -o $@
 
+$(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.c
+		@echo "Compiling" $<
+		$(CXX) $(CXXFLAGS) -I$(BINCDIR) -c $< -o $@
+
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
 		$(ROOTCLING) -f $@ -c -p $^
@@ -111,7 +142,7 @@ htmldoc:
 		sh mkhtml.sh
 
 clean:
-		rm -rf $(LIB) $(OBJS) $(DICTI) $(DICTS) $(DICTO) $(RMAP)
+		rm -rf $(LIB) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(RMAP)
 
 test:		all
 		@for script in $(UNITTEST);\

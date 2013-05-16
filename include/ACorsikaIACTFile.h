@@ -1,0 +1,53 @@
+#ifndef A_CORSIKA_IACT_FILE_H
+#define A_CORSIKA_IACT_FILE_H
+
+#include "bernlohr/io_basic.h"
+#include "bernlohr/mc_tel.h"
+
+#include "TTree.h"
+
+#include "ACorsikaIACTEventHeader.h"
+#include "ACorsikaIACTRunHeader.h"
+
+class ACorsikaIACTFile : public TObject {
+ private:
+  static const Int_t       kMaxArrays;
+  static const Int_t       kMaxTelescopes; // 99 limited in CORSIKA
+
+  IO_ITEM_HEADER           fBlockHeader;
+  TTree*                   fBunches;
+  struct linked_string     fCorsikaInputs;
+  ACorsikaIACTEventHeader* fEventHeader;
+  TString                  fFileName;
+  IO_BUFFER*               fIOBuffer;
+  Int_t                    fMaxPhotonBunches;
+  Int_t                    fNumberOfTelescopes;
+  ACorsikaIACTRunHeader*   fRunHeader;
+  Double_t                 fTelescopePosition[4][99];
+
+  Int_t    ReadNextBlock();
+
+ public:
+  ACorsikaIACTFile(Int_t bufferLenght = 20000000);
+  virtual ~ACorsikaIACTFile();
+
+  void     Close();
+  TTree*   GetBunches() const { return fBunches;}
+  const Char_t* GetFileName() const { return fFileName.Data();}
+  Int_t    GetNumberOfTelescopes() const { return fNumberOfTelescopes;}
+  Double_t GetTelescopeR(Int_t i) const;
+  Double_t GetTelescopeX(Int_t i) const;
+  Double_t GetTelescopeY(Int_t i) const;
+  Double_t GetTelescopeZ(Int_t i) const;
+  Bool_t   IsAllocated();
+  Bool_t   IsOpen();
+  void     Open(const Char_t* fname);
+  void     PrintInputCard() const;
+  Int_t    ReadEvent(Int_t num);
+  void     SetMaxPhotonBunches(UInt_t max) { fMaxPhotonBunches = max;}
+
+  ACorsikaIACTEventHeader* GetEventHeader() const { return fEventHeader;}
+  ACorsikaIACTRunHeader*   GetRunHeader() const { return fRunHeader;}
+};
+
+#endif // A_CORSIKA_IACT_FILE_H
