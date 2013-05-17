@@ -143,7 +143,7 @@ htmldoc:
 		sh mkhtml.sh
 
 clean:
-		rm -rf $(LIB) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(RMAP)
+		rm -rf $(LIB) $(MODS) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(RMAP)
 
 test:		all
 		@for script in $(UNITTEST);\
