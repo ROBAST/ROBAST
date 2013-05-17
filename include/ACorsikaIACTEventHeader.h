@@ -16,7 +16,7 @@ class ACorsikaIACTEventHeader {
 
  public:
   ACorsikaIACTEventHeader(Float_t* eventHeader = 0);
-  ~ACorsikaIACTEventHeader();
+  virtual ~ACorsikaIACTEventHeader();
 
   // Read CORSIKA_GUIDE69xx.pdf (table 8) for the detail
   Int_t   GetEventNumber() const { return (Int_t)fEventHeader[1];}
