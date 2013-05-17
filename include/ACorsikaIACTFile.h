@@ -12,7 +12,7 @@
 class ACorsikaIACTFile : public TObject {
  private:
   static const Int_t       kMaxArrays;
-  static const Int_t       kMaxTelescopes; // 99 limited in CORSIKA
+  static const Int_t       kMaxTelescopes;
 
   IO_ITEM_HEADER           fBlockHeader;
   TTree*                   fBunches;
@@ -23,7 +23,7 @@ class ACorsikaIACTFile : public TObject {
   Int_t                    fMaxPhotonBunches;
   Int_t                    fNumberOfTelescopes;
   ACorsikaIACTRunHeader*   fRunHeader;
-  Double_t                 fTelescopePosition[4][99];
+  Double_t*                fTelescopePosition[4];
 
   Int_t    ReadNextBlock();
 
