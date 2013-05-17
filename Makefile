@@ -78,7 +78,8 @@ all:		$(RMAP)
 $(MOD1): $(ORG1)
 		sed -e 's/s = malloc(/s = (char\*)malloc(/g' $< | \
 		sed -e 's/root_path = calloc(/root_path = (incpath\*)calloc(/g' | \
-		sed -e 's/last->next = calloc(/last->next = (incpath\*)calloc(/g' > $@
+		sed -e 's/last->next = calloc(/last->next = (incpath\*)calloc(/g' | \
+		sed -e 's/s = strchr(fname/s = (char\*)strchr(fname/g' > $@
 
 $(MOD2): $(ORG2)
 		sed -e 's/xl->text = malloc(/xl->text = (char\*)malloc(/g' $< | \
