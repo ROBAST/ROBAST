@@ -48,6 +48,8 @@ class ACorsikaIACTFile : public TObject {
 
   ACorsikaIACTEventHeader* GetEventHeader() const { return fEventHeader;}
   ACorsikaIACTRunHeader*   GetRunHeader() const { return fRunHeader;}
+
+  ClassDef(ACorsikaIACTFile, 1)
 };
 
 #endif // A_CORSIKA_IACT_FILE_H

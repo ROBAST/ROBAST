@@ -1,4 +1,8 @@
+#include <stdlib.h>
+
 #include "ACorsikaIACTEventHeader.h"
+
+ClassImp(ACorsikaIACTEventHeader)
 
 const Int_t ACorsikaIACTEventHeader::kMaxArrays = 20;
 

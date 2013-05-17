@@ -2,6 +2,8 @@
 
 #include "ACorsikaIACTRunHeader.h"
 
+ClassImp(ACorsikaIACTRunHeader)
+
 ACorsikaIACTRunHeader::ACorsikaIACTRunHeader(Float_t* runHeader)
 {
   memcpy(fRunHeader, runHeader, sizeof(Float_t)*273);

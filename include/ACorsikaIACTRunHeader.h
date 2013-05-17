@@ -47,6 +47,8 @@ class ACorsikaIACTRunHeader {
   Int_t     GetNFLPIF() const { return ((Int_t)fRunHeader[271])/100;}
   Int_t     GetNFLCHE() const { return ((Int_t)fRunHeader[272])%100;}
   Int_t     GetNFRAGM() const { return ((Int_t)fRunHeader[272])/100;}
+
+  ClassDef(ACorsikaIACTRunHeader, 1)
 };
 
 #endif // A_CORSIKA_IACT_RUN_HEADER_H

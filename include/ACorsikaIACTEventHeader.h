@@ -106,6 +106,8 @@ class ACorsikaIACTEventHeader {
   Int_t    GetInstanceNumberOfArrays() const { return fInstanceNumberOfArrays;}
 
   void SetMultipleUseHeader(Int_t numberOfArrays, Double_t timeOffset, Double_t* xOffset, Double_t* yOffset, Int_t instanceNumberOfArrays);
+
+  ClassDef(ACorsikaIACTEventHeader, 1)
 };
 
 #endif // A_CORSIKA_IACT_EVENT_HEADER_H

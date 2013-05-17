@@ -2,6 +2,8 @@
 
 #include "ACorsikaIACTFile.h"
 
+ClassImp(ACorsikaIACTFile)
+
 const Int_t ACorsikaIACTFile::kMaxArrays = 100;
 const Int_t ACorsikaIACTFile::kMaxTelescopes = 1000;
 
@@ -67,7 +69,7 @@ void ACorsikaIACTFile::Close()
 //_____________________________________________________________________________
 Double_t ACorsikaIACTFile::GetTelescopeR(Int_t i) const
 {
-  if(0 <= i and i < 100){
+  if(0 <= i and i < fNumberOfTelescopes){
     return fTelescopePosition[3][i];
   } else {
     return atof("NaN");
@@ -77,7 +79,7 @@ Double_t ACorsikaIACTFile::GetTelescopeR(Int_t i) const
 //_____________________________________________________________________________
 Double_t ACorsikaIACTFile::GetTelescopeX(Int_t i) const
 {
-  if(0 <= i and i < 100){
+  if(0 <= i and i < fNumberOfTelescopes){
     return fTelescopePosition[0][i];
   } else {
     return atof("NaN");
@@ -87,7 +89,7 @@ Double_t ACorsikaIACTFile::GetTelescopeX(Int_t i) const
 //_____________________________________________________________________________
 Double_t ACorsikaIACTFile::GetTelescopeY(Int_t i) const
 {
-  if(0 <= i and i < 100){
+  if(0 <= i and i < fNumberOfTelescopes){
     return fTelescopePosition[1][i];
   } else {
     return atof("NaN");
@@ -97,7 +99,7 @@ Double_t ACorsikaIACTFile::GetTelescopeY(Int_t i) const
 //_____________________________________________________________________________
 Double_t ACorsikaIACTFile::GetTelescopeZ(Int_t i) const
 {
-  if(0 <= i and i < 100){
+  if(0 <= i and i < fNumberOfTelescopes){
     return fTelescopePosition[2][i];
   } else {
     return atof("NaN");
