@@ -68,6 +68,10 @@ class AOpticsManager : public TGeoManager {
   static Double_t um() { return 1e-6*m();};
   static Double_t nm() { return 1e-9*m();};
   static Double_t inch() { return 2.54*cm();};
+  static Double_t  s() { return 1.;};
+  static Double_t ms() { return 1e-3*s();};
+  static Double_t us() { return 1e-6*s();};
+  static Double_t ns() { return 1e-9*s();};
 
   void   DisableFresnelReflection(Bool_t disable) {fDisableFresnelReflection = disable;}
   Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == AFocalSurface::Class();};
