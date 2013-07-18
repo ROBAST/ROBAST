@@ -198,7 +198,7 @@ void ACorsikaIACTFile::Open(const Char_t* fname)
   } // if
 
   if(IsAllocated()){
-    if((fIOBuffer->input_file = fopen(gSystem->ExpandPathName(fname), "r")) == 0){
+    if((fIOBuffer->input_file = fileopen(gSystem->ExpandPathName(fname), "r")) == 0){
       fprintf(stderr, "Cannot open the file.\n");
       return;
     } // if

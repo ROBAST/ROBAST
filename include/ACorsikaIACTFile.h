@@ -1,6 +1,7 @@
 #ifndef A_CORSIKA_IACT_FILE_H
 #define A_CORSIKA_IACT_FILE_H
 
+#include "bernlohr/fileopen.h"
 #include "bernlohr/io_basic.h"
 #include "bernlohr/mc_tel.h"
 
