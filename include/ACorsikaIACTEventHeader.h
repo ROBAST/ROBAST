@@ -8,7 +8,6 @@ class ACorsikaIACTEventHeader {
   static const Int_t kMaxArrays;
 
   Float_t  fEventHeader[273];
-  Int_t    fInstanceNumberOfArrays;
   Int_t    fNumberOfArrays;
   Double_t fTimeOffset;
   Double_t fXOffset[20];
@@ -103,9 +102,8 @@ class ACorsikaIACTEventHeader {
   Double_t GetTimeOffset() const { return fTimeOffset;}
   Double_t GetXOffset(Int_t i) const;
   Double_t GetYOffset(Int_t i) const;
-  Int_t    GetInstanceNumberOfArrays() const { return fInstanceNumberOfArrays;}
 
-  void SetMultipleUseHeader(Int_t numberOfArrays, Double_t timeOffset, Double_t* xOffset, Double_t* yOffset, Int_t instanceNumberOfArrays);
+  void SetMultipleUseHeader(Int_t numberOfArrays, Double_t timeOffset, Double_t* xOffset, Double_t* yOffset);
 
   ClassDef(ACorsikaIACTEventHeader, 1)
 };

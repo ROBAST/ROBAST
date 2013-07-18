@@ -92,11 +92,11 @@ Double_t ACorsikaIACTEventHeader::GetYOffset(Int_t i) const
 }
 
 //_____________________________________________________________________________
-void ACorsikaIACTEventHeader::SetMultipleUseHeader(Int_t numberOfArrays, Double_t timeOffset, Double_t* xOffset, Double_t* yOffset, Int_t instanceNumberOfArrays)
+void ACorsikaIACTEventHeader::SetMultipleUseHeader(Int_t numberOfArrays, Double_t timeOffset, Double_t* xOffset, Double_t* yOffset)
 {
   fNumberOfArrays = numberOfArrays;
   fTimeOffset = timeOffset;
-  fInstanceNumberOfArrays = instanceNumberOfArrays;  
+
   for(Int_t i = 0; i < fNumberOfArrays; i++){
     fXOffset[i] = xOffset[i];
     fYOffset[i] = yOffset[i];

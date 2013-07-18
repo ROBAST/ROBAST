@@ -8,6 +8,7 @@
 
 #include "ACorsikaIACTEventHeader.h"
 #include "ACorsikaIACTRunHeader.h"
+#include "ARayArray.h"
 
 class ACorsikaIACTFile : public TObject {
  private:
@@ -23,7 +24,7 @@ class ACorsikaIACTFile : public TObject {
   Int_t                    fMaxPhotonBunches;
   Int_t                    fNumberOfTelescopes;
   ACorsikaIACTRunHeader*   fRunHeader;
-  Double_t*                fTelescopePosition[4];
+  Double_t*                fTelescopePosition[4]; //
 
   Int_t    ReadNextBlock();
 
@@ -35,6 +36,7 @@ class ACorsikaIACTFile : public TObject {
   TTree*   GetBunches() const { return fBunches;}
   const Char_t* GetFileName() const { return fFileName.Data();}
   Int_t    GetNumberOfTelescopes() const { return fNumberOfTelescopes;}
+  ARayArray* GetRayArray(Int_t telNo, Int_t arrayNo, Double_t zoffset, Double_t refractiveIndex);
   Double_t GetTelescopeR(Int_t i) const;
   Double_t GetTelescopeX(Int_t i) const;
   Double_t GetTelescopeY(Int_t i) const;
