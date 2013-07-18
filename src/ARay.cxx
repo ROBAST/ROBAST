@@ -25,6 +25,7 @@ ARay::ARay()
   fLambda = 0;
   fDirection = TVector3(1, 0, 0);
   fStatus = kRun;
+  fWeight = 1;
 }
 
 //_____________________________________________________________________________
@@ -37,6 +38,7 @@ ARay::ARay(Int_t id, Double_t lambda, Double_t x, Double_t y, Double_t z,
   fLambda = lambda;
   SetDirection(nx, ny, nz);
   fStatus = kRun;
+  fWeight = 1;
 }
 
 //_____________________________________________________________________________
