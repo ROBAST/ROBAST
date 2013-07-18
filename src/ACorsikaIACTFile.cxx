@@ -118,10 +118,10 @@ ARayArray* ACorsikaIACTFile::GetRayArray(Int_t telNo, Int_t arrayNo,
     Double_t px = x*cm - tel_dist*cx;
     Double_t py = y*cm - tel_dist*cy;
     Double_t pt = time*ns - tel_dist/speed;
-    for(Int_t j = 0; j < photons; j++){
-      ARay* ray = new ARay(0, lambda*nm, px, py, z, pt, cx, cy, cz);
-      array->Add(ray);
-    } // j
+
+    ARay* ray = new ARay(0, lambda*nm, px, py, z, pt, cx, cy, cz);
+    ray->SetWeight(photons);
+    array->Add(ray);
   } // i
 
   return array;
