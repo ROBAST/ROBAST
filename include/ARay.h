@@ -33,7 +33,6 @@ class ARay : public TGeoTrack {
   Double_t     fLambda;     // Wavelength
   TVector3     fDirection;  // Current direction vector
   Int_t        fStatus;     // status of ray
-  UInt_t       fWeight;     // weight used for photon bunch
 
  public:
   ARay();
@@ -47,7 +46,6 @@ class ARay : public TGeoTrack {
   void         GetDirection(Double_t* d) const;
   Double_t     GetLambda() const {return fLambda;}
   void         GetLastPoint(Double_t* x) const;
-  UInt_t       GetWeight() const {return fWeight;}
   Bool_t       IsAbsorbed() const;
   Bool_t       IsExited() const;
   Bool_t       IsFocused() const;
@@ -58,7 +56,6 @@ class ARay : public TGeoTrack {
   void         SetDirection(Double_t dx, Double_t dy, Double_t dz);
   void         SetDirection(Double_t* d);
   void         SetLambda(Double_t lambda) {fLambda = lambda;}
-  void         SetWeight(UInt_t weight) {fWeight = weight;}
   void         Stop() {fStatus = kStop;}
   void         Suspend() {fStatus = kSuspend;}
 
