@@ -26,6 +26,8 @@ class ACorsikaIACTFile : public TObject {
   Int_t                    fNumberOfTelescopes;
   ACorsikaIACTRunHeader*   fRunHeader;
   Double_t*                fTelescopePosition[4]; //
+  Double_t                 fMaxWavelength;
+  Double_t                 fMinWavelength;
 
   Int_t    ReadNextBlock();
 

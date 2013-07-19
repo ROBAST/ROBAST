@@ -1,5 +1,6 @@
 #include "TDirectory.h"
 #include "TSystem.h"
+#include "TRandom.h"
 
 #include "ACorsikaIACTFile.h"
 #include "AOpticsManager.h"
@@ -119,9 +120,12 @@ ARayArray* ACorsikaIACTFile::GetRayArray(Int_t telNo, Int_t arrayNo,
     Double_t py = y*cm - tel_dist*cy;
     Double_t pt = time*ns - tel_dist/speed;
 
-    ARay* ray = new ARay(0, lambda*nm, px, py, z, pt, cx, cy, cz);
-    ray->SetWeight(photons);
-    array->Add(ray);
+    for(Int_t j = 0; j < photons; j++){
+      // if the wavelength is not determined in CORSIKA (i.e. lambda == 0), we randomize it now
+      Double_t random_lambda = lambda == 0 ? 1./(1./fMinWavelength - gRandom->Uniform()*(1./fMinWavelength - 1./fMaxPhotonBunches)) : lambda;
+      ARay* ray = new ARay(0, random_lambda*nm, px, py, z, pt, cx, cy, cz);
+      array->Add(ray);
+    } // j
   } // i
 
   return array;
@@ -315,6 +319,9 @@ Int_t ACorsikaIACTFile::ReadEvent(Int_t num)
       if(evth[1] != num){
         break;
       } // if
+
+      fMaxWavelength = evth[96];
+      fMinWavelength = evth[95];
 
       SafeDelete(fEventHeader);
       fEventHeader = new ACorsikaIACTEventHeader(evth);
