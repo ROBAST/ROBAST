@@ -37,4 +37,7 @@
 #pragma link C++ class ASchottFormula;
 #pragma link C++ class ASellmeierFormula;
 
+#pragma link C++ namespace AGeoUtil;
+#pragma link C++ global A_GEO_UTIL_H;
+#pragma link C++ function AGeoUtil::MakePointToPointTube(const char*, TVector3&, TVector3&, Double_t, TGeoTube**, TGeoCombiTrans**);
 #endif
