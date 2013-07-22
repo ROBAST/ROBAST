@@ -17,15 +17,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef ROOT_TGeoTrack
+#include "TGeoNode.h"
 #include "TGeoTrack.h"
-#endif
-#ifndef ROOT_TPolyLine3D
 #include "TPolyLine3D.h"
-#endif
-#ifndef ROOT_TVector3
 #include "TVector3.h"
-#endif
 
 class ARay : public TGeoTrack {
  private:
@@ -33,6 +28,7 @@ class ARay : public TGeoTrack {
   Double_t     fLambda;     // Wavelength
   TVector3     fDirection;  // Current direction vector
   Int_t        fStatus;     // status of ray
+  TObjArray    fNodeHisotry; // History of nodes on which the photon has hi
 
  public:
   ARay();
@@ -44,8 +40,11 @@ class ARay : public TGeoTrack {
   void         Exit() {fStatus = kExit;}
   void         Focus() {fStatus = kFocus;}
   void         GetDirection(Double_t* d) const;
+  const TObjArray* GetNodeHistory() const {return &fNodeHisotry;}
   Double_t     GetLambda() const {return fLambda;}
   void         GetLastPoint(Double_t* x) const;
+  void         AddNode(TGeoNode* node) {fNodeHisotry.Add(node);}
+  TGeoNode*    FindNode(const char* name) const {return (TGeoNode*)fNodeHisotry.FindObject(name);}
   Bool_t       IsAbsorbed() const;
   Bool_t       IsExited() const;
   Bool_t       IsFocused() const;
