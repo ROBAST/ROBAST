@@ -401,69 +401,72 @@ void AGeoWinstonConePoly::SetDimensions(Double_t* param)
 void AGeoWinstonConePoly::SetPoints(Double_t* points) const
 {
   // create mesh points
+  if(!points){
+    return;
+  } // if
+
   Int_t n = gGeoManager->GetNsegments();
 
-  if(points){
-    for(int i = 0; i <= n; i++){
-      // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
-      Double_t t = 2.*fDZ*i/n;
-      Double_t z = -fDZ + t;
-      Double_t r = CalcR(z)/TMath::Cos(TMath::Pi()/fPolyN);
+  Int_t index = 0;
+  for(int i = 0; i <= n; i++){
+    // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
+    Double_t t = 2.*fDZ*i/n;
+    Double_t z = -fDZ + t;
+    Double_t r = CalcR(z)/TMath::Cos(TMath::Pi()/fPolyN);
 
-      for(Int_t j = 0; j < fPolyN; j++){
-        Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
-        Double_t x = r*TMath::Cos(theta);
-        Double_t y = r*TMath::Sin(theta);
-        Int_t index = (i*fPolyN + j)*3;
-        points[index    ] = x;
-        points[index + 1] = y;
-        points[index + 2] = z;
-      } // j
-    } // i
+    for(Int_t j = 0; j < fPolyN; j++){
+      Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
+      Double_t x = r*TMath::Cos(theta);
+      Double_t y = r*TMath::Sin(theta);
+      points[index++] = x;
+      points[index++] = y;
+      points[index++] = z;
+    } // j
+  } // i
 
-    Int_t index = (n + 1)*fPolyN*3;
-    points[index + 0] = 0;
-    points[index + 1] = 0;
-    points[index + 2] = -fDZ;
+  points[index++] = 0;
+  points[index++] = 0;
+  points[index++] = -fDZ;
 
-    points[index + 3] = 0;
-    points[index + 4] = 0;
-    points[index + 5] = fDZ;
-  } // if
+  points[index++] = 0;
+  points[index++] = 0;
+  points[index++] = fDZ;
 }
 
 //_____________________________________________________________________________
 void AGeoWinstonConePoly::SetPoints(Float_t* points) const
 {
   // create mesh points
+  if(!points){
+    return;
+  } // if
+
   Int_t n = gGeoManager->GetNsegments();
 
-  if(points){
-    Int_t index = 0;
-    for(int i = 0; i <= n; i++){
-      // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
-      Double_t t = 2.*fDZ*i/n;
-      Double_t z = -fDZ + t;
-      Double_t r = CalcR(z)/TMath::Cos(TMath::TwoPi()/fPolyN);;
+  Int_t index = 0;
+  for(int i = 0; i <= n; i++){
+    // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
+    Double_t t = 2.*fDZ*i/n;
+    Double_t z = -fDZ + t;
+    Double_t r = CalcR(z)/TMath::Cos(TMath::TwoPi()/fPolyN);;
 
-      for(Int_t j = 0; j < fPolyN; j++){
-        Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
-        Double_t x = r*TMath::Cos(theta);
-        Double_t y = r*TMath::Sin(theta);
-        points[index++] = x;
-        points[index++] = y;
-        points[index++] = z;
-      } // j
-    } // i
+    for(Int_t j = 0; j < fPolyN; j++){
+      Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
+      Double_t x = r*TMath::Cos(theta);
+      Double_t y = r*TMath::Sin(theta);
+      points[index++] = x;
+      points[index++] = y;
+      points[index++] = z;
+    } // j
+  } // i
 
-    points[index++] = 0;
-    points[index++] = 0;
-    points[index++] = -fDZ;
+  points[index++] = 0;
+  points[index++] = 0;
+  points[index++] = -fDZ;
 
-    points[index++] = 0;
-    points[index++] = 0;
-    points[index++] = fDZ;
-  } // if
+  points[index++] = 0;
+  points[index++] = 0;
+  points[index++] = fDZ;
 }
 
 //_____________________________________________________________________________
