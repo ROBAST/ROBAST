@@ -480,7 +480,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
   // segments
   Int_t index = 0;
   for(Int_t i = 0; i < n; i++){
-    // segments on parabola
+    // segments on parabolaÁ
     for(Int_t j = 0; j < fPolyN; j++){
       buff.fSegs[index++] = c;
       buff.fSegs[index++] = fPolyN*i + j;
@@ -513,10 +513,10 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
   index = 0;
   for(Int_t i = 0; i < n; i++){
     for(Int_t j = 0; j < fPolyN; j++){
-    // polygon on parabola
+      // polygon on parabola
       buff.fPols[index++] = c;
       buff.fPols[index++] = 4;
-      buff.fPols[index++] = j == fPolyN*i + j;
+      buff.fPols[index++] = fPolyN*i + j; // this is a segment number
       buff.fPols[index++] = fPolyN*n + fPolyN*i + j + fPolyN;
       buff.fPols[index++] = j == (fPolyN - 1) ? fPolyN*i : fPolyN*i + j + 1;
       buff.fPols[index++] = fPolyN*n + fPolyN*i + j;
@@ -528,7 +528,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
     buff.fPols[index++] = c;
     buff.fPols[index++] = 3;
     buff.fPols[index++] = fPolyN*n + i;
-    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 1) + i + 1 - fPolyN: fPolyN*(2*n + 1) + i + 1;
+    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 1) + i + 1 - fPolyN : fPolyN*(2*n + 1) + i + 1;
     buff.fPols[index++] = fPolyN*(2*n + 1) + i;
   } // i
 
@@ -538,7 +538,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
     buff.fPols[index++] = 3;
     buff.fPols[index++] = fPolyN*2*n + i;
     buff.fPols[index++] = fPolyN*(2*n + 2) + i;
-    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 2) + i + 1 - fPolyN: fPolyN*(2*n + 2) + i + 1;
+    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 2) + i + 1 - fPolyN : fPolyN*(2*n + 2) + i + 1;
   } // i
 }
 
