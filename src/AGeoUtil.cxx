@@ -17,6 +17,24 @@ NamespaceImp(AGeoUtil)
 namespace AGeoUtil {
 
 //______________________________________________________________________________
+void MakePointToPointBBox(const char* name, TVector3& v1, TVector3& v2,
+                          Double_t dx, Double_t dy,
+                          TGeoBBox** box, TGeoCombiTrans** combi)
+{
+  TVector3 v3 = v1 + v2;
+  v3 *= 0.5; // center of the gravity
+  TVector3 v4 = v3 - v1;
+
+  Double_t theta = v4.Theta()*TMath::RadToDeg();
+  Double_t phi   = v4.Phi()*TMath::RadToDeg();
+
+  *box = new TGeoBBox(Form("%sbox", name), dx, dy, v4.Mag());
+  *combi = new TGeoCombiTrans(TGeoTranslation(v3.X(), v3.Y(), v3.Z()), TGeoRotation("", phi + 90, theta, 0));
+  (*combi)->SetName(Form("%scombi", name));
+  (*combi)->RegisterYourself();
+}
+
+//______________________________________________________________________________
 void MakePointToPointTube(const char* name, TVector3& v1, TVector3& v2,
                           Double_t radius, TGeoTube** tube,
                           TGeoCombiTrans** combi)
@@ -47,8 +65,10 @@ void MakePointToPointTube(const char* name, TVector3& v1, TVector3& v2,
   Double_t theta = v4.Theta()*TMath::RadToDeg();
   Double_t phi   = v4.Phi()*TMath::RadToDeg();
 
-  *tube = new TGeoTube("", 0., radius, v4.Mag());
+  *tube = new TGeoTube(Form("%stube", name), 0., radius, v4.Mag());
   *combi = new TGeoCombiTrans(TGeoTranslation(v3.X(), v3.Y(), v3.Z()), TGeoRotation("", phi + 90, theta, 0));
+  (*combi)->SetName(Form("%scombi", name));
+  (*combi)->RegisterYourself();
 }
 
 } // AGeoUtil
