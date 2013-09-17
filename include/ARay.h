@@ -45,6 +45,8 @@ class ARay : public TGeoTrack {
   void         GetLastPoint(Double_t* x) const;
   void         AddNode(TGeoNode* node) {fNodeHisotry.Add(node);}
   TGeoNode*    FindNode(const char* name) const {return (TGeoNode*)fNodeHisotry.FindObject(name);}
+  TGeoNode*    FindNodeStartWith(const char* name) const;
+  Int_t        FindNodeNumberStartWith(const char* name) const;
   Bool_t       IsAbsorbed() const;
   Bool_t       IsExited() const;
   Bool_t       IsFocused() const;

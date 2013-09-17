@@ -45,6 +45,32 @@ ARay::~ARay()
 }
 
 //_____________________________________________________________________________
+TGeoNode* ARay::FindNodeStartWith(const char* name) const
+{
+  for(Int_t i = 0; i < fNodeHisotry.GetEntries(); i++){
+    TGeoNode* node = (TGeoNode*)fNodeHisotry.At(i);
+    if(node and strncmp(node->GetName(), name, strlen(name)) == 0){
+      return node;
+    } // if
+  } // i
+
+  return 0;
+}
+
+//_____________________________________________________________________________
+Int_t ARay::FindNodeNumberStartWith(const char* name) const
+{
+  for(Int_t i = 0; i < fNodeHisotry.GetEntries(); i++){
+    TGeoNode* node = (TGeoNode*)fNodeHisotry.At(i);
+    if(node and strncmp(node->GetName(), name, strlen(name)) == 0){
+      return i;
+    } // if
+  } // i
+
+  return -1;
+}
+
+//_____________________________________________________________________________
 void ARay::GetDirection(Double_t* v) const
 {
   fDirection.GetXYZ(v);
