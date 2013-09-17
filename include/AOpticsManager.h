@@ -45,8 +45,12 @@
 
 class AOpticsManager : public TGeoManager {
  private:
-  Int_t fLimit; // Maximum number of crossing calculations
+  Int_t  fLimit; // Maximum number of crossing calculations
   Bool_t fDisableFresnelReflection; // disable Fresnel reflection
+  TGeoNode* fStoredStartNode; // start node
+  TGeoNode* fStoredEndNode; // end node
+  std::map<long, TGeoNode*> fStoredStartNodes; // for multi threading
+  std::map<long, TGeoNode*> fStoredEndNodes; // for multi threading
 
   static void* Thread(void* args);
 
@@ -74,6 +78,10 @@ class AOpticsManager : public TGeoManager {
   static Double_t ns() { return 1e-9*s();};
 
   void   DisableFresnelReflection(Bool_t disable) {fDisableFresnelReflection = disable;}
+  TGeoNode* GetStoredStartNode() const;
+  TGeoNode* GetStoredEndNode() const;
+  void   SetStoredStartNode(TGeoNode* node);
+  void   SetStoredEndNode(TGeoNode* node);
   Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == AFocalSurface::Class();};
   Bool_t IsLens(TGeoNode* node) const { return node->GetVolume()->IsA() == ALens::Class();};
   Bool_t IsMirror(TGeoNode* node) const { return node->GetVolume()->IsA() == AMirror::Class();};

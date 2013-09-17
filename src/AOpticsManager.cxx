@@ -47,8 +47,8 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
 {
   TGeoNavigator* nav = GetCurrentNavigator();
   Double_t step = nav->GetStep();
-  TGeoNode* startNode = nav->GetCurrentNode();
-  TGeoNode* endNode = nav->GetNextNode();
+  TGeoNode* startNode = GetStoredStartNode();
+  TGeoNode* endNode = GetStoredEndNode();
 
   // Use the same notation used in Wikipedia
   // http://en.wikipedia.org/wiki/Fresnel_equations
@@ -97,7 +97,6 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
   Double_t speed = TMath::C()*m()/n1;
   x2[3] = x1[3] + step/speed;
   ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
-  ray.AddNode(endNode);
 }
 
 //_____________________________________________________________________________
@@ -140,15 +139,50 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
   Double_t speed = TMath::C()*m()/n1;
   x2[3] = x1[3] + step/speed;
   ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
-  ray.AddNode(endNode);
+}
+
+//_____________________________________________________________________________
+TGeoNode* AOpticsManager::GetStoredStartNode() const
+{
+  // Return the current "current node" for the calling thread.
+  if(!IsMultiThread()){
+    return fStoredStartNode;
+  } // if
+
+  Long_t threadId = TThread::SelfId();
+  std::map<long, TGeoNode*>::const_iterator cit = fStoredStartNodes.find(threadId);
+  if(cit == fStoredStartNodes.end()){
+    return 0;
+  } // if
+
+  TGeoNode* node = cit->second;
+  return node;
+}
+
+//_____________________________________________________________________________
+TGeoNode* AOpticsManager::GetStoredEndNode() const
+{
+  // Return the current "next node" for the calling thread.
+  if(!IsMultiThread()){
+    return fStoredEndNode;
+  } // if
+
+  Long_t threadId = TThread::SelfId();
+  std::map<long, TGeoNode*>::const_iterator cit = fStoredEndNodes.find(threadId);
+  if(cit == fStoredEndNodes.end()){
+    return 0;
+  } // if
+
+  TGeoNode* node = cit->second;
+  return node;
 }
 
 //_____________________________________________________________________________
 TVector3 AOpticsManager::GetFacetNormal()
 {
   TGeoNavigator* nav = GetCurrentNavigator();
-  TGeoNode* startNode = nav->GetCurrentNode();
-  TGeoNode* endNode = nav->GetNextNode();
+  TGeoNode* startNode = GetStoredStartNode();
+  TGeoNode* endNode = GetStoredEndNode();
 
   TGeoVolume* volume1 = startNode->GetVolume();
   TGeoVolume* volume2 = endNode ? endNode->GetVolume() : 0;
@@ -195,6 +229,28 @@ TVector3 AOpticsManager::GetFacetNormal()
 }
 
 //_____________________________________________________________________________
+void AOpticsManager::SetStoredStartNode(TGeoNode* node)
+{
+  if(!IsMultiThread()){
+    fStoredStartNode = node;
+  } else {
+    Long_t threadId = TThread::SelfId();
+    fStoredStartNodes[threadId] = node;
+  } // if
+}
+
+//_____________________________________________________________________________
+void AOpticsManager::SetStoredEndNode(TGeoNode* node)
+{
+  if(!IsMultiThread()){
+    fStoredEndNode = node;
+  } else {
+    Long_t threadId = TThread::SelfId();
+    fStoredEndNodes[threadId] = node;
+  } // if
+}
+
+//_____________________________________________________________________________
 void* AOpticsManager::Thread(void* args)
 {
   AOpticsManager* manager = (AOpticsManager*)((TObjArray**)args)[0];
@@ -237,8 +293,10 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
     if(nav->IsOutside()){ // if the current position is outside of top volume
       startNode = 0;
     } // if
+    SetStoredStartNode(startNode);
 
     TGeoNode* endNode = nav->FindNextBoundaryAndStep();
+    SetStoredEndNode(endNode);
 
     // Check type of start node
     Int_t typeStart = kOther;
@@ -274,7 +332,6 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
           Double_t n1 = ((ALens*)startNode->GetVolume())->GetRefractiveIndex(ray.GetLambda());
           Double_t speed = TMath::C()*m()/n1;
           ray.AddPoint(x1[0] + x1[0]*abs_step, x1[1] + x1[1]*abs_step, x1[2] + d1[2]*abs_step, x1[3] + abs_step/speed);
-          ray.AddNode(startNode);
           ray.Absorb();
           nav->SetStep(step);
           continue;
@@ -307,7 +364,6 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
         x2[3] = x1[3] + step/speed;
       } // if
       ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
-      ray.AddNode(endNode);
     } else if((typeStart == kNull or typeStart == kOpt or typeStart == kOther)
                and (typeEnd == kOther or typeEnd == kOpt)){
 
@@ -318,7 +374,6 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
       Double_t speed = TMath::C()*m();
       x2[3] = x1[3] + step/speed;
       ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
-      ray.AddNode(endNode);
     } else if(typeStart == kLens and typeEnd == kLens){
       Double_t n1 = ((ALens*)startNode->GetVolume())->GetRefractiveIndex(lambda);
       Double_t n2 = ((ALens*)endNode->GetVolume())->GetRefractiveIndex(lambda);
@@ -338,7 +393,6 @@ void AOpticsManager::TraceNonSequential(ARay& ray)
       Double_t speed = TMath::C()*m();
       x2[3] = x1[3] + step/speed;
       ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
-      ray.AddNode(endNode);
       ray.Exit();
     } else if(typeStart == kFocus or typeStart == kObs or typeStart == kMirror or typeEnd == kObs){
       ray.Stop();
