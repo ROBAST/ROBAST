@@ -1,6 +1,10 @@
 #ifndef A_CORSIKA_IACT_FILE_H
 #define A_CORSIKA_IACT_FILE_H
 
+#ifdef __CINT__
+#define _SYS_TYPES_H_
+#endif
+
 #include "bernlohr/fileopen.h"
 #include "bernlohr/io_basic.h"
 #include "bernlohr/mc_tel.h"
