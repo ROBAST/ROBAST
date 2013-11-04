@@ -3,6 +3,7 @@
 
 #ifdef __CINT__
 #define _SYS_TYPES_H_
+#define _STDINT_H_
 #endif
 
 #include "bernlohr/fileopen.h"
