@@ -126,7 +126,7 @@ void AGeoWinstonCone2D::ComputeBBox()
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonCone2D::ComputeNormal(Double_t* point, Double_t* dir,
+void AGeoWinstonCone2D::ComputeNormal(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                       Double_t* norm)
 {
   // Compute normal to closest surface from POINT.
@@ -181,7 +181,7 @@ void AGeoWinstonCone2D::ComputeNormal(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Bool_t AGeoWinstonCone2D::Contains(Double_t* point) const
+Bool_t AGeoWinstonCone2D::Contains(CONST53411 Double_t* point) const
 {
   // Test if point is in this shape
   Double_t x = point[0];
@@ -211,7 +211,7 @@ Int_t AGeoWinstonCone2D::DistancetoPrimitive(Int_t px, Int_t py)
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistFromInside(Double_t* point, Double_t* dir,
+Double_t AGeoWinstonCone2D::DistFromInside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                            Int_t iact, Double_t step,
                                            Double_t* safe) const
 {
@@ -249,7 +249,7 @@ Double_t AGeoWinstonCone2D::DistFromInside(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistFromOutside(Double_t* point, Double_t* dir,
+Double_t AGeoWinstonCone2D::DistFromOutside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                             Int_t iact, Double_t step,
                                             Double_t* safe) const
 {
@@ -333,7 +333,7 @@ Double_t AGeoWinstonCone2D::DistFromOutside(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir, Double_t phi, Double_t open) const
+Double_t AGeoWinstonCone2D::DistToParabola(CONST53411 Double_t* point, CONST53411 Double_t* dir, Double_t phi, Double_t open) const
 {
   Double_t x = TMath::Cos(phi)*point[0] + TMath::Sin(phi)*point[1];
   Double_t y =-TMath::Sin(phi)*point[0] + TMath::Cos(phi)*point[1];
@@ -528,7 +528,7 @@ TBuffer3D* AGeoWinstonCone2D::MakeBuffer3D() const
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::Safety(Double_t* point, Bool_t in) const
+Double_t AGeoWinstonCone2D::Safety(CONST53411 Double_t* point, Bool_t in) const
 {
   // Not implemented yet. But keep this as is.
   return TGeoShape::Big();

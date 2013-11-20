@@ -236,7 +236,7 @@ void AGeoAsphericDisk::ComputeBBox()
 }
 
 //_____________________________________________________________________________
-void AGeoAsphericDisk::ComputeNormal(Double_t* point, Double_t* dir,
+void AGeoAsphericDisk::ComputeNormal(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                      Double_t* norm)
 {
   // Compute normal to closest surface from POINT.
@@ -319,7 +319,7 @@ void AGeoAsphericDisk::ComputeNormal(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Bool_t AGeoAsphericDisk::Contains(Double_t* point) const
+Bool_t AGeoAsphericDisk::Contains(CONST53411 Double_t* point) const
 {
   // Test if point is in this shape
   
@@ -354,7 +354,7 @@ Int_t AGeoAsphericDisk::DistancetoPrimitive(Int_t px, Int_t py)
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::DistFromInside(Double_t* point, Double_t* dir,
+Double_t AGeoAsphericDisk::DistFromInside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                           Int_t iact, Double_t step,
                                           Double_t* safe) const
 {
@@ -378,7 +378,7 @@ Double_t AGeoAsphericDisk::DistFromInside(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::DistFromOutside(Double_t* point, Double_t* dir,
+Double_t AGeoAsphericDisk::DistFromOutside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                            Int_t iact, Double_t step,
                                            Double_t* safe) const
 {
@@ -407,7 +407,7 @@ Double_t AGeoAsphericDisk::DistFromOutside(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, Double_t* point, Double_t* dir) const
+Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, CONST53411 Double_t* point, CONST53411 Double_t* dir) const
 {
   if(n!=1 and n!=2) return TGeoShape::Big();
 
@@ -515,7 +515,7 @@ Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, Double_t* point, Double_t* dir
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::DistToInner(Double_t* point, Double_t* dir) const
+Double_t AGeoAsphericDisk::DistToInner(CONST53411 Double_t* point, CONST53411 Double_t* dir) const
 {
   if(!TestShapeBit(kGeoRSeg)){
     return TGeoShape::Big();
@@ -580,7 +580,7 @@ Double_t AGeoAsphericDisk::DistToInner(Double_t* point, Double_t* dir) const
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::DistToOuter(Double_t* point, Double_t* dir) const
+Double_t AGeoAsphericDisk::DistToOuter(CONST53411 Double_t* point, CONST53411 Double_t* dir) const
 {
   Double_t rsq = point[0]*point[0] + point[1]*point[1];
   Double_t nsq = dir[0]*dir[0] + dir[1]*dir[1];
@@ -777,7 +777,7 @@ TBuffer3D* AGeoAsphericDisk::MakeBuffer3D() const
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::Safety(Double_t* point, Bool_t in) const
+Double_t AGeoAsphericDisk::Safety(CONST53411 Double_t* point, Bool_t in) const
 {
   Double_t safe;
 

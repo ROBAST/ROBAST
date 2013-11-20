@@ -72,7 +72,7 @@ void AGeoWinstonConePoly::ComputeBBox()
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonConePoly::ComputeNormal(Double_t* point, Double_t* dir,
+void AGeoWinstonConePoly::ComputeNormal(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                         Double_t* norm)
 {
   // Compute normal to closest surface from POINT.
@@ -128,7 +128,7 @@ void AGeoWinstonConePoly::ComputeNormal(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Bool_t AGeoWinstonConePoly::Contains(Double_t* point) const
+Bool_t AGeoWinstonConePoly::Contains(CONST53411 Double_t* point) const
 {
   // Test if point is in this shape
   Double_t x = point[0];
@@ -155,7 +155,7 @@ Int_t AGeoWinstonConePoly::DistancetoPrimitive(Int_t px, Int_t py)
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonConePoly::DistFromInside(Double_t* point, Double_t* dir,
+Double_t AGeoWinstonConePoly::DistFromInside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
                                              Int_t iact, Double_t step,
                                              Double_t* safe) const
 {
@@ -185,9 +185,9 @@ Double_t AGeoWinstonConePoly::DistFromInside(Double_t* point, Double_t* dir,
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonConePoly::DistFromOutside(Double_t* point, Double_t* dir,
-                                            Int_t iact, Double_t step,
-                                            Double_t* safe) const
+Double_t AGeoWinstonConePoly::DistFromOutside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
+                                              Int_t iact, Double_t step,
+                                              Double_t* safe) const
 {
   // compute distance from outside point to surface of the sphere
 
