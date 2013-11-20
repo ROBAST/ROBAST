@@ -1,0 +1,7 @@
+/htmldoc/
+/libROBAST.*
+/src/*.o
+/src/ROBASTDict*
+/src/bernlohr/*.o
+/src/bernlohr/*_mod.c
+/include/ROBAST
