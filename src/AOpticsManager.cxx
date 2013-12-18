@@ -116,7 +116,7 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
 
   Bool_t absorbed = kFALSE;
 
-  if(IsMirror(endNode) == kMirror){
+  if(IsMirror(endNode)){
     Double_t angle = TMath::ACos(cosi)*TMath::RadToDeg();
     Double_t lambda = ray.GetLambda();
     Double_t ref = ((AMirror*)endNode->GetVolume())->GetReflectivity(lambda, angle);
