@@ -89,6 +89,7 @@ class AOpticsManager : public TGeoManager {
   Bool_t IsOpticalComponent(TGeoNode* node) const { return node->GetVolume()->IsA() == AOpticalComponent::Class();};
   void   SetLimit(Int_t n);
   void   TraceNonSequential(ARay& ray);
+  void   TraceNonSequential(ARay* ray) {if(ray) TraceNonSequential(*ray);}
   void   TraceNonSequential(ARayArray& array);
   void   TraceNonSequential(ARayArray* array) {if(array) TraceNonSequential(*array);}
 
