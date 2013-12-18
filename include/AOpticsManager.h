@@ -90,6 +90,7 @@ class AOpticsManager : public TGeoManager {
   void   SetLimit(Int_t n);
   void   TraceNonSequential(ARay& ray);
   void   TraceNonSequential(ARayArray& array);
+  void   TraceNonSequential(ARayArray* array) {if(array) TraceNonSequential(*array);}
 
   ClassDef(AOpticsManager, 1)
 };
