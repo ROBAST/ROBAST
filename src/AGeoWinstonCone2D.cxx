@@ -363,8 +363,14 @@ Double_t AGeoWinstonCone2D::DistToParabola(CONST53411 Double_t* point, CONST5341
     dist[0] = TGeoShape::Big();
     dist[1] = TGeoShape::Big();
   } else {
-    Double_t X_cross_p = 2*fF*(tanA + TMath::Sqrt(tmp));
-    Double_t X_cross_m = 2*fF*(tanA - TMath::Sqrt(tmp));
+    Double_t X_cross_p, X_cross_m;
+    if(fDZ*2/TMath::Abs(tanA) < TGeoShape::Tolerance()){ // direction is almost parallel to Z axis
+      X_cross_p = X;
+      X_cross_m = X;
+    } else {
+      X_cross_p = 2*fF*(tanA + TMath::Sqrt(tmp));
+      X_cross_m = 2*fF*(tanA - TMath::Sqrt(tmp));
+    } // if
     Double_t Z_cross_p = X_cross_p*X_cross_p/4./fF;
     Double_t Z_cross_m = X_cross_m*X_cross_m/4./fF;
 
