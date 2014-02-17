@@ -23,6 +23,9 @@
 #ifndef ROOT_TMath
 #include "TMath.h"
 #endif
+#ifndef ROOT_TThread
+#include "TThread.h"
+#endif
 
 #ifndef A_RAY_ARRAY_H
 #include "ARayArray.h"
@@ -54,9 +57,9 @@ class AOpticsManager : public TGeoManager {
 
   static void* Thread(void* args);
 
-  void     DoFresnel(Double_t n1, Double_t n2, ARay& ray);
-  void     DoReflection(Double_t n1, ARay& ray);
-  TVector3 GetFacetNormal();
+  void     DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigator* nav, TGeoNode* startNode, TGeoNode* endNode);
+  void     DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TGeoNode* startNode, TGeoNode* endNode);
+  TVector3 GetFacetNormal(TGeoNavigator* nav, TGeoNode* startNode, TGeoNode* endNode);
 
  public:
   enum {kLens, kObs, kMirror, kFocus, kOpt, kOther, kNull};
@@ -92,8 +95,31 @@ class AOpticsManager : public TGeoManager {
   void   TraceNonSequential(ARay* ray) {if(ray) TraceNonSequential(*ray);}
   void   TraceNonSequential(ARayArray& array);
   void   TraceNonSequential(ARayArray* array) {if(array) TraceNonSequential(*array);}
+  void   TraceNonSequential(TObjArray* array);
 
   ClassDef(AOpticsManager, 1)
 };
+
+//_____________________________________________________________________________
+inline void AOpticsManager::SetStoredStartNode(TGeoNode* node)
+{
+  if(!IsMultiThread()){
+    fStoredStartNode = node;
+  } else {
+    Long_t threadId = TThread::SelfId();
+    fStoredStartNodes[threadId] = node;
+  } // if
+}
+
+//_____________________________________________________________________________
+inline void AOpticsManager::SetStoredEndNode(TGeoNode* node)
+{
+  if(!IsMultiThread()){
+    fStoredEndNode = node;
+  } else {
+    Long_t threadId = TThread::SelfId();
+    fStoredEndNodes[threadId] = node;
+  } // if
+}
 
 #endif // A_OPTICS_MANAGER_H

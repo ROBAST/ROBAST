@@ -22,18 +22,24 @@ ClassImp(ARayArray)
 ARayArray::ARayArray() : TObject()
 {
   // Constructor
+  fAbsorbed.SetOwner(kTRUE);
+  fExited.SetOwner(kTRUE);
+  fFocused.SetOwner(kTRUE);
+  fRunning.SetOwner(kTRUE);
+  fStopped.SetOwner(kTRUE);
+  fSuspended.SetOwner(kTRUE);
 }
 
 //_____________________________________________________________________________
 ARayArray::~ARayArray()
 {
   // Destructor
-  fAbsorbed.Delete();
-  fExited.Delete();
-  fFocused.Delete();
-  fRunning.Delete();
-  fStopped.Delete();
-  fSuspended.Delete();
+  fAbsorbed.Clear();
+  fExited.Clear();
+  fFocused.Clear();
+  fRunning.Clear();
+  fStopped.Clear();
+  fSuspended.Clear();
 }
 
 //_____________________________________________________________________________
