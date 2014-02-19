@@ -242,10 +242,16 @@ void* AOpticsManager::Thread(void* args)
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(running->RemoveAt(i));
     if(!ray) continue;
+    TThread::Lock();
     array->Add(ray);
+    TThread::UnLock();
   } // i
 
-  running->Expand(0);
+  TThread::Lock();
+  running->Expand(0); // todo sometimes show nonempty error
+  TThread::UnLock();
+
+  manager->RemoveNavigator(manager->GetCurrentNavigator());
 
   return 0;
 }
@@ -402,15 +408,15 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
     } // while
   } // j
 }
-#include <iostream>
+
 //_____________________________________________________________________________
 void AOpticsManager::TraceNonSequential(ARayArray& array)
 {
   TObjArray* running = array.GetRunning();
-  std::cerr << "aho*\n";
+
   Int_t n = running->GetLast();
   Int_t nthreads = GetMaxThreads();
-  std::cerr << "aho*\n";
+
   if(IsMultiThread() and nthreads >= 1){
     TThread** threads = new TThread*[nthreads];
     ARayArray** dividedArray = new ARayArray*[nthreads];
@@ -427,21 +433,17 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
       threads[i] = new TThread(Form("thread%d", i), AOpticsManager::Thread, (void*)args);
       threads[i]->Run();
     } // i
-    std::cerr << "aho*\n";
+
     for(Int_t i = 0; i < nthreads; i++){
-      std::cerr << "aho" << i << "\n";
       threads[i]->Join();
     } // i
-    std::cerr << "aho*\n";
+
     ClearThreadsMap();
 
     for(Int_t i = 0; i < nthreads; i++){
       array.Merge(dividedArray[i]);
-      std::cerr << "aho" << i << "\n";
       SafeDelete(dividedArray[i]);
-      std::cerr << "baka" << i << "\n";
       SafeDelete(threads[i]);
-      std::cerr << "boke" << i << "\n";
     } // i
 
     delete [] threads;
