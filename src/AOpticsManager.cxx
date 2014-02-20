@@ -19,7 +19,7 @@
 
 #include "ABorderSurfaceCondition.h"
 #include "AOpticsManager.h"
-
+#include <iostream>
 static const Double_t kEpsilon = 1e-6; // Fixed in TGeoNavigator.cxx (equiv to 1e-6 cm)
 
 ClassImp(AOpticsManager)
@@ -28,6 +28,11 @@ ClassImp(AOpticsManager)
 AOpticsManager::AOpticsManager() : TGeoManager(), fDisableFresnelReflection(kFALSE)
 {
   fLimit = 100;
+  fClassList[kLens]   = ALens::Class();
+  fClassList[kFocus]  = AFocalSurface::Class();
+  fClassList[kMirror] = AMirror::Class();
+  fClassList[kObs]    = AObscuration::Class();
+  fClassList[kOpt]    = AOpticalComponent::Class();
 }
 
 //_____________________________________________________________________________
@@ -35,6 +40,11 @@ AOpticsManager::AOpticsManager(const char* name, const char* title)
  : TGeoManager(name, title), fDisableFresnelReflection(kFALSE)
 {
   fLimit = 100;
+  fClassList[kLens]   = ALens::Class();
+  fClassList[kFocus]  = AFocalSurface::Class();
+  fClassList[kMirror] = AMirror::Class();
+  fClassList[kObs]    = AObscuration::Class();
+  fClassList[kOpt]    = AOpticalComponent::Class();
 }
 
 //_____________________________________________________________________________
@@ -239,16 +249,16 @@ void* AOpticsManager::Thread(void* args)
   TObjArray* running = array->GetRunning();
   manager->TraceNonSequential(running);
 
-  for(Int_t i = 0; i <= running->GetLast(); i++){
+  TThread::Lock();
+  Int_t n = running->GetLast();
+
+  for(Int_t i = 0; i <= n; i++){
     ARay* ray = (ARay*)(running->RemoveAt(i));
     if(!ray) continue;
-    TThread::Lock();
     array->Add(ray);
-    TThread::UnLock();
   } // i
 
-  TThread::Lock();
-  running->Expand(0); // todo sometimes show nonempty error
+  running->Expand(0);
   TThread::UnLock();
 
   manager->RemoveNavigator(manager->GetCurrentNavigator());
@@ -273,7 +283,11 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
     nav = AddNavigator();
   } // if
 
-  for(Int_t j = 0; j <= array->GetLast(); j++){
+  TThread::Lock();
+  Int_t n = array->GetLast();
+  TThread::UnLock();
+
+  for(Int_t j = 0; j <= n; j++){
     ARay* ray = (ARay*)array->At(j);
     if(not ray or not ray->IsRunning()){
       continue;
@@ -299,20 +313,21 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       // Check type of start node
       Int_t typeStart = kOther;
       Int_t typeEnd   = kOther;
+
       if     (                  !startNode)  typeStart = kNull;
       else if(            IsLens(startNode)) typeStart = kLens;
       else if(     IsObscuration(startNode)) typeStart = kObs;
       else if(          IsMirror(startNode)) typeStart = kMirror;
-      else if(IsOpticalComponent(startNode)) typeStart = kOpt;
       else if(    IsFocalSurface(startNode)) typeStart = kFocus;
+      else if(IsOpticalComponent(startNode)) typeStart = kOpt;
 
       // Check type of end node
       if     (                  !endNode)  typeEnd = kNull;
       else if(            IsLens(endNode)) typeEnd = kLens;
       else if(     IsObscuration(endNode)) typeEnd = kObs;
       else if(          IsMirror(endNode)) typeEnd = kMirror;
-      else if(IsOpticalComponent(endNode)) typeEnd = kOpt;
       else if(    IsFocalSurface(endNode)) typeEnd = kFocus;
+      else if(IsOpticalComponent(endNode)) typeEnd = kOpt;
 
       Double_t step = nav->GetStep(); // distance to the next boundary
       if(typeEnd == kMirror){
@@ -425,12 +440,16 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
       dividedArray[i] = new ARayArray();
       for(Int_t j = ((n + 1)/nthreads)*i; (i == (nthreads - 1)) ? j <= n : j < ((n + 1)/nthreads)*(i + 1); j++){
         ARay* ray = (ARay*)running->RemoveAt(j);
-        if(!ray) continue;
         dividedArray[i]->Add(ray);
       } // j
+    } // i
 
-      TObject* args[2] = {this, dividedArray[i]};
-      threads[i] = new TThread(Form("thread%d", i), AOpticsManager::Thread, (void*)args);
+    TObject*** args = new TObject**[nthreads];
+    for(Int_t i = 0; i < nthreads; i++){
+      args[i] = new TObject*[2];
+      args[i][0] = this;
+      args[i][1] = dividedArray[i];
+      threads[i] = new TThread(Form("thread%d", i), AOpticsManager::Thread, (void*)args[i]);
       threads[i]->Run();
     } // i
 
@@ -441,25 +460,35 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
     ClearThreadsMap();
 
     for(Int_t i = 0; i < nthreads; i++){
+      delete [] args[i];
       array.Merge(dividedArray[i]);
       SafeDelete(dividedArray[i]);
       SafeDelete(threads[i]);
     } // i
 
+    delete [] args;
     delete [] threads;
     delete [] dividedArray;
   } else { // single thread
     for(Int_t i = 0; i <= n; i++){
-      ARay* ray = (ARay*)(*running)[i];
+      ARay* ray = (ARay*)running->RemoveAt(i);
       if(!ray) continue;
-
-      ray = (ARay*)running->RemoveAt(i);
       TraceNonSequential(*ray);
       array.Add(ray);
     } // i
   } // if
 
-  running->Expand(0); // shrink the array
+  running->Expand(0); // shrink the array // todo sometimes show nonempty errorTThread::Lock();
+  n = running->GetLast();
+  if(n >= 0){
+    for(int i = 0; i <= n; i++){
+      TObject* obj = running->At(i);
+      if(obj) {
+        std::cerr << n << "***" << i << std::endl;
+        break;
+      }
+    }
+  }
 }
 
 //_____________________________________________________________________________

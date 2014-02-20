@@ -47,7 +47,7 @@ void ARayArray::Add(ARay* ray)
 {
   if(!ray) return;
 
-  if     (ray->IsAbsorbed() )    fAbsorbed.Add(ray);
+  if     (ray->IsAbsorbed() )  fAbsorbed.Add(ray);
   else if(ray->IsExited()   )    fExited.Add(ray);
   else if(ray->IsFocused()  )   fFocused.Add(ray);
   else if(ray->IsRunning()  )   fRunning.Add(ray);
@@ -66,7 +66,7 @@ void ARayArray::Merge(ARayArray* array)
 
   for(Int_t j = 0; j < 6; j++){
     for(Int_t i = 0; i <= objs[j]->GetLast(); i++){
-      ARay* ray = ray = (ARay*)objs[j]->RemoveAt(i);
+      ARay* ray = (ARay*)objs[j]->RemoveAt(i);
       if(!ray) continue;
       Add(ray);
     } // i

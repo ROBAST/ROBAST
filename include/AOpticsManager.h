@@ -54,6 +54,7 @@ class AOpticsManager : public TGeoManager {
   TGeoNode* fStoredEndNode; // end node
   std::map<long, TGeoNode*> fStoredStartNodes; // for multi threading
   std::map<long, TGeoNode*> fStoredEndNodes; // for multi threading
+  TClass* fClassList[5];
 
   static void* Thread(void* args);
 
@@ -62,7 +63,7 @@ class AOpticsManager : public TGeoManager {
   TVector3 GetFacetNormal(TGeoNavigator* nav, TGeoNode* startNode, TGeoNode* endNode);
 
  public:
-  enum {kLens, kObs, kMirror, kFocus, kOpt, kOther, kNull};
+  enum {kLens = 0, kObs = 1, kMirror = 2, kFocus = 3, kOpt = 4, kOther = 5, kNull = 6};
 
   AOpticsManager();
   AOpticsManager(const char* name, const char* title);
@@ -85,11 +86,11 @@ class AOpticsManager : public TGeoManager {
   TGeoNode* GetStoredEndNode() const;
   void   SetStoredStartNode(TGeoNode* node);
   void   SetStoredEndNode(TGeoNode* node);
-  Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == AFocalSurface::Class();};
-  Bool_t IsLens(TGeoNode* node) const { return node->GetVolume()->IsA() == ALens::Class();};
-  Bool_t IsMirror(TGeoNode* node) const { return node->GetVolume()->IsA() == AMirror::Class();};
-  Bool_t IsObscuration(TGeoNode* node) const { return node->GetVolume()->IsA() == AObscuration::Class();};
-  Bool_t IsOpticalComponent(TGeoNode* node) const { return node->GetVolume()->IsA() == AOpticalComponent::Class();};
+  Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kFocus];};
+  Bool_t IsLens(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kLens];};
+  Bool_t IsMirror(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kMirror];};
+  Bool_t IsObscuration(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kObs];};
+  Bool_t IsOpticalComponent(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kOpt];};
   void   SetLimit(Int_t n);
   void   TraceNonSequential(ARay& ray);
   void   TraceNonSequential(ARay* ray) {if(ray) TraceNonSequential(*ray);}
