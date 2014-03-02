@@ -303,10 +303,10 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       if(nav->IsOutside()){ // if the current position is outside of top volume
         startNode = 0;
       } // if
-      //SetStoredStartNode(startNode);
+      SetStoredStartNode(startNode);
 
       TGeoNode* endNode = nav->FindNextBoundaryAndStep();
-      //SetStoredEndNode(endNode);
+      SetStoredEndNode(endNode);
 
       // Check type of start node
       Int_t typeStart = kOther;
