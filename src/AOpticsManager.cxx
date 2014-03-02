@@ -249,7 +249,7 @@ void* AOpticsManager::Thread(void* args)
   TObjArray* running = array->GetRunning();
   manager->TraceNonSequential(running);
 
-  TThread::Lock();
+  //TThread::Lock();
   Int_t n = running->GetLast();
 
   for(Int_t i = 0; i <= n; i++){
@@ -259,7 +259,7 @@ void* AOpticsManager::Thread(void* args)
   } // i
 
   running->Expand(0);
-  TThread::UnLock();
+  //TThread::UnLock();
 
   manager->RemoveNavigator(manager->GetCurrentNavigator());
 
@@ -283,9 +283,7 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
     nav = AddNavigator();
   } // if
 
-  TThread::Lock();
   Int_t n = array->GetLast();
-  TThread::UnLock();
 
   for(Int_t j = 0; j <= n; j++){
     ARay* ray = (ARay*)array->At(j);
@@ -305,10 +303,10 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       if(nav->IsOutside()){ // if the current position is outside of top volume
         startNode = 0;
       } // if
-      SetStoredStartNode(startNode);
+      //SetStoredStartNode(startNode);
 
       TGeoNode* endNode = nav->FindNextBoundaryAndStep();
-      SetStoredEndNode(endNode);
+      //SetStoredEndNode(endNode);
 
       // Check type of start node
       Int_t typeStart = kOther;
@@ -478,17 +476,7 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
     } // i
   } // if
 
-  running->Expand(0); // shrink the array // todo sometimes show nonempty errorTThread::Lock();
-  n = running->GetLast();
-  if(n >= 0){
-    for(int i = 0; i <= n; i++){
-      TObject* obj = running->At(i);
-      if(obj) {
-        std::cerr << n << "***" << i << std::endl;
-        break;
-      }
-    }
-  }
+  running->Expand(0); // shrink the array
 }
 
 //_____________________________________________________________________________
