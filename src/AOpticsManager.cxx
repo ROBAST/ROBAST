@@ -342,7 +342,7 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
           if(abs_step < step){
             Double_t n1 = ((ALens*)startNode->GetVolume())->GetRefractiveIndex(lambda);
             Double_t speed = TMath::C()*m()/n1;
-            ray->AddPoint(x1[0] + x1[0]*abs_step, x1[1] + x1[1]*abs_step, x1[2] + d1[2]*abs_step, x1[3] + abs_step/speed);
+            ray->AddPoint(x1[0] + d1[0]*abs_step, x1[1] + d1[1]*abs_step, x1[2] + d1[2]*abs_step, x1[3] + abs_step/speed);
             ray->AddNode(endNode);
             ray->Absorb();
             nav->SetStep(step);
