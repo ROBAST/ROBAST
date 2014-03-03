@@ -51,8 +51,10 @@ class TestROBAST(unittest.TestCase):
 
         for j in range(2):
             if j == 0:
+                # test a constant absorption length
                 lens.SetConstantAbsorptionLength(1*mm)
             else:
+                # test absorption length evaluated from a TGraph
                 graph = ROOT.TGraph()
                 graph.SetPoint(0, 300*nm, 0.5*mm) # 1 mm at 400 nm
                 graph.SetPoint(1, 500*nm, 1.5*mm)
@@ -80,8 +82,129 @@ class TestROBAST(unittest.TestCase):
             p = -expo.GetParameter(1)
             e = expo.GetParError(1)
 
-            self.assertGreater(1, p - 5*e)
-            self.assertLess(1, p + 5*e)
+            self.assertGreater(1, p - 3*e)
+            self.assertLess(1, p + 3*e)
+
+    def testFresnelReflection(self):
+        manager = makeTheWorld()
+        manager.DisableFresnelReflection(False) # enable
+
+        lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 0.5*m)
+        lens = ROOT.ALens("lens", lensbox)
+        lens.SetConstantAbsorptionLength(1*um)
+
+        idx = 3.
+        lens.SetConstantRefractiveIndex(idx)
+
+        manager.GetTopVolume().AddNode(lens, 1)
+        manager.CloseGeometry()
+
+        N = 10000
+
+        rays = ROOT.ARayArray()
+        for i in range(N):
+            ray = ROOT.ARay(i, 400*nm, 0, 0, 0.8*m, 0, 0, 0, -1)
+            rays.Add(ray)
+
+        manager.TraceNonSequential(rays)
+
+        n = rays.GetExited().GetLast() + 1
+        ref = (idx - 1)**2/(idx + 1)**2
+
+        self.assertGreater(ref, (n - n**0.5*3)/N)
+        self.assertLess(ref, (n + n**0.5*3)/N)
+
+    def testMirrorReflection(self):
+        manager = makeTheWorld()
+
+        mirrorbox = ROOT.TGeoBBox("mirrorbox", 0.5*m, 0.5*m, 0.5*m)
+        mirror = ROOT.AMirror("mirror", mirrorbox)
+        graph = ROOT.TGraph()
+        graph.SetPoint(0, 300*nm, 0.)
+        graph.SetPoint(1, 500*nm, .5) # 0.25 at 400 nm
+        mirror.SetReflectivity(graph)
+
+        manager.GetTopVolume().AddNode(mirror, 1)
+        manager.CloseGeometry()
+
+        N = 10000
+
+        rays = ROOT.ARayArray()
+        for i in range(N):
+            ray = ROOT.ARay(i, 400*nm, 0, 0, 0.8*m, 0, 0, 0, -1)
+            rays.Add(ray)
+
+        manager.TraceNonSequential(rays)
+
+        n = rays.GetExited().GetLast() + 1
+        ref = 0.25
+
+        self.assertGreater(ref, (n - n**0.5*3)/N)
+        self.assertLess(ref, (n + n**0.5*3)/N)
+
+    def testMirrorScattaring(self):
+        manager = makeTheWorld()
+
+        mirrorbox = ROOT.TGeoBBox("mirrorbox", 0.5*m, 0.5*m, 0.5*m)
+        mirror = ROOT.AMirror("mirror", mirrorbox)
+
+        condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror )
+        sigma = 1
+        condition.SetGaussianRoughness(sigma*ROOT.TMath.DegToRad())
+
+        manager.GetTopVolume().AddNode(mirror, 1)
+        manager.CloseGeometry()
+
+        N = 10000
+
+        rays = ROOT.ARayArray()
+        for i in range(N):
+            ray = ROOT.ARay(i, 400*nm, 0, 0, 0.8*m, 0, 0, 0, -1)
+            rays.Add(ray)
+
+        manager.TraceNonSequential(rays)
+
+        exited = rays.GetExited()
+
+        h2 = ROOT.TH2D("h2", "h2", 40, -10*sigma, 10*sigma, 40, -10*sigma, 10*sigma)
+
+        for i in range(N):
+            ray = exited.At(i)
+            p = array.array("d", [0, 0, 0])
+            ray.GetDirection(p)
+            px = p[0]
+            py = p[1]
+            pz = p[2]
+            h2.Fill(px*ROOT.TMath.RadToDeg(), py*ROOT.TMath.RadToDeg())
+
+        f2 = ROOT.TF2("f2", "[0]*exp(-(x*x + y*y)/(2*[1]*[1]))", -10*sigma, 10*sigma, -10*sigma, 10*sigma)
+        f2.SetParameter(0, 1000)
+        f2.SetParLimits(1, 0, 10)
+        f2.SetParameter(1, sigma)
+        h2.Draw("lego")
+        ROOT.gPad.Update()
+        h2.Fit("f2", "l")
+        p = f2.GetParameter(1)
+        e = f2.GetParError(1)
+
+        self.assertGreater(2*sigma, p - 3*e) # reflected angle is 2 times larger
+        self.assertLess(2*sigma, p + 3*e)
+
+    def testLimitForSuspended(self):
+        manager = makeTheWorld()
+        manager.SetLimit(1000)
+
+        mirrorsphere = ROOT.TGeoSphere("mirrorsphere", 0.1*m, 0.2*m)
+        mirror = ROOT.AMirror("mirror", mirrorsphere)
+
+        manager.GetTopVolume().AddNode(mirror, 1)
+        manager.CloseGeometry()
+        ray = ROOT.ARay(i, 400*nm, 0, 0, 0, 0, 0, 0, -1)
+
+        manager.TraceNonSequential(ray)
+
+        n = ray.GetNpoints()
+        self.assertEqual(n, 1000)
 
 if __name__=="__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)
