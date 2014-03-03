@@ -21,6 +21,7 @@ ClassImp(ALens)
 ALens::ALens()
 {
   // Default constructor
+  fAbsorptionLength = 0;
   fIndex = 0;
   fConstantIndex = 1;
   SetLineColor(7);
@@ -39,6 +40,18 @@ ALens::ALens(const char* name, const TGeoShape* shape,
 //_____________________________________________________________________________
 ALens::~ALens()
 {
+}
+
+//_____________________________________________________________________________
+Double_t ALens::GetAbsorptionLength(Double_t lambda) const
+{
+  if(!fAbsorptionLength){
+    return fConstantAbsorptionLength;
+  } // if
+
+  Double_t abs = fAbsorptionLength->Eval(lambda);
+
+  return abs >= 0 ? abs : 0;
 }
 
 //_____________________________________________________________________________
