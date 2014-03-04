@@ -3,6 +3,7 @@
 import unittest
 import ROOT
 import array
+import time
 
 # The following lines are only needed in PyROOT
 ROOT.PyConfig.StartGuiThread = 'inputhook' # for the OpenGL viewer thread
@@ -20,6 +21,8 @@ mm = ROOT.AOpticsManager.mm()
 um = ROOT.AOpticsManager.um()
 nm = ROOT.AOpticsManager.nm()
 m  = ROOT.AOpticsManager.m()
+r2d = ROOT.TMath.RadToDeg()
+d2r = ROOT.TMath.DegToRad()
 
 def makeTheWorld():
     manager = ROOT.AOpticsManager("manager", "manager")
@@ -150,7 +153,7 @@ class TestROBAST(unittest.TestCase):
 
         condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror )
         sigma = 1
-        condition.SetGaussianRoughness(sigma*ROOT.TMath.DegToRad())
+        condition.SetGaussianRoughness(sigma*d2r)
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
@@ -175,7 +178,7 @@ class TestROBAST(unittest.TestCase):
             px = p[0]
             py = p[1]
             pz = p[2]
-            h2.Fill(px*ROOT.TMath.RadToDeg(), py*ROOT.TMath.RadToDeg())
+            h2.Fill(px*r2d, py*r2d)
 
         f2 = ROOT.TF2("f2", "[0]*exp(-(x*x + y*y)/(2*[1]*[1]))", -10*sigma, 10*sigma, -10*sigma, 10*sigma)
         f2.SetParameter(0, 1000)
@@ -206,7 +209,42 @@ class TestROBAST(unittest.TestCase):
         n = ray.GetNpoints()
         self.assertEqual(n, 1000)
 
+    def testSnellsLaw(self):
+        manager = makeTheWorld()
+        manager.SetLimit(1000)
+
+        lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
+        lens = ROOT.ALens("lens", lensbox)
+
+        idx = 1.5
+        lens.SetConstantRefractiveIndex(idx)
+
+        manager.GetTopVolume().AddNode(lens, 1)
+
+        focalbox = ROOT.TGeoBBox("focalbox", 0.5*m, 0.5*m, 0.1*mm)
+        focal = ROOT.AFocalSurface("focal", focalbox)
+        lens.AddNode(focal, 1)
+
+        manager.CloseGeometry()
+        manager.DisableFresnelReflection(True)
+
+        theta = 30*d2r
+        sint = ROOT.TMath.Sin(theta)
+        cost = ROOT.TMath.Cos(theta)
+        ray = ROOT.ARay(i, 400*nm, 0*m, 0*m, 2*mm, 0, sint, 0, -cost)
+
+        manager.TraceNonSequential(ray)
+        
+        p = array.array("d", [0, 0, 0])
+        ray.GetDirection(p)
+        px = p[0]
+        py = p[1]
+        pz = p[2]
+
+        self.assertAlmostEqual(px, sint/idx)
+        self.assertAlmostEqual(py, 0)
+
 if __name__=="__main__":
+    ROOT.gRandom.SetSeed(int(time.time()))
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
