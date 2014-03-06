@@ -86,11 +86,11 @@ class AOpticsManager : public TGeoManager {
   TGeoNode* GetStoredEndNode() const;
   void   SetStoredStartNode(TGeoNode* node);
   void   SetStoredEndNode(TGeoNode* node);
-  Bool_t IsFocalSurface(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kFocus];};
-  Bool_t IsLens(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kLens];};
-  Bool_t IsMirror(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kMirror];};
-  Bool_t IsObscuration(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kObs];};
-  Bool_t IsOpticalComponent(TGeoNode* node) const { return node->GetVolume()->IsA() == fClassList[kOpt];};
+  Bool_t IsFocalSurface(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kFocus] : kFALSE;};
+  Bool_t IsLens(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kLens] : kFALSE;};
+  Bool_t IsMirror(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kMirror] : kFALSE;};
+  Bool_t IsObscuration(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kObs] : kFALSE;};
+  Bool_t IsOpticalComponent(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kOpt] : kFALSE;};
   void   SetLimit(Int_t n);
   void   TraceNonSequential(ARay& ray);
   void   TraceNonSequential(ARay* ray) {if(ray) TraceNonSequential(*ray);}
