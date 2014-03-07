@@ -21,9 +21,10 @@ ClassImp(ALens)
 ALens::ALens()
 {
   // Default constructor
-  fAbsorptionLength = 0;
-  fIndex = 0;
+  fAbsorptionLength = NULL;
+  fIndex = NULL;
   fConstantIndex = 1;
+  fConstantAbsorptionLength = -1;
   SetLineColor(7);
 }
 
@@ -31,7 +32,8 @@ ALens::ALens()
 ALens::ALens(const char* name, const TGeoShape* shape,
              const TGeoMedium* med) : AOpticalComponent(name, shape, med)
 {
-  fIndex = 0;
+  fAbsorptionLength = NULL;
+  fIndex = NULL;
   fConstantIndex = 1;
   fConstantAbsorptionLength = -1;
   SetLineColor(7);
