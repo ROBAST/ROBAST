@@ -412,7 +412,12 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       } else if(typeStart == kFocus or typeStart == kObs or typeStart == kMirror or typeEnd == kObs){
         ray->Stop();
       } else if(typeEnd == kFocus){
-        ray->Focus();
+        Double_t qe = ((AFocalSurface*)endNode->GetVolume())->GetQuantumEfficiency(lambda);
+        if(qe == 1 or gRandom->Uniform(0, 1) < qe){
+          ray->Focus();
+        } else {
+          ray->Stop();
+        } // if
       } // if
 
       if(ray->IsRunning() and ray->GetNpoints() >= fLimit){

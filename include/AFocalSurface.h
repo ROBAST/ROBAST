@@ -17,16 +17,22 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TGraph.h"
+
 #ifndef A_OPTICAL_COMPONENT_H
 #include "AOpticalComponent.h"
 #endif
 
 class AFocalSurface : public AOpticalComponent {
  private:
+  TGraph* fQuantumEfficiency; // Quantum efficiency
 
  public:
   AFocalSurface();
   AFocalSurface(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
+
+  void     SetQuantumEfficiency(TGraph* qe) {fQuantumEfficiency = qe;}
+  Double_t GetQuantumEfficiency(Double_t lambda) const;
 
   ClassDef(AFocalSurface, 1)
 };

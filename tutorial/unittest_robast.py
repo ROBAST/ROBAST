@@ -244,6 +244,42 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(px, sint/idx)
         self.assertAlmostEqual(py, 0)
 
+    def testQE(self):
+        manager = makeTheWorld()
+
+        focalbox = ROOT.TGeoBBox("focalbox", 0.5*m, 0.5*m, 1*mm)
+        focal = ROOT.AFocalSurface("focal", focalbox)
+        qe = ROOT.TGraph()
+        qe.SetPoint(0, 300*nm, 0.0)
+        qe.SetPoint(1, 500*nm, 1.0)
+
+        manager.GetTopVolume().AddNode(focal, 1)
+        manager.CloseGeometry()
+        manager.SetMultiThread(True)
+        manager.SetMaxThreads(4)
+
+        for i in range(2):
+            if i == 1:
+                focal.SetQuantumEfficiency(qe)
+
+            array = ROOT.ARayArray()
+
+            N = 1000000
+            raytr = ROOT.TGeoTranslation("raytr", 0, 0, 2*mm)
+            direction = ROOT.TVector3(0, 0, -1)
+            array = ROOT.ARayShooter.Square(400*nm, 1*mm, 1000, 0, raytr, direction)
+            manager.TraceNonSequential(array)
+        
+            nfocused = array.GetFocused().GetLast() + 1
+            nstopped = array.GetStopped().GetLast() + 1
+
+            self.assertAlmostEqual(nfocused + nstopped, N)
+            if i == 0:
+                self.assertEqual(nfocused, N)
+            else:
+                sigma = (N*(1 - 0.5)*0.5)**0.5
+                self.assertLess(abs(nfocused - N/2.), 3*sigma)
+
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)
