@@ -25,14 +25,18 @@
 
 class AFocalSurface : public AOpticalComponent {
  private:
-  TGraph* fQuantumEfficiency; // Quantum efficiency
+  TGraph* fQuantumEfficiencyLambda; // Quantum efficiency (QE vs lambda)
+  TGraph* fQuantumEfficiencyAngle; // Quantum efficiency (QE vs angle)
 
  public:
   AFocalSurface();
   AFocalSurface(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
 
-  void     SetQuantumEfficiency(TGraph* qe) {fQuantumEfficiency = qe;}
+  Bool_t   HasQEAngle() const {return fQuantumEfficiencyAngle ? kTRUE : kFALSE;}
+  void     SetQuantumEfficiency(TGraph* qe) {fQuantumEfficiencyLambda = qe;}
+  void     SetQuantumEfficiencyAngle(TGraph* qe) {fQuantumEfficiencyAngle = qe;}
   Double_t GetQuantumEfficiency(Double_t lambda) const;
+  Double_t GetQuantumEfficiency(Double_t lambda, Double_t angle) const;
 
   ClassDef(AFocalSurface, 1)
 };

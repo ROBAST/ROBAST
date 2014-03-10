@@ -412,7 +412,16 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       } else if(typeStart == kFocus or typeStart == kObs or typeStart == kMirror or typeEnd == kObs){
         ray->Stop();
       } else if(typeEnd == kFocus){
-        Double_t qe = ((AFocalSurface*)endNode->GetVolume())->GetQuantumEfficiency(lambda);
+        AFocalSurface* focal = (AFocalSurface*)endNode->GetVolume();
+        Double_t angle = 0.;
+        if(focal->HasQEAngle()){
+          TVector3 n = GetFacetNormal(nav, startNode, endNode); // normal vect perpendicular to the surface
+          Double_t d1[3];
+          ray->GetDirection(d1);
+          Double_t cosi = d1[0]*n[0] + d1[1]*n[1] + d1[2]*n[2];
+          angle = TMath::ACos(cosi);
+        } // if
+        Double_t qe = focal->GetQuantumEfficiency(lambda, angle);
         if(qe == 1 or gRandom->Uniform(0, 1) < qe){
           ray->Focus();
         } else {

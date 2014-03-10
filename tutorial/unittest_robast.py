@@ -249,36 +249,46 @@ class TestROBAST(unittest.TestCase):
 
         focalbox = ROOT.TGeoBBox("focalbox", 0.5*m, 0.5*m, 1*mm)
         focal = ROOT.AFocalSurface("focal", focalbox)
-        qe = ROOT.TGraph()
-        qe.SetPoint(0, 300*nm, 0.0)
-        qe.SetPoint(1, 500*nm, 1.0)
+
+        qe_lambda = ROOT.TGraph()
+        qe_lambda.SetPoint(0, 300*nm, 0.0)
+        qe_lambda.SetPoint(1, 500*nm, 1.0)
+
+        qe_angle = ROOT.TGraph()
+        qe_angle.SetPoint(0,  0*d2r, 1.) # QE = 100% for on-axis photons
+        qe_angle.SetPoint(1, 90*d2r, 0.)
 
         manager.GetTopVolume().AddNode(focal, 1)
         manager.CloseGeometry()
         manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
-        for i in range(2):
+        for i in range(3):
             if i == 1:
-                focal.SetQuantumEfficiency(qe)
+                focal.SetQuantumEfficiency(qe_lambda)
+            elif i == 2:
+                focal.SetQuantumEfficiencyAngle(qe_angle)
 
             array = ROOT.ARayArray()
 
-            N = 1000000
+            N = 1000**2
             raytr = ROOT.TGeoTranslation("raytr", 0, 0, 2*mm)
-            direction = ROOT.TVector3(0, 0, -1)
+            direction = ROOT.TVector3(ROOT.TMath.Cos(45*d2r), 0, -ROOT.TMath.Sin(45*d2r))
             array = ROOT.ARayShooter.Square(400*nm, 1*mm, 1000, 0, raytr, direction)
             manager.TraceNonSequential(array)
         
             nfocused = array.GetFocused().GetLast() + 1
             nstopped = array.GetStopped().GetLast() + 1
 
-            self.assertAlmostEqual(nfocused + nstopped, N)
+            self.assertEqual(nfocused + nstopped, N)
             if i == 0:
                 self.assertEqual(nfocused, N)
-            else:
+            elif i == 1:
                 sigma = (N*(1 - 0.5)*0.5)**0.5
                 self.assertLess(abs(nfocused - N/2.), 3*sigma)
+            else:
+                sigma = (N*(1 - 0.25)*0.25)**0.5
+                self.assertLess(abs(nfocused - N/4.), 3*sigma)
 
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
