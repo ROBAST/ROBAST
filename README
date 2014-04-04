@@ -27,7 +27,7 @@ LGPL
 $ tar zxvf robast_1.0.0.tgz
 $ cd robast_1.0.0
 $ make
-$ export LD_LIBRARY_PATH=../robast_1.0.0:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH
 
 If you would like to read HTML document, generate it yourself.
 $ make htmldoc
