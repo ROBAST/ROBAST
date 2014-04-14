@@ -27,7 +27,10 @@ LGPL
 $ tar zxvf robast_1.0.0.tgz
 $ cd robast_1.0.0
 $ make
-$ export LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=PATH_TO_YOUR_ROBAST_DIRECTORY:$LD_LIBRARY_PATH
+
+Adding the following line in your $HOME/.rootlogon.C will be useful.
+gInterpreter->AddIncludePath("PATH_TO_YOUR_ROBAST_DIRECTORY/include");
 
 If you would like to read HTML document, generate it yourself.
 $ make htmldoc
