@@ -22,6 +22,9 @@
 #include "ARefractiveIndex.h"
 #endif
 
+#include "TF1.h"
+#include "TGraph.h"
+
 class ASellmeierFormula : public ARefractiveIndex {
  private:
   Double_t fPar[6]; // Parameters
@@ -33,6 +36,8 @@ class ASellmeierFormula : public ARefractiveIndex {
   ASellmeierFormula(const Double_t* p);
 
   virtual Double_t GetIndex(Double_t lambda /* (m) */) const;
+  virtual TF1*     FitData(TGraph* graph, const char* tf1name, Option_t* option = "");
+  virtual TF1*     MakeGraph(const char* tf1name, Double_t xmin, Double_t xmax);
 
   ClassDef(ASellmeierFormula, 1)
 };
