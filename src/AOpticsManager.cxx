@@ -127,7 +127,7 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TG
   Bool_t absorbed = kFALSE;
 
   if(IsMirror(endNode)){
-    Double_t angle = TMath::ACos(cosi)*TMath::RadToDeg();
+    Double_t angle = TMath::ACos(cosi);
     Double_t lambda = ray.GetLambda();
     Double_t ref = ((AMirror*)endNode->GetVolume())->GetReflectivity(lambda, angle);
     if(ref < gRandom->Uniform(1)){

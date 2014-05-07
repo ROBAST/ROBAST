@@ -49,7 +49,7 @@ AMirror::~AMirror()
 Double_t AMirror::GetReflectivity(Double_t lambda, Double_t angle)
 {
   // Return mirror reflectivity for a photon whose wavelength is lambda, and
-  // whose incident angle is "angle" (deg)
+  // whose incident angle is "angle" (rad)
   Double_t ret;
 
   if(fReflectivity2D){

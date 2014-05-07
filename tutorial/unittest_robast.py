@@ -122,13 +122,14 @@ class TestROBAST(unittest.TestCase):
 
         mirrorbox = ROOT.TGeoBBox("mirrorbox", 0.5*m, 0.5*m, 0.5*m)
         mirror = ROOT.AMirror("mirror", mirrorbox)
+        manager.GetTopVolume().AddNode(mirror, 1)
+        manager.CloseGeometry()
+        
         graph = ROOT.TGraph()
         graph.SetPoint(0, 300*nm, 0.)
         graph.SetPoint(1, 500*nm, .5) # 0.25 at 400 nm
         mirror.SetReflectivity(graph)
-
-        manager.GetTopVolume().AddNode(mirror, 1)
-        manager.CloseGeometry()
+        self.assertAlmostEqual(mirror.GetReflectivity(400*nm, 0), 0.25, 6)
 
         N = 10000
 
@@ -141,6 +142,33 @@ class TestROBAST(unittest.TestCase):
 
         n = rays.GetExited().GetLast() + 1
         ref = 0.25
+
+        self.assertGreater(ref, (n - n**0.5*3)/N)
+        self.assertLess(ref, (n + n**0.5*3)/N)
+        
+        # Test of a 2D reflectance graph
+        graph = ROOT.TGraph2D()
+        deg = ROOT.TMath.DegToRad()
+
+        # This should be 0.5 at (400 nm, 45 deg)
+        graph.SetPoint(0, 300*nm,  0*deg, 0.0)
+        graph.SetPoint(1, 300*nm, 90*deg, 0.3)
+        graph.SetPoint(2, 500*nm,  0*deg, 0.7)
+        graph.SetPoint(3, 500*nm, 90*deg, 1.0)
+        mirror.SetReflectivity(graph)
+        self.assertAlmostEqual(mirror.GetReflectivity(400*nm, 45*deg), 0.5, 3)
+
+        rays = ROOT.ARayArray()
+        for i in range(N):
+            x, y, z, t = 0, 0, 0.51*m, 0
+            px, py, pz = ROOT.TMath.Sqrt2(), 0, -ROOT.TMath.Sqrt2()
+            ray = ROOT.ARay(i, 400*nm, x, y, z, t, px, py, pz)
+            rays.Add(ray)
+
+        manager.TraceNonSequential(rays)
+
+        n = rays.GetExited().GetLast() + 1
+        ref = 0.5
 
         self.assertGreater(ref, (n - n**0.5*3)/N)
         self.assertLess(ref, (n + n**0.5*3)/N)
