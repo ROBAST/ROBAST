@@ -28,7 +28,8 @@ class ARefractiveIndex : public TObject {
   ARefractiveIndex();
   virtual ~ARefractiveIndex();
 
-  virtual Double_t GetIndex(Double_t lambda /* (m) */) const = 0;
+  virtual Double_t GetAbbeNumber() const;
+  virtual Double_t GetIndex(Double_t lambda) const = 0;
 
   ClassDef(ARefractiveIndex, 1)
 };
