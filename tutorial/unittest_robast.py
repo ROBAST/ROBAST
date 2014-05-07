@@ -289,6 +289,67 @@ class TestROBAST(unittest.TestCase):
             else:
                 sigma = (N*(1 - 0.25)*0.25)**0.5
                 self.assertLess(abs(nfocused - N/4.), 3*sigma)
+    
+    def testSellmeierFormula(self):
+        # N-BK7 from a SCHOTT catalog
+        nbk7 = ROOT.ASellmeierFormula(1.03961212, 0.231792344, 1.01046945,
+                                      0.00600069867, 0.0200179144, 103.560653)
+       
+        self.assertAlmostEqual(nbk7.GetIndex( 312.6*nm), 1.548620, 4) # n312.6
+        self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), 1.516730, 4) # nD
+        self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 4) # nt
+        self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 4) # n2325.4
+
+        self.assertAlmostEqual(nbk7.GetAbbeNumber(), 64.17, 1)
+
+        data = ((2325.4*nm, 1.489210),
+                (1970.1*nm, 1.494950),
+                (1529.6*nm, 1.500910),
+                (1060.0*nm, 1.506690),
+                (1014.0*nm, 1.507310),
+                ( 852.1*nm, 1.509800),
+                ( 706.5*nm, 1.512890),
+                ( 656.3*nm, 1.514320),
+                ( 643.8*nm, 1.514720),
+                ( 632.8*nm, 1.515090),
+                ( 589.3*nm, 1.516730),
+                ( 587.6*nm, 1.516800),
+                ( 546.1*nm, 1.518720),
+                ( 486.1*nm, 1.522380),
+                ( 480.0*nm, 1.522830),
+                ( 435.8*nm, 1.526680),
+                ( 404.7*nm, 1.530240),
+                ( 365.0*nm, 1.536270),
+                ( 334.1*nm, 1.542720),
+                ( 312.6*nm, 1.548620))
+
+        graph = ROOT.TGraph()
+        for i in range(len(data)):
+            graph.SetPoint(i, data[i][0], data[i][1])
+
+        nbk7 = ROOT.ASellmeierFormula(1.03961212*0.95, 0.231792344*0.95, 1.01046945*0.95,
+                                      0.00600069867*0.95, 0.0200179144*0.95, 103.560653*0.95)
+
+        # These comparisons should fail because B1 to C3 are scaled by 0.95
+        self.assertNotAlmostEqual(nbk7.GetIndex( 312.6*nm), 1.548620, 3) # n312.6
+        self.assertNotAlmostEqual(nbk7.GetIndex( 589.3*nm), 1.516730, 3) # nD
+        self.assertNotAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 3) # nt
+        self.assertNotAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 3) # n2325.4
+
+        f = nbk7.FitData(graph, "N-BK7", "")
+        graph.Draw("a*")
+
+        # Will get an almost correct answers. "3" is due to an inperfect fitting result.
+        self.assertAlmostEqual(nbk7.GetIndex( 312.6*nm), 1.548620, 3) # n312.6
+        self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), 1.516730, 3) # nD
+        self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 3) # nt
+        self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 3) # n2325.4
+
+        self.assertAlmostEqual(nbk7.GetIndex( 312.6*nm), f.Eval( 312.6*nm), 6) # n312.6
+        self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), f.Eval( 589.3*nm), 6) # nD
+        self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
+        self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
+
 
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
