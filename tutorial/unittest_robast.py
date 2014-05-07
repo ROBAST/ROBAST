@@ -300,7 +300,7 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 4) # nt
         self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 4) # n2325.4
 
-        self.assertAlmostEqual(nbk7.GetAbbeNumber(), 64.17, 1)
+        self.assertAlmostEqual(nbk7.GetAbbeNumber(), 64.17, 1) # vD, vd = 64.17
 
         data = ((2325.4*nm, 1.489210),
                 (1970.1*nm, 1.494950),
