@@ -80,6 +80,8 @@ class AOpticsManager : public TGeoManager {
   static Double_t ms() { return 1e-3*s();};
   static Double_t us() { return 1e-6*s();};
   static Double_t ns() { return 1e-9*s();};
+  static Double_t deg() { return TMath::DegToRad();};
+  static Double_t rad() { return 1.;}
 
   void   DisableFresnelReflection(Bool_t disable) {fDisableFresnelReflection = disable;}
   TGeoNode* GetStoredStartNode() const;
