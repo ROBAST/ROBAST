@@ -42,7 +42,6 @@ class TestROBAST(unittest.TestCase):
     def tearDown(self):
         pass
 
-
     def testAbsorptionLength(self):
         manager = makeTheWorld()
 
@@ -51,6 +50,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
+        manager.SetMultiThread(True);
+        manager.SetMaxThreads(4)
 
         for j in range(2):
             if j == 0:
@@ -101,6 +102,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
+        manager.SetMultiThread(True);
+        manager.SetMaxThreads(4)
 
         N = 10000
 
@@ -124,6 +127,8 @@ class TestROBAST(unittest.TestCase):
         mirror = ROOT.AMirror("mirror", mirrorbox)
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
+        manager.SetMultiThread(True);
+        manager.SetMaxThreads(4)
         
         graph = ROOT.TGraph()
         graph.SetPoint(0, 300*nm, 0.)
@@ -185,6 +190,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
+        manager.SetMultiThread(True);
+        manager.SetMaxThreads(4)
 
         N = 10000
 
@@ -230,7 +237,10 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        ray = ROOT.ARay(i, 400*nm, 0, 0, 0, 0, 0, 0, -1)
+        manager.SetMultiThread(True);
+        manager.SetMaxThreads(4)
+
+        ray = ROOT.ARay(0, 400*nm, 0, 0, 0, 0, 0, 0, -1)
 
         manager.TraceNonSequential(ray)
 
@@ -254,15 +264,20 @@ class TestROBAST(unittest.TestCase):
         lens.AddNode(focal, 1)
 
         manager.CloseGeometry()
+        manager.SetMultiThread(True);
+        manager.SetMaxThreads(4)
         manager.DisableFresnelReflection(True)
 
         theta = 30*d2r
         sint = ROOT.TMath.Sin(theta)
         cost = ROOT.TMath.Cos(theta)
-        ray = ROOT.ARay(i, 400*nm, 0*m, 0*m, 2*mm, 0, sint, 0, -cost)
+        ray = ROOT.ARay(0, 400*nm, 0*m, 0*m, 2*mm, 0, sint, 0, -cost)
+        arr = ROOT.ARayArray()
+        arr.Add(ray)
 
-        manager.TraceNonSequential(ray)
-        
+        # calling TraceNonSequential(ARay*) causes a seg fault...
+        manager.TraceNonSequential(arr)
+
         p = array.array("d", [0, 0, 0])
         ray.GetDirection(p)
         px = p[0]
@@ -317,7 +332,7 @@ class TestROBAST(unittest.TestCase):
             else:
                 sigma = (N*(1 - 0.25)*0.25)**0.5
                 self.assertLess(abs(nfocused - N/4.), 3*sigma)
-    
+
     def testSellmeierFormula(self):
         # N-BK7 from a SCHOTT catalog
         nbk7 = ROOT.ASellmeierFormula(1.03961212, 0.231792344, 1.01046945,
@@ -377,7 +392,6 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), f.Eval( 589.3*nm), 6) # nD
         self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
         self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
-
 
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
