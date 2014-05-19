@@ -50,10 +50,10 @@ class AOpticsManager : public TGeoManager {
  private:
   Int_t  fLimit; // Maximum number of crossing calculations
   Bool_t fDisableFresnelReflection; // disable Fresnel reflection
-  TGeoNode* fStoredStartNode; // start node
-  TGeoNode* fStoredEndNode; // end node
-  std::map<long, TGeoNode*> fStoredStartNodes; // for multi threading
-  std::map<long, TGeoNode*> fStoredEndNodes; // for multi threading
+  TGeoNode* fStoredCurrentNode; // current node
+  TGeoNode* fStoredNextNode; // next node
+  std::map<long, TGeoNode*> fStoredCurrentNodes; // for multi threading
+  std::map<long, TGeoNode*> fStoredNextNodes; // for multi threading
   TClass* fClassList[5];
 
   static void* Thread(void* args);
@@ -84,10 +84,10 @@ class AOpticsManager : public TGeoManager {
   static Double_t rad() { return 1.;}
 
   void   DisableFresnelReflection(Bool_t disable) {fDisableFresnelReflection = disable;}
-  TGeoNode* GetStoredStartNode() const;
-  TGeoNode* GetStoredEndNode() const;
-  void   SetStoredStartNode(TGeoNode* node);
-  void   SetStoredEndNode(TGeoNode* node);
+  TGeoNode* GetStoredCurrentNode() const;
+  TGeoNode* GetStoredNextNode() const;
+  void   SetStoredCurrentNode(TGeoNode* node);
+  void   SetStoredNextNode(TGeoNode* node);
   Bool_t IsFocalSurface(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kFocus] : kFALSE;};
   Bool_t IsLens(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kLens] : kFALSE;};
   Bool_t IsMirror(TGeoNode* node) const { return node ? node->GetVolume()->IsA() == fClassList[kMirror] : kFALSE;};
@@ -104,24 +104,24 @@ class AOpticsManager : public TGeoManager {
 };
 
 //_____________________________________________________________________________
-inline void AOpticsManager::SetStoredStartNode(TGeoNode* node)
+inline void AOpticsManager::SetStoredCurrentNode(TGeoNode* node)
 {
   if(!IsMultiThread()){
-    fStoredStartNode = node;
+    fStoredCurrentNode = node;
   } else {
     Long_t threadId = TThread::SelfId();
-    fStoredStartNodes[threadId] = node;
+    fStoredCurrentNodes[threadId] = node;
   } // if
 }
 
 //_____________________________________________________________________________
-inline void AOpticsManager::SetStoredEndNode(TGeoNode* node)
+inline void AOpticsManager::SetStoredNextNode(TGeoNode* node)
 {
   if(!IsMultiThread()){
-    fStoredEndNode = node;
+    fStoredNextNode = node;
   } else {
     Long_t threadId = TThread::SelfId();
-    fStoredEndNodes[threadId] = node;
+    fStoredNextNodes[threadId] = node;
   } // if
 }
 
