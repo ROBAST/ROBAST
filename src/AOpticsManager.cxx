@@ -53,19 +53,18 @@ AOpticsManager::~AOpticsManager()
 }
 
 //_____________________________________________________________________________
-void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigator* nav, TGeoNode* currentNode, TGeoNode* nextNode)
+void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
 {
-  //TGeoNavigator* nav = GetCurrentNavigator();
+  TGeoNavigator* nav = GetCurrentNavigator();
   Double_t step = nav->GetStep();
-  //TGeoNode* currentNode = GetStoredCurrentNode();
-  //TGeoNode* nextNode = GetStoredNextNode();
+  TGeoNode* nextNode = GetStoredNextNode();
 
   // Use the same notation used in Wikipedia
   // http://en.wikipedia.org/wiki/Fresnel_equations
   // theta_i = incident angle
   // theta_t = transmission angle
   // Double_t* n = FindNormal(); // normal vect perpendicular to the surface
-  TVector3 n = GetFacetNormal(nav, currentNode, nextNode); // normal vect perpendicular to the surface
+  TVector3 n = GetFacetNormal(); // normal vect perpendicular to the surface
   Double_t d1[3];
   ray.GetDirection(d1);
   Double_t cosi = d1[0]*n[0] + d1[1]*n[1] + d1[2]*n[2]; // cos(theta_i)
@@ -75,7 +74,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
   if(sint > 1.){ // total internal reflection
     step -= kEpsilon*2.; // stop the step before reaching the boundary
     nav->SetStep(step);
-    DoReflection(n1, ray, nav, currentNode, nextNode);
+    DoReflection(n1, ray);
     return;
   } // if
 
@@ -89,7 +88,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
     if(gRandom->Uniform(1) < R){ // reflection at the boundary
       step -= kEpsilon*2.; // stop the step before reaching the boundary
       nav->SetStep(step);
-      DoReflection(n1, ray, nav, currentNode, nextNode);
+      DoReflection(n1, ray);
       return;
     } // if
   } // if
@@ -111,15 +110,14 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
 }
 
 //_____________________________________________________________________________
-void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TGeoNode* currentNode, TGeoNode* nextNode)
+void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
 {
-  //TGeoNavigator* nav = GetCurrentNavigator();
+  TGeoNavigator* nav = GetCurrentNavigator();
   Double_t step = nav->GetStep();
-  //TGeoNode* currentNode = nav->GetCurrentNode();
-  //TGeoNode* nextNode = nav->GetNextNode();
+  TGeoNode* nextNode = nav->GetNextNode();
 
   //Double_t* n = FindNormal(); // normal vect perpendicular to the surface
-  TVector3 n = GetFacetNormal(nav, currentNode, nextNode); // normal vect perpendicular to the surface
+  TVector3 n = GetFacetNormal(); // normal vect perpendicular to the surface
   Double_t d1[3];
   ray.GetDirection(d1);
   Double_t cosi = d1[0]*n[0] + d1[1]*n[1] + d1[2]*n[2];
@@ -190,11 +188,11 @@ TGeoNode* AOpticsManager::GetStoredNextNode() const
 }
 
 //_____________________________________________________________________________
-TVector3 AOpticsManager::GetFacetNormal(TGeoNavigator* nav, TGeoNode* currentNode, TGeoNode* nextNode)
+TVector3 AOpticsManager::GetFacetNormal()
 {
-  //TGeoNavigator* nav = GetCurrentNavigator();
-  //TGeoNode* currentNode = GetStoredCurrentNode();
-  //TGeoNode* nextNode = GetStoredNextNode();
+  TGeoNavigator* nav = GetCurrentNavigator();
+  TGeoNode* currentNode = GetStoredCurrentNode();
+  TGeoNode* nextNode = GetStoredNextNode();
 
   TGeoVolume* volume1 = currentNode->GetVolume();
   TGeoVolume* volume2 = nextNode ? nextNode->GetVolume() : 0;
@@ -354,12 +352,12 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       if((typeCurrent == kNull or typeCurrent == kOpt or typeCurrent == kLens or typeCurrent == kOther)
           and typeNext == kMirror){
         Double_t n1 = typeCurrent == kLens ? ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda) : 1.;
-        DoReflection(n1, *ray, nav, currentNode, nextNode);
+        DoReflection(n1, *ray);
       } else if((typeCurrent == kNull or typeCurrent == kOpt or typeCurrent == kOther)
           and typeNext == kLens){
         Double_t n1 = 1; // Assume refractive index equals 1 (= vacuum)
         Double_t n2 = ((ALens*)nextNode->GetVolume())->GetRefractiveIndex(lambda);
-        DoFresnel(n1, n2, *ray, nav, currentNode, nextNode);
+        DoFresnel(n1, n2, *ray);
       } else if((typeCurrent == kNull or typeCurrent == kLens or typeCurrent == kOpt or typeCurrent == kOther)
           and (typeNext == kObs or typeNext == kFocus)){
 
@@ -391,12 +389,12 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       } else if(typeCurrent == kLens and typeNext == kLens){
         Double_t n1 = ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda);
         Double_t n2 = ((ALens*)nextNode->GetVolume())->GetRefractiveIndex(lambda);
-        DoFresnel(n1, n2, *ray, nav, currentNode, nextNode);
+        DoFresnel(n1, n2, *ray);
       } else if(typeCurrent == kLens and
                (typeNext == kNull or typeNext == kOpt or typeNext == kOther)){
         Double_t n1 = ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda);
         Double_t n2 = 1; // Assume refractive index equals 1 (= vacuum)
-        DoFresnel(n1, n2, *ray, nav, currentNode, nextNode);
+        DoFresnel(n1, n2, *ray);
       } // if
 
       if(typeNext == kNull){
@@ -415,7 +413,7 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
         AFocalSurface* focal = (AFocalSurface*)nextNode->GetVolume();
         Double_t angle = 0.;
         if(focal->HasQEAngle()){
-          TVector3 n = GetFacetNormal(nav, currentNode, nextNode); // normal vect perpendicular to the surface
+          TVector3 n = GetFacetNormal(); // normal vect perpendicular to the surface
           Double_t d1[3];
           ray->GetDirection(d1);
           Double_t cosi = d1[0]*n[0] + d1[1]*n[1] + d1[2]*n[2];
