@@ -38,12 +38,12 @@ void AbsLengthTest()
 
   ARayArray* array = ARayShooter::RandomSphere(400*nm, 10000);
   manager->TraceNonSequential(*array);
-  TObjArray* stopped = array->GetStopped();
+  TObjArray* absorbed = array->GetAbsorbed();
 
   TH1D* h1 = new TH1D("h1", "h1", 100, 0, 0);
 
-  for(Int_t i = 0; i <= stopped->GetLast(); i++){
-    ARay* ray = (ARay*)(*stopped)[i];
+  for(Int_t i = 0; i <= absorbed->GetLast(); i++){
+    ARay* ray = (ARay*)(*absorbed)[i];
     if(!ray) continue;
 
     Double_t p[4];    

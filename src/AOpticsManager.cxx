@@ -61,7 +61,6 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
   // http://en.wikipedia.org/wiki/Fresnel_equations
   // theta_i = incident angle
   // theta_t = transmission angle
-  // Double_t* n = FindNormal(); // normal vect perpendicular to the surface
   TVector3 n = GetFacetNormal(nav, currentNode, nextNode); // normal vect perpendicular to the surface
   Double_t d1[3];
   ray.GetDirection(d1);
@@ -70,8 +69,6 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
   Double_t sint = n1*sini/n2; // Snell's law
 
   if(sint > 1.){ // total internal reflection
-    step -= kEpsilon*2.; // stop the step before reaching the boundary
-    nav->SetStep(step);
     DoReflection(n1, ray, nav, currentNode, nextNode);
     return;
   } // if
@@ -84,26 +81,27 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
     Double_t R = (Rs + Rp)/2.; // We assume that polarization is random
 
     if(gRandom->Uniform(1) < R){ // reflection at the boundary
-      step -= kEpsilon*2.; // stop the step before reaching the boundary
-      nav->SetStep(step);
       DoReflection(n1, ray, nav, currentNode, nextNode);
       return;
     } // if
   } // if
 
-  Double_t x1[4], x2[4], d2[3];
+  Double_t x1[4], d2[3];
   ray.GetLastPoint(x1);
-
+  const Double_t* x2 = nav->GetCurrentPoint();
   for(Int_t i = 0; i < 3; i++){
-    x2[i] = x1[i] + step*d1[i];
-    d2[i] = (d1[i] - cosi*n[i])*sint/sini + n[i]*cost;
+    if(sini != 0){
+      d2[i] = (d1[i] - cosi*n[i])*sint/sini + n[i]*cost;
+    } else {
+      d2[i] = d1[i];
+    } // if
   } // i
   ray.SetDirection(d2);
-
+  nav->SetCurrentDirection(d2);
   // step (m), c (m/s)
   Double_t speed = TMath::C()*m()/n1;
-  x2[3] = x1[3] + step/speed;
-  ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
+  Double_t t = x1[3] + step/speed;
+  ray.AddPoint(x2[0], x2[1], x2[2], t);
   ray.AddNode(nextNode);
 }
 
@@ -112,7 +110,6 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TG
 {
   Double_t step = nav->GetStep();
 
-  //Double_t* n = FindNormal(); // normal vect perpendicular to the surface
   TVector3 n = GetFacetNormal(nav, currentNode, nextNode); // normal vect perpendicular to the surface
   Double_t d1[3];
   ray.GetDirection(d1);
@@ -130,20 +127,24 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TG
     } // if
   } // if
 
-  Double_t x1[4], x2[4], d2[3];
-  ray.GetLastPoint(x1);
-
+  Double_t d2[3];
   for(Int_t i = 0; i < 3; i++){ // d2 = d1 - 2n*(d1*n)
-    x2[i] = x1[i] + step*d1[i];
     d2[i] = d1[i] - 2*n[i]*cosi;
   } // i
   if(not absorbed){
     ray.SetDirection(d2);
   } // if
 
+  Double_t x1[4];
+  ray.GetLastPoint(x1);
+  const Double_t* x2 = nav->GetCurrentPoint();
   Double_t speed = TMath::C()*m()/n1;
-  x2[3] = x1[3] + step/speed;
-  ray.AddPoint(x2[0], x2[1], x2[2], x2[3]);
+  Double_t t = x1[3] + step/speed;
+  nav->SetCurrentDirection(-d1[0], -d1[1], -d1[2]);
+  nav->SetStep(kEpsilon);
+  nav->Step();
+  nav->SetCurrentDirection(d2);
+  ray.AddPoint(x2[0], x2[1], x2[2], t);
   ray.AddNode(nextNode);
 }
 
@@ -153,7 +154,7 @@ TVector3 AOpticsManager::GetFacetNormal(TGeoNavigator* nav, TGeoNode* currentNod
   TGeoVolume* volume1 = currentNode->GetVolume();
   TGeoVolume* volume2 = nextNode ? nextNode->GetVolume() : 0;
 
-  TVector3 normal(FindNormal());
+  TVector3 normal(nav->FindNormal());
   TVector3 momentum(nav->GetCurrentDirection());
 
   ABorderSurfaceCondition* condition = ABorderSurfaceCondition::GetSurfaceCondition(volume1, volume2);
@@ -238,7 +239,6 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
   } // if
 
   Int_t n = array->GetLast();
-
   for(Int_t j = 0; j <= n; j++){
     ARay* ray = (ARay*)array->At(j);
     if(not ray or not ray->IsRunning()){
@@ -246,19 +246,22 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
     } // if
 
     Double_t lambda = ray->GetLambda();
+    Double_t x1[4], d1[3];
+    ray->GetLastPoint(x1);
+    ray->GetDirection(d1);
+    nav->InitTrack(x1, d1);
 
     while(ray->IsRunning()){
-      Double_t x1[4], d1[3];
       ray->GetLastPoint(x1);
       ray->GetDirection(d1);
 
-      TGeoNode* currentNode = nav->InitTrack(x1, d1); // start node
-
+      TGeoNode* currentNode = nav->GetCurrentNode();
       if(nav->IsOutside()){ // if the current position is outside of top volume
         currentNode = 0;
       } // if
 
       TGeoNode* nextNode = nav->FindNextBoundaryAndStep();
+      Double_t step = nav->GetStep(); // distance to the next boundary
 
       // Check type of start node
       Int_t typeCurrent = kOther;
@@ -279,14 +282,6 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       else if(    IsFocalSurface(nextNode)) typeNext = kFocus;
       else if(IsOpticalComponent(nextNode)) typeNext = kOpt;
 
-      Double_t step = nav->GetStep(); // distance to the next boundary
-      if(typeNext == kMirror){
-        step -= kEpsilon; // make sure that the photon do NOT cross the boundary
-      } else {
-        step += kEpsilon; // make sure that the photon crosses the boundary
-      } // if
-      nav->SetStep(step);
-
       if(typeCurrent == kLens){
         Double_t abs = ((ALens*)currentNode->GetVolume())->GetAbsorptionLength(lambda);
         if(abs > 0){
@@ -294,10 +289,14 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
           if(abs_step < step){
             Double_t n1 = ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda);
             Double_t speed = TMath::C()*m()/n1;
-            ray->AddPoint(x1[0] + d1[0]*abs_step, x1[1] + d1[1]*abs_step, x1[2] + d1[2]*abs_step, x1[3] + abs_step/speed);
+            Double_t x2[3];
+            for(Int_t i = 0; i < 3; i++){
+              x2[i] = x1[i] + abs_step*d1[i];
+            } // if
+            Double_t t = x1[3] + abs_step/speed;
+            ray->AddPoint(x2[0], x2[1], x2[2], t);
             ray->AddNode(nextNode);
             ray->Absorb();
-            nav->SetStep(step);
             continue;
           } // if
         } // if
@@ -315,30 +314,25 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       } else if((typeCurrent == kNull or typeCurrent == kLens or typeCurrent == kOpt or typeCurrent == kOther)
           and (typeNext == kObs or typeNext == kFocus)){
 
-        Double_t x2[4];
-        for(Int_t i = 0; i < 3; i++){
-          x2[i] = x1[i] + step*d1[i];
-        } // i
+        const Double_t* x2 = nav->GetCurrentPoint();
+        Double_t t;
         if (typeCurrent == kLens){
           Double_t n1 = ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda);
           Double_t speed = TMath::C()*m()/n1;
-          x2[3] = x1[3] + step/speed;
+          t = x1[3] + step/speed;
         } else {
           Double_t speed = TMath::C()*m();
-          x2[3] = x1[3] + step/speed;
+          t = x1[3] + step/speed;
         } // if
-        ray->AddPoint(x2[0], x2[1], x2[2], x2[3]);
+        ray->AddPoint(x2[0], x2[1], x2[2], t);
         ray->AddNode(nextNode);
       } else if((typeCurrent == kNull or typeCurrent == kOpt or typeCurrent == kOther)
             and (typeNext == kOther or typeNext == kOpt)){
+        const Double_t* x2 = nav->GetCurrentPoint();
 
-        Double_t x2[4];
-        for(Int_t i = 0; i < 3; i++){
-          x2[i] = x1[i] + step*d1[i];
-        } // i
         Double_t speed = TMath::C()*m();
-        x2[3] = x1[3] + step/speed;
-        ray->AddPoint(x2[0], x2[1], x2[2], x2[3]);
+        Double_t t = x1[3] + step/speed;
+        ray->AddPoint(x2[0], x2[1], x2[2], t);
         ray->AddNode(nextNode);
       } else if(typeCurrent == kLens and typeNext == kLens){
         Double_t n1 = ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda);
@@ -352,13 +346,10 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       } // if
 
       if(typeNext == kNull){
-        Double_t x2[4];
-        for(Int_t i = 0; i < 3; i++){
-          x2[i] = x1[i] + step*d1[i];
-        } // i
+        const Double_t* x2 = nav->GetCurrentPoint();
         Double_t speed = TMath::C()*m();
-        x2[3] = x1[3] + step/speed;
-        ray->AddPoint(x2[0], x2[1], x2[2], x2[3]);
+        Double_t t = x1[3] + step/speed;
+        ray->AddPoint(x2[0], x2[1], x2[2], t);
         ray->AddNode(nextNode);
         ray->Exit();
       } else if(typeCurrent == kFocus or typeCurrent == kObs or typeCurrent == kMirror or typeNext == kObs){
@@ -434,12 +425,20 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
     delete [] threads;
     delete [] dividedArray;
   } else { // single thread
+    TObjArray* objarray = new TObjArray;
     for(Int_t i = 0; i <= n; i++){
       ARay* ray = (ARay*)running->RemoveAt(i);
       if(!ray) continue;
-      TraceNonSequential(*ray);
+      objarray->Add(ray);
+    } // i
+    TraceNonSequential(objarray);
+    n = objarray->GetLast();
+    for(Int_t i = 0; i <= n; i++){
+      ARay* ray = (ARay*)objarray->RemoveAt(i);
+      if(!ray) continue;
       array.Add(ray);
     } // i
+    delete objarray;
   } // if
 
   running->Expand(0); // shrink the array
