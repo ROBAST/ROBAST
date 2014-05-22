@@ -105,35 +105,35 @@ void AshraOptics()
   const Int_t kLambdaN = 30;
   // weight map                                     eff x flat eff x Cere
   const Double_t kSpectrum[kLambdaN][3] = {{300*nm, 0.0810219, 0.0900244},
-					   {310*nm, 0.0832656, 0.0866447},
-					   {320*nm, 0.1530340, 0.149447},
-					   {330*nm, 0.1561810, 0.143417},
-					   {340*nm, 0.1729140, 0.14958},
-					   {350*nm, 0.1680870, 0.137214},
-					   {360*nm, 0.1820270, 0.140453},
-					   {370*nm, 0.1840770, 0.134461},
-					   {380*nm, 0.1891030, 0.130958},
-					   {390*nm, 0.1877240, 0.123421},
-					   {400*nm, 0.1899490, 0.118718},
-					   {410*nm, 0.1869390, 0.111207},
-					   {420*nm, 0.1886550, 0.106947},
-					   {430*nm, 0.1865470, 0.100891},
-					   {440*nm, 0.1838270, 0.0949519},
-					   {450*nm, 0.1745720, 0.0862083},
-					   {460*nm, 0.1605160, 0.0758582},
-					   {470*nm, 0.1463170, 0.0662367},
-					   {480*nm, 0.0438607, 0.0190368},
-					   {490*nm, 0.00256585, 0.00106866},
-					   {500*nm, 0.00165472, 0.000661888},
-					   {510*nm, 0.00218826, 0.000841315},
-					   {520*nm, 0.000492465, 0.000182125},
-					   {530*nm, 0.000677054, 0.00024103},
-					   {540*nm, 0.000597908, 0.000205044},
-					   {550*nm, 0.000212673, 7.03052e-05},
-					   {560*nm, 0.000374296, 0.000119355},
-					   {570*nm, 0.00026141, 8.04586e-05},
-					   {580*nm, 0.000148344, 4.40976e-05},
-					   {590*nm, 0.000224703, 6.45514e-05}};
+                                           {310*nm, 0.0832656, 0.0866447},
+                                           {320*nm, 0.1530340, 0.149447},
+                                           {330*nm, 0.1561810, 0.143417},
+                                           {340*nm, 0.1729140, 0.14958},
+                                           {350*nm, 0.1680870, 0.137214},
+                                           {360*nm, 0.1820270, 0.140453},
+                                           {370*nm, 0.1840770, 0.134461},
+                                           {380*nm, 0.1891030, 0.130958},
+                                           {390*nm, 0.1877240, 0.123421},
+                                           {400*nm, 0.1899490, 0.118718},
+                                           {410*nm, 0.1869390, 0.111207},
+                                           {420*nm, 0.1886550, 0.106947},
+                                           {430*nm, 0.1865470, 0.100891},
+                                           {440*nm, 0.1838270, 0.0949519},
+                                           {450*nm, 0.1745720, 0.0862083},
+                                           {460*nm, 0.1605160, 0.0758582},
+                                           {470*nm, 0.1463170, 0.0662367},
+                                           {480*nm, 0.0438607, 0.0190368},
+                                           {490*nm, 0.00256585, 0.00106866},
+                                           {500*nm, 0.00165472, 0.000661888},
+                                           {510*nm, 0.00218826, 0.000841315},
+                                           {520*nm, 0.000492465, 0.000182125},
+                                           {530*nm, 0.000677054, 0.00024103},
+                                           {540*nm, 0.000597908, 0.000205044},
+                                           {550*nm, 0.000212673, 7.03052e-05},
+                                           {560*nm, 0.000374296, 0.000119355},
+                                           {570*nm, 0.00026141, 8.04586e-05},
+                                           {580*nm, 0.000148344, 4.40976e-05},
+                                           {590*nm, 0.000224703, 6.45514e-05}};
 
   const int kN = 22; // 0 to 22 [deg]
   TH2D* hist[kN][3];
@@ -143,7 +143,7 @@ void AshraOptics()
   for(Int_t n=0; n<kN; n++){
     for(Int_t j=0; j<3; j++){
       hist[n][j] = new TH2D(Form("hist%d_%d", n, j), "", 100, -1, 1,
-			    100, -1, 1);
+                            100, -1, 1);
     } // j
 
     TGeoRotation* rayrot = new TGeoRotation;
@@ -157,17 +157,17 @@ void AshraOptics()
       TObjArray* focused = array->GetFocused();
       
       for(Int_t j=0; j<=focused->GetLast(); j++){
-	ARay* ray = (ARay*)(*focused)[j];
-	if(!ray) continue;
-	Double_t p[4];    
-	ray->GetLastPoint(p);
-	ray->SetLineWidth(1);
+        ARay* ray = (ARay*)(*focused)[j];
+        if(!ray) continue;
+        Double_t p[4];
+        ray->GetLastPoint(p);
+        ray->SetLineWidth(1);
 
-	Double_t y = kInputR[0]*TMath::Sin(n*TMath::Pi()/180);
-	hist[n][0]->Fill(p[1]/mm, p[2]/mm - y/mm);
-	hist[n][1]->Fill(p[1]/mm, p[2]/mm - y/mm, kSpectrum[i][1]);
-	hist[n][2]->Fill(p[1]/mm, p[2]/mm - y/mm, kSpectrum[i][2]);
-	nt->Fill(p[0], p[1], p[2]);
+        Double_t y = kInputR[0]*TMath::Sin(n*TMath::Pi()/180);
+        hist[n][0]->Fill(p[1]/mm, p[2]/mm - y/mm);
+        hist[n][1]->Fill(p[1]/mm, p[2]/mm - y/mm, kSpectrum[i][1]);
+        hist[n][2]->Fill(p[1]/mm, p[2]/mm - y/mm, kSpectrum[i][2]);
+        nt->Fill(p[0], p[1], p[2]);
       } // j
 
       delete array;
@@ -192,14 +192,14 @@ void AshraOptics()
     rms[i]->SetLineColor(i+1);
     for(Int_t j=0; j<kN; j++){
       Double_t val = TMath::Sqrt(TMath::Power(hist[j][i]->GetRMS(1), 2)
-				 + TMath::Power(hist[j][i]->GetRMS(2)/TMath::Cos(TMath::Pi()*j/180), 2));
+                                 + TMath::Power(hist[j][i]->GetRMS(2)/TMath::Cos(TMath::Pi()*j/180), 2));
       rms[i]->SetPoint(j, j, val*mm/kInputR[0]/TMath::Pi()*180*60);
     } // j
   } // i
 
   TCanvas* can3 = new TCanvas("can3", "", 640+4, 480+4);
   TH2D* frameRMS = new TH2D("frameRMS", ";Incident Angle [deg];RMS [arcmin];",
-			    1, 0, 21, 1, 0, 2);
+                            1, 0, 21, 1, 0, 2);
   frameRMS->Draw();
 
   for(Int_t i=0; i<3; i++){
@@ -215,7 +215,7 @@ void AddMirror(AOpticalComponent* opt)
   const Double_t kMirrorRad = 425*mm; // radius
   const Int_t kMirrorN = 7;
   const Double_t kMirrorR[kMirrorN] = {1363*mm, 1363*mm, 1363*mm, 1363*mm,
-				       1363*mm, 1363*mm, 1363*mm};
+                                       1363*mm, 1363*mm, 1363*mm};
 
   // Mirror
   TGeoSphere* sphere[kMirrorN];
@@ -243,17 +243,17 @@ void AddMirror(AOpticalComponent* opt)
       cut2[i] = new TGeoArb8(Form("mir_cut2%d", i), R_/2.);
       cut3[i] = new TGeoArb8(Form("mir_cut3%d", i), R_/2.);
       for(Int_t j=0; j<2; j++){
-	Double_t r_;
-	if(j==0) r_ = 1*nm; else r_ = r; // hack again
-	cut2[i]->SetVertex(0 + j*4, r_*TMath::Cos(60*deg), r_*TMath::Sin(60*deg));
-	cut2[i]->SetVertex(1 + j*4, r_*TMath::Cos(-8.6*deg), r_*TMath::Sin(-8.6*deg));
-	cut2[i]->SetVertex(2 + j*4, r_*TMath::Cos(188.6*deg), r_*TMath::Sin(188.6*deg));
-	cut2[i]->SetVertex(3 + j*4, r_*TMath::Cos(120*deg), r_*TMath::Sin(120*deg));
+        Double_t r_;
+        if(j==0) r_ = 1*nm; else r_ = r; // hack again
+        cut2[i]->SetVertex(0 + j*4, r_*TMath::Cos(60*deg), r_*TMath::Sin(60*deg));
+        cut2[i]->SetVertex(1 + j*4, r_*TMath::Cos(-8.6*deg), r_*TMath::Sin(-8.6*deg));
+        cut2[i]->SetVertex(2 + j*4, r_*TMath::Cos(188.6*deg), r_*TMath::Sin(188.6*deg));
+        cut2[i]->SetVertex(3 + j*4, r_*TMath::Cos(120*deg), r_*TMath::Sin(120*deg));
       
-	cut3[i]->SetVertex(0 + j*4, r_*TMath::Cos(351.4*deg), r_*TMath::Sin(351.4*deg));
-	cut3[i]->SetVertex(1 + j*4, 0, r_/r*-10000*mm);
-	cut3[i]->SetVertex(2 + j*4, r_*TMath::Cos(188.6*deg), r_*TMath::Sin(188.6*deg));
-	cut3[i]->SetVertex(3 + j*4, 0, 0);
+        cut3[i]->SetVertex(0 + j*4, r_*TMath::Cos(351.4*deg), r_*TMath::Sin(351.4*deg));
+        cut3[i]->SetVertex(1 + j*4, 0, r_/r*-10000*mm);
+        cut3[i]->SetVertex(2 + j*4, r_*TMath::Cos(188.6*deg), r_*TMath::Sin(188.6*deg));
+        cut3[i]->SetVertex(3 + j*4, 0, 0);
       } // j
     } // if
       
@@ -268,7 +268,7 @@ void AddMirror(AOpticalComponent* opt)
     rt[i]->RegisterYourself();
 
     sphere[i] = new TGeoSphere(Form("mir_sph%d", i), R, R_,
-			       0, TMath::ASin(kMirrorRad/R)/deg);
+                               0, TMath::ASin(kMirrorRad/R)/deg);
     if(i==0){
       composite[i] = new TGeoCompositeShape(Form("mir_cs%d", i), Form("(mir_sph%d*mir_cut1):mir_tr%d", i, i));
     } else {
@@ -285,29 +285,29 @@ void AddLens(AOpticalComponent* opt)
 {
   // Lens parameters
   const Double_t kLensZ[3][2] = {{-184.0*mm, -174.0*mm},
-				 {  -5.0*mm,    4.5*mm},
-				 { 174.0*mm,  184.0*mm}};
+                                 {  -5.0*mm,    4.5*mm},
+                                 { 174.0*mm,  184.0*mm}};
   const Double_t kLensR[3] = {-10739.5*mm, 29819.0*mm, -11148.2*mm};
   const Double_t kLensRadius[3][2] = {{590*mm,  85*mm},
-				      {500*mm, 140*mm},
-				      {590*mm, 205*mm}};
+                                      {500*mm, 140*mm},
+                                      {590*mm, 205*mm}};
   const Double_t kLensPol[3][4] = {{0,
-				    2.50657e-10*TMath::Power(mm, -3),
-				    -3.26591e-16*TMath::Power(mm, -5),
-				    -2.30099e-22*TMath::Power(mm, -7)},
-				   {0,
-				    -3.16481e-10*TMath::Power(mm, -3),
-				    6.23315e-16*TMath::Power(mm, -5),
-				    8.71537e-22*TMath::Power(mm, -7)},
-				   {0,
-				    2.48098e-10*TMath::Power(mm, -3),
-				    -3.44020e-16*TMath::Power(mm, -5),
-				    -1.99402e-22*TMath::Power(mm, -7)}};
+                                    2.50657e-10*TMath::Power(mm, -3),
+                                    -3.26591e-16*TMath::Power(mm, -5),
+                                    -2.30099e-22*TMath::Power(mm, -7)},
+                                   {0,
+                                    -3.16481e-10*TMath::Power(mm, -3),
+                                    6.23315e-16*TMath::Power(mm, -5),
+                                    8.71537e-22*TMath::Power(mm, -7)},
+                                   {0,
+                                    2.48098e-10*TMath::Power(mm, -3),
+                                    -3.44020e-16*TMath::Power(mm, -5),
+                                    -1.99402e-22*TMath::Power(mm, -7)}};
 
   // Acrylite data measured with V-Block method
   ASchottFormula* acrylite = new ASchottFormula(+2.192728e-0, -5.320698e-3,
-						+7.215869e-3, +1.657987e-3,
-						-2.122694e-4, +1.173515e-5);
+                                                +7.215869e-3, +1.657987e-3,
+                                                -2.122694e-4, +1.173515e-5);
 
   // Dummy vacuum
   TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0, 0, 0);
@@ -318,8 +318,8 @@ void AddLens(AOpticalComponent* opt)
   ALens* lens[3];
   for(Int_t i=0; i<3; i++){
     a[i] = new AGeoAsphericDisk(Form("lens_a%d", i+1), kLensZ[i][0], 0,
-				kLensZ[i][1], 1/kLensR[i],
-				kLensRadius[i][0], kLensRadius[i][1]);
+                                kLensZ[i][1], 1/kLensR[i],
+                                kLensRadius[i][0], kLensRadius[i][1]);
     a[i]->SetPolynomials(0, 0, 4, &kLensPol[i][0]);
     lens[i] = new ALens(Form("lens%d", i+1), a[i], Vacuum);
     lens[i]->SetRefractiveIndex(acrylite);
@@ -345,14 +345,14 @@ void AddPipeline(AOpticalComponent* opt)
   const Double_t kOffset = 714*mm - 20.35*mm + kInputZ;
   const Int_t kHaubeN = 14;
   const Double_t kHaubeZ[kHaubeN] = {  0*mm,   4*mm,   4*mm, 194*mm, 194*mm,
-				     202*mm, 202*mm, 298*mm, 613*mm, 717*mm,
-				     717*mm, 720*mm, 720*mm, 730*mm};
+                                       202*mm, 202*mm, 298*mm, 613*mm, 717*mm,
+                                       717*mm, 720*mm, 720*mm, 730*mm};
   const Double_t kHaubeRmax[kHaubeN] = {320*mm, 320*mm, 315*mm, 315*mm, 315*mm,
-					315*mm, 291*mm, 291*mm, 119*mm, 119*mm,
-					119*mm, 119*mm,  93*mm,  93*mm}; 
+                                        315*mm, 291*mm, 291*mm, 119*mm, 119*mm,
+                                        119*mm, 119*mm,  93*mm,  93*mm};
   const Double_t kHaubeRmin[kHaubeN] = {310*mm, 310*mm, 310*mm, 310*mm, 287*mm,
-					287*mm, 287*mm, 287*mm, 115*mm, 115*mm,
-					0*mm,     0*mm,   0*mm,   0*mm}; 
+                                        287*mm, 287*mm, 287*mm, 115*mm, 115*mm,
+                                        0*mm,     0*mm,   0*mm,   0*mm};
 
   TGeoPcon* pcon1 = new TGeoPcon("pip_pcon1", 0, 360, kHaubeN);
   for(Int_t i=0; i<kHaubeN; i++){
@@ -361,16 +361,16 @@ void AddPipeline(AOpticalComponent* opt)
   AObscuration* haube = new AObscuration("haube", pcon1);
   opt->AddNode(haube, 1);
   /*
-  const Int_t kPipeN = 14;
-  const Double_t kHaubeZ[kHaubeN] = {};
-  const Double_t kHaubeZ[kHaubeN] = {-516.94375*mm, -206.943475*mm,
-				     -206.943475*mm, 103.056525*mm, 
-				     103.056525*mm, 405.056525*mm,
-				     479.056525*mm, 703.056525*mm};
-  const Double_t kHaubeRmax[kHaubeN] = {50*mm, 50*mm, 81*mm, 81*mm, 
-					128*mm, 227*mm, 315*mm, 320*mm};
-  const Double_t kHaubeRmin[kHaubeN] = { 0*mm,  0*mm,  0*mm, 0*mm,
-					 0*mm, 0*mm, 0*mm, 319*mm};
+    const Int_t kPipeN = 14;
+    const Double_t kHaubeZ[kHaubeN] = {};
+    const Double_t kHaubeZ[kHaubeN] = {-516.94375*mm, -206.943475*mm,
+    -206.943475*mm, 103.056525*mm,
+    103.056525*mm, 405.056525*mm,
+    479.056525*mm, 703.056525*mm};
+    const Double_t kHaubeRmax[kHaubeN] = {50*mm, 50*mm, 81*mm, 81*mm, 
+    128*mm, 227*mm, 315*mm, 320*mm};
+    const Double_t kHaubeRmin[kHaubeN] = { 0*mm,  0*mm,  0*mm, 0*mm,
+    0*mm, 0*mm, 0*mm, 319*mm};
   */
 
   // Stewart
@@ -443,12 +443,12 @@ void AddInputWindow(AOpticalComponent* opt)
 {
   // Kovar glass
   ASchottFormula* kovar = new ASchottFormula(+2.176400e-0, -5.051050e-3,
-					     +1.379077e-2, -9.428276e-4,
-					     +1.304423e-4, -5.956672e-6);
+                                             +1.379077e-2, -9.428276e-4,
+                                             +1.304423e-4, -5.956672e-6);
 
   // Input window of 20" II
   TGeoSphere* sphere1 = new TGeoSphere("in_sphere1", kInputR[0], kInputR[1],
-				       0, 24);
+                                       0, 24);
   ALens* input = new ALens("input", sphere1);
   input->SetLineColor(42);
   input->SetRefractiveIndex(kovar);
@@ -457,7 +457,7 @@ void AddInputWindow(AOpticalComponent* opt)
 
   // Focal plane
   TGeoSphere* sphere2 = new TGeoSphere("in_sphere2", kInputR[0]-.1*mm,
-				       kInputR[0], 0, 24);
+                                       kInputR[0], 0, 24);
   AFocalSurface* focal = new AFocalSurface("focal", sphere2);
   opt->AddNode(focal, 1, tr1);
 }
@@ -675,9 +675,9 @@ void Add30Frame(AOpticalComponent* opt)
 
   // H steal
   Double_t x[12] = { 50*mm,  50*mm,   4*mm,   4*mm,  50*mm,  50*mm,
-		    -50*mm, -50*mm,  -4*mm,  -4*mm, -50*mm, -50*mm,};
+                    -50*mm, -50*mm,  -4*mm,  -4*mm, -50*mm, -50*mm,};
   Double_t y[12] = { 50*mm,  42*mm,  42*mm, -42*mm, -42*mm, -50*mm,
-		    -50*mm, -42*mm, -42*mm,  42*mm,  42*mm,  50*mm};
+                    -50*mm, -42*mm, -42*mm,  42*mm,  42*mm,  50*mm};
 
   // ASHRA30-013.dwg ASHRA30-015.dwg ASHRA30-030.dwg
   TGeoXtru* xtru1 = new TGeoXtru(2);
@@ -826,9 +826,9 @@ void Add30Frame(AOpticalComponent* opt)
 
   // C channel
   Double_t x2[8] = {   75*mm,    75*mm, 68.5*mm, 68.5*mm,
-		    -68.5*mm, -68.5*mm,  -75*mm,  -75*mm};
+                    -68.5*mm, -68.5*mm,  -75*mm,  -75*mm};
   Double_t y2[8] = {37.5*mm, -37.5*mm, -37.5*mm, 31*mm,
-		      31*mm, -37.5*mm, -37.5*mm, 37.5*mm};
+                    31*mm, -37.5*mm, -37.5*mm, 37.5*mm};
 
   // ASHRA30-0054.dwg ASHRA30-0064.dwg ASHRA30-0121.dwg
   // ASHRA30-001.dwg ASHRA30-0021.dwg 

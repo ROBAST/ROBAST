@@ -837,14 +837,14 @@ Double_t AGeoAsphericDisk::Safety(CONST53411 Double_t* point, Bool_t in) const
       Double_t r = r1 + j*step;
       Double_t f;
       try {
-	f = CalcF2(r);
+    f = CalcF2(r);
       } catch (...) {
-	f = TGeoShape::Big();
+    f = TGeoShape::Big();
       } // try
       Double_t d2 = (f - point[2])*(f - point[2]) + (r - rad)*(r - rad);
       if(d2 < dist[1]){
-	dist[1] = d2;
-	r_ = r;
+    dist[1] = d2;
+    r_ = r;
       } // if
     } // r
     r1 = r_==fRmin ? fRmin : r_ - step;

@@ -61,7 +61,6 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigato
   // http://en.wikipedia.org/wiki/Fresnel_equations
   // theta_i = incident angle
   // theta_t = transmission angle
-  //Double_t* n = FindNormal(); // normal vect perpendicular to the surface
   TVector3 n = GetFacetNormal(nav, currentNode, nextNode); // normal vect perpendicular to the surface
   Double_t d1[3];
   ray.GetDirection(d1);
