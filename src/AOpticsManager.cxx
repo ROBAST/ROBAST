@@ -72,6 +72,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
   Double_t sint = n1*sini/n2; // Snell's law
 
   if(sint > 1.){ // total internal reflection
+    std::cerr << "Total Reflection\n";
     DoReflection(n1, ray);
     return;
   } // if
@@ -84,6 +85,8 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
     Double_t R = (Rs + Rp)/2.; // We assume that polarization is random
 
     if(gRandom->Uniform(1) < R){ // reflection at the boundary
+      std::cerr << "Fresnel Reflection\n";
+      std::cerr << n[0] << "\t" << n[1] << "\t" << n[2] << "\t" << n1 << "\t" << n2 << "\t" << cosi << "\t" << cost << "\n";
       DoReflection(n1, ray);
       return;
     } // if
@@ -92,6 +95,10 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, ARay& ray)
   Double_t x1[4], d2[3];
   ray.GetLastPoint(x1);
   const Double_t* x2 = nav->GetCurrentPoint();
+  if(x2[0] != x2[0]){
+    //exit(1);
+  } // if
+
   for(Int_t i = 0; i < 3; i++){
     d2[i] = (d1[i] - cosi*n[i])*sint/sini + n[i]*cost;
   } // i
@@ -139,11 +146,16 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray)
   Double_t x1[4];
   ray.GetLastPoint(x1);
   const Double_t* x2 = nav->GetCurrentPoint();
+  if(x2[0] != x2[0]){
+    std::cerr << "aho5" << std::endl;
+    exit(1);
+  } // if
 
   Double_t speed = TMath::C()*m()/n1;
   Double_t t = x1[3] + step/speed;
   nav->SetCurrentDirection(-d1[0], -d1[1], -d1[2]);
   nav->SetStep(kEpsilon*2);
+  std::cerr << "ahoooo\n";
   nav->Step(kFALSE); // move backward to escape from the mirror node
   nav->SetCurrentDirection(d2);
   ray.AddPoint(x2[0], x2[1], x2[2], t);
@@ -303,9 +315,12 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
         currentNode = 0;
       } // if
       SetStoredCurrentNode(currentNode);
-
-      TGeoNode* nextNode = nav->FindNextBoundaryAndStep();
+      //TGeoNode* nextNode = nav->FindNextBoundaryAndStep();
+      nav->FindNextBoundary();
+      Double_t step = nav->GetStep(); // distance to the next boundary
+      TGeoNode* nextNode = nav->Step();
       SetStoredNextNode(nextNode);
+      //nav->SetStep(kEpsilon);
 
       // Check type of start node
       Int_t typeCurrent = kOther;
@@ -326,8 +341,7 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       else if(    IsFocalSurface(nextNode)) typeNext = kFocus;
       else if(IsOpticalComponent(nextNode)) typeNext = kOpt;
 
-      Double_t step = nav->GetStep(); // distance to the next boundary
-
+      std::cerr << j << "\t" << (currentNode ? currentNode->GetName() : "NULL") << "\t" << (nextNode ? nextNode->GetName() : "NULL") << "\t" << step << "\t" << x1[0] << "\t" << x1[1] << "\t" << x1[2] << "\t" << d1[0] << "\t" << d1[1] << "\t" << d1[2] << "\t" << "aho4" << std::endl;
       if(typeCurrent == kLens){
         Double_t abs = ((ALens*)currentNode->GetVolume())->GetAbsorptionLength(lambda);
         if(abs > 0){
@@ -338,8 +352,14 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
             nav->SetCurrentDirection(-d1[0], -d1[1], -d1[2]);
             nav->SetStep(step + kEpsilon - abs_step); // step backward because a too long step is already done
             nav->Step(kFALSE);
+            nav->SetCurrentDirection(d1[0], d1[1], d1[2]);
 
             const Double_t* x2 = nav->GetCurrentPoint();
+            if(x2[0] != x2[0]){
+              std::cerr << "aho6" << std::endl;
+              exit(1);
+            } // if
+
             Double_t t = x1[3] + abs_step/speed;
             ray->AddPoint(x2[0], x2[1], x2[2], t);
             ray->AddNode(nextNode);
@@ -362,6 +382,11 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
           and (typeNext == kObs or typeNext == kFocus)){
 
         const Double_t* x2 = nav->GetCurrentPoint();
+        if(x2[0] != x2[0]){
+          std::cerr << "aho1" << std::endl;
+          exit(1);
+        } // if
+
         Double_t t;
         if (typeCurrent == kLens){
           Double_t n1 = ((ALens*)currentNode->GetVolume())->GetRefractiveIndex(lambda);
@@ -376,6 +401,11 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
       } else if((typeCurrent == kNull or typeCurrent == kOpt or typeCurrent == kOther)
             and (typeNext == kOther or typeNext == kOpt)){
         const Double_t* x2 = nav->GetCurrentPoint();
+        if(x2[0] != x2[0]){
+          std::cerr << "aho2" << std::endl;
+          exit(1);
+        } // if
+
         Double_t speed = TMath::C()*m();
         Double_t t = x1[3] + step/speed;
         ray->AddPoint(x2[0], x2[1], x2[2], t);
@@ -393,6 +423,10 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
 
       if(typeNext == kNull){
         const Double_t* x2 = nav->GetCurrentPoint();
+        if(x2[0] != x2[0]){
+          std::cerr << "aho3" << std::endl;
+          exit(1);
+        } // if
         Double_t speed = TMath::C()*m();
         Double_t t = x1[3] + step/speed;
         ray->AddPoint(x2[0], x2[1], x2[2], t);
