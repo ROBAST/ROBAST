@@ -1,6 +1,3 @@
-// $Id: AOpticsManager.cxx 92 2012-11-30 02:59:57Z oxon $
-// Author: Akira Okumura 2007/09/24
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -151,13 +148,13 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TG
 //_____________________________________________________________________________
 TVector3 AOpticsManager::GetFacetNormal(TGeoNavigator* nav, TGeoNode* currentNode, TGeoNode* nextNode)
 {
-  TGeoVolume* volume1 = currentNode->GetVolume();
-  TGeoVolume* volume2 = nextNode ? nextNode->GetVolume() : 0;
+  AOpticalComponent* component1 = (AOpticalComponent*)currentNode->GetVolume();
+  AOpticalComponent* component2 = nextNode ? (AOpticalComponent*)nextNode->GetVolume() : 0;
 
   TVector3 normal(nav->FindNormal());
   TVector3 momentum(nav->GetCurrentDirection());
 
-  ABorderSurfaceCondition* condition = ABorderSurfaceCondition::GetSurfaceCondition(volume1, volume2);
+  ABorderSurfaceCondition* condition = component1 ? component1->FindSurfaceCondition(component2) : 0;
 
   if(condition and condition->GetGaussianRoughness() != 0){
     // The following method is based on G4OpBoundaryProcess::GetFacetNormal in
