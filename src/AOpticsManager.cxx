@@ -382,7 +382,11 @@ void AOpticsManager::TraceNonSequential(ARayArray& array)
   TObjArray* running = array.GetRunning();
 
   Int_t n = running->GetLast();
+#ifdef SINGLE_THREAD
+  Int_t nthreads = 1;
+#else
   Int_t nthreads = GetMaxThreads();
+#endif
 
   if(IsMultiThread() and nthreads >= 1){
     TThread** threads = new TThread*[nthreads];

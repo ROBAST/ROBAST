@@ -60,6 +60,8 @@ BOBJS	:=	$(patsubst %.c,%.$(ObjSuf),$(BSRCS))
 
 LIB	=	lib$(NAME).$(DllSuf)
 
+CXXFLAGS	+= $(ROBASTFLAGS)
+
 #CXXFLAGS	+= -fopenmp
 ifneq ($(EXPLLINKLIBS), )
 #EXPLLINKLIBS	+= -lgomp -lGeom -lGeomPainter
