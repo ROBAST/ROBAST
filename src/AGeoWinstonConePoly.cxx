@@ -72,7 +72,7 @@ void AGeoWinstonConePoly::ComputeBBox()
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonConePoly::ComputeNormal(CONST53411 Double_t* point, CONST53411 Double_t* dir,
+void AGeoWinstonConePoly::ComputeNormal(CONST53410 Double_t* point, CONST53410 Double_t* dir,
                                         Double_t* norm)
 {
   // Compute normal to closest surface from POINT.
@@ -128,7 +128,7 @@ void AGeoWinstonConePoly::ComputeNormal(CONST53411 Double_t* point, CONST53411 D
 }
 
 //_____________________________________________________________________________
-Bool_t AGeoWinstonConePoly::Contains(CONST53411 Double_t* point) const
+Bool_t AGeoWinstonConePoly::Contains(CONST53410 Double_t* point) const
 {
   // Test if point is in this shape
   Double_t x = point[0];
@@ -155,7 +155,7 @@ Int_t AGeoWinstonConePoly::DistancetoPrimitive(Int_t px, Int_t py)
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonConePoly::DistFromInside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
+Double_t AGeoWinstonConePoly::DistFromInside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
                                              Int_t iact, Double_t step,
                                              Double_t* safe) const
 {
@@ -185,7 +185,7 @@ Double_t AGeoWinstonConePoly::DistFromInside(CONST53411 Double_t* point, CONST53
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonConePoly::DistFromOutside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
+Double_t AGeoWinstonConePoly::DistFromOutside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
                                               Int_t iact, Double_t step,
                                               Double_t* safe) const
 {
@@ -480,7 +480,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
   // segments
   Int_t index = 0;
   for(Int_t i = 0; i < n; i++){
-    // segments on parabolaÁ
+    // segments on parabolaï¿½
     for(Int_t j = 0; j < fPolyN; j++){
       buff.fSegs[index++] = c;
       buff.fSegs[index++] = fPolyN*i + j;

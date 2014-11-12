@@ -21,10 +21,10 @@
 #include "TGeoBBox.h"
 #endif
 
-#if ROOT_VERSION_CODE > ROOT_VERSION(5,34,10)
-#define CONST53411 const
+#if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,10)
+#define CONST53410 const
 #else
-#define CONST53411
+#define CONST53410
 #endif
 
 class AGeoAsphericDisk : public TGeoBBox {
@@ -60,20 +60,20 @@ public:
   virtual Double_t    CalcF1(Double_t r) const throw(std::exception);
   virtual Double_t    CalcF2(Double_t r) const throw(std::exception);
   virtual void        ComputeBBox();
-  virtual void        ComputeNormal(CONST53411 Double_t* point, CONST53411 Double_t* dir, Double_t* norm);
-  virtual Bool_t      Contains(CONST53411 Double_t* point) const;
+  virtual void        ComputeNormal(CONST53410 Double_t* point, CONST53410 Double_t* dir, Double_t* norm);
+  virtual Bool_t      Contains(CONST53410 Double_t* point) const;
   virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
-  virtual Double_t    DistFromInside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
+  virtual Double_t    DistFromInside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
                                      Int_t iact = 1,
                                      Double_t step = TGeoShape::Big(),
                                      Double_t *safe = 0) const;
-  virtual Double_t    DistFromOutside(CONST53411 Double_t* point, CONST53411 Double_t* dir,
+  virtual Double_t    DistFromOutside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
                                       Int_t iact = 1,
                                       Double_t step = TGeoShape::Big(),
                                       Double_t* safe = 0) const;
-  virtual Double_t    DistToAsphere(Int_t i, CONST53411 Double_t* point, CONST53411 Double_t* dir) const;
-  virtual Double_t    DistToInner(CONST53411 Double_t* point, CONST53411 Double_t* dir) const;
-  virtual Double_t    DistToOuter(CONST53411 Double_t* point, CONST53411 Double_t* dir) const;
+  virtual Double_t    DistToAsphere(Int_t i, CONST53410 Double_t* point, CONST53410 Double_t* dir) const;
+  virtual Double_t    DistToInner(CONST53410 Double_t* point, CONST53410 Double_t* dir) const;
+  virtual Double_t    DistToOuter(CONST53410 Double_t* point, CONST53410 Double_t* dir) const;
   virtual TGeoVolume* Divide(TGeoVolume* voldiv, const char* divname,
                              Int_t iaxis, Int_t ndiv, Double_t start,
                              Double_t step);
@@ -97,7 +97,7 @@ public:
   virtual Bool_t      IsCylType() const {return kTRUE;}
   virtual TBuffer3D*  MakeBuffer3D() const;
   virtual void        SavePrimitive(std::ostream& out, Option_t* option = "");
-  virtual Double_t    Safety(CONST53411 Double_t* point, Bool_t in=kTRUE) const;
+  virtual Double_t    Safety(CONST53410 Double_t* point, Bool_t in=kTRUE) const;
   virtual void        SetAsphDimensions(Double_t x1, Double_t curve1,
                                         Double_t x2, Double_t curve2,
                                         Double_t rmax, Double_t rmin);
