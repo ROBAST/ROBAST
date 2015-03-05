@@ -134,7 +134,7 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 
 $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.c
 		@echo "Compiling" $<
-		$(CXX) $(CXXFLAGS) -I$(BINCDIR) -c $< -o $@
+		$(CC) $(CCFLAGS) -I$(BINCDIR) -c $< -o $@
 
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
