@@ -86,8 +86,8 @@ endif
 
 $(MOD1): $(ORG1)
 		sed -e 's/s = malloc(/s = (char\*)malloc(/g' $< | \
-		sed -e 's/root_path = calloc(/root_path = (incpath\*)calloc(/g' | \
-		sed -e 's/last->next = calloc(/last->next = (incpath\*)calloc(/g' | \
+		sed -e 's/root_path = calloc(/root_path = (struct incpath\*)calloc(/g' | \
+		sed -e 's/last->next = calloc(/last->next = (struct incpath\*)calloc(/g' | \
 		sed -e 's/s = strchr(fname/s = (char\*)strchr(fname/g' > $@
 
 $(MOD2): $(ORG2)
@@ -95,10 +95,10 @@ $(MOD2): $(ORG2)
 		sed -e 's/xln->text = malloc(/xln->text = (char\*)malloc(/g' | \
 		sed -e 's/ep->iparam = calloc(/ep->iparam = (int\*)calloc(/g' | \
 		sed -e 's/ep->fparam = calloc(/ep->fparam = (int\*)calloc(/g' | \
-		sed -e 's/xln = calloc(/xln = (linked_string\*)calloc(/g' > $@
+		sed -e 's/xln = calloc(/xln = (struct linked_string\*)calloc(/g' > $@
 
 $(MOD3): $(ORG3)
-		sed -e 's/struct warn_specific_data \*wt = get_warn_specific();/struct warn_specific_data \*wt = (warn_specific_data\*)get_warn_specific();/g' $< > $@
+		sed -e 's/struct warn_specific_data \*wt = get_warn_specific();/struct warn_specific_data \*wt = (struct warn_specific_data\*)get_warn_specific();/g' $< > $@
 
 $(LIB):		$(OBJS) $(BOBJS)
 ifeq ($(PLATFORM),macosx)
@@ -134,7 +134,7 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 
 $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.c
 		@echo "Compiling" $<
-		$(CXX) $(CCFLAGS) -I$(BINCDIR) -c $< -o $@
+		$(CC) $(CCFLAGS) -I$(BINCDIR) -c $< -o $@
 
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
