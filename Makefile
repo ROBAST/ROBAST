@@ -29,6 +29,8 @@ include $(MAKEARCH)
 
 ifeq ($(ROOTCLING),)
 ROOTCLING	:=	$(ROOTCINT)
+else
+ROOTCLING_FOUND	:= 1
 endif
 
 NAME	:=	ROBAST
@@ -46,6 +48,7 @@ DICTO	:=	$(SRCDIR)/$(NAME)Dict.$(ObjSuf)
 INCS	:=	$(filter-out $(INCDIR)/LinkDef.h,$(wildcard $(INCDIR)/*.h))
 SRCS	:=	$(filter-out $(SRCDIR)/$(DICT).%,$(wildcard $(SRCDIR)/*.$(SrcSuf)))
 OBJS	:=	$(patsubst %.$(SrcSuf),%.$(ObjSuf),$(SRCS)) $(DICTO)
+PCM	:=	$(NAME)Dict_rdict.pcm
 
 ORG1	:=	$(SRCDIR)/bernlohr/fileopen.c
 ORG2	:=	$(SRCDIR)/bernlohr/io_simtel.c
@@ -75,7 +78,11 @@ UNITTEST:= $(wildcard unittest/*.py)
 .SUFFIXES:	.$(SrcSuf) .$(ObjSuf) .$(DllSuf)
 .PHONY:		all clean test doc htmldoc
 
-all:		$(RMAP)
+ifeq ($(ROOTCLING_FOUND),)
+all:		$(LIB)
+else
+all:		$(LIB) $(PCM)
+endif
 
 $(MOD1): $(ORG1)
 		sed -e 's/s = malloc(/s = (char\*)malloc(/g' $< | \
@@ -133,6 +140,9 @@ $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
 		$(ROOTCLING) -f $@ -c -p $^
 
+$(PCM):		$(SRCDIR)/$(PCM)
+		cp $^ $@
+
 $(DICTO):	$(DICTS)
 		@echo "Compiling" $<
 		$(CXX) $(CXXFLAGS) -I. -c $< -o $@
@@ -145,7 +155,7 @@ htmldoc:
 		sh mkhtml.sh
 
 clean:
-		rm -rf $(LIB) $(MODS) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(RMAP)
+		rm -rf $(LIB) $(MODS) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(PCM) $(SRCDIR)/$(PCM)
 
 test:		all
 		@for script in $(UNITTEST);\
