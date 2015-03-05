@@ -89,7 +89,6 @@ ARayArray* ACorsikaIACTFile::GetRayArray(Int_t telNo, Int_t arrayNo,
 
   Int_t telNo_, arrayNo_;
   Float_t x, y, zem, time, cx, cy, cz, lambda, photons;
-  Double_t totalPhotons;
   fBunches->SetBranchAddress("telNo", &telNo_);
   fBunches->SetBranchAddress("arrayNo", &arrayNo_);
   fBunches->SetBranchAddress("x", &x);
@@ -281,7 +280,7 @@ Int_t ACorsikaIACTFile::ReadEvent(Int_t num)
     fprintf(stderr, "File is not open.\n");
     return -1;
   } // if
-  
+
   if(fEventHeader){
     if(fEventHeader->GetEventNumber() == num){
       // Event is already read. Do nothing.
@@ -438,7 +437,7 @@ Int_t ACorsikaIACTFile::ReadEvent(Int_t num)
           //fprintf(stderr, "Cannot process data for telescope #%d because only %d are configured.\n", i + 1, kMaxTelescopes);
           continue;
         } // if
-      
+
         for(Int_t j = 0; j < nbunches; j++){
           x = bunches[j].x;
           y = bunches[j].y;

@@ -223,7 +223,7 @@ Double_t AGeoWinstonCone2D::DistFromInside(CONST53410 Double_t* point, CONST5341
     if (iact==0) return TGeoShape::Big();
     if (iact==1 && step < *safe) return TGeoShape::Big();
   } // if
-  
+
   // calculate distance
   Double_t dz = TGeoShape::Big();
   if(dir[2] < 0){
@@ -458,7 +458,7 @@ const TBuffer3D& AGeoWinstonCone2D::GetBuffer3D(Int_t reqSections,
   static TBuffer3D buffer(TBuffer3DTypes::kGeneric);
 
   TGeoBBox::FillBuffer3D(buffer, reqSections, localFrame);
-  
+
   if(reqSections & TBuffer3D::kRawSizes){
     Int_t n = gGeoManager->GetNsegments();
     Int_t nbPnts = 4*(n + 1); // Number of points
@@ -534,7 +534,7 @@ TBuffer3D* AGeoWinstonCone2D::MakeBuffer3D() const
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::Safety(CONST53410 Double_t* point, Bool_t in) const
+Double_t AGeoWinstonCone2D::Safety(CONST53410 Double_t*, Bool_t) const
 {
   // Not implemented yet. But keep this as is.
   return TGeoShape::Big();
