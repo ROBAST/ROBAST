@@ -4,6 +4,7 @@ static const Double_t nm = AOpticsManager::nm();
 
 Double_t multithread(Int_t nthreads)
 {
+  TThread::Initialize();
   AOpticsManager* manager = new AOpticsManager("manager", "multithread");
   manager->SetLimit(1000); // rays will have long track histories without being suspended
 
