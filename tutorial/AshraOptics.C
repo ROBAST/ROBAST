@@ -37,6 +37,7 @@
 #include "TNtuple.h"
 
 #include "TCanvas.h"
+#include "TGLView.h"
 #include "TH2D.h"
 #include "TMath.h"
 #include "TStyle.h"
@@ -71,10 +72,10 @@ void AshraOptics()
   AOpticalComponent *top = new AOpticalComponent("top", box1);
   manager->SetTopVolume(top);
 
-  // Top volume 
+  // Top volume
   TGeoBBox* optbox = new TGeoBBox("optbox", 2*m, 2*m, 2*m);
   AOpticalComponent* opt = new AOpticalComponent("opt", optbox);
-   
+
   AddLens(opt);
   AddLensRing(opt);
   AddLensFrame(opt);
@@ -99,6 +100,9 @@ void AshraOptics()
 
   TCanvas* can = new TCanvas("can", "", 640+4, 480+28);
   top->Draw("ogl");
+  // Rotate the camera angles in OpenGL View
+  TGLViewer* gl = (TGLViewer*)gPad->GetViewer3D();
+  gl->SetPerspectiveCamera(TGLViewer::kCameraPerspXOZ, 25., 0, 0, -75*TMath::DegToRad(), 210.*TMath::DegToRad());
 
   // Start ray-tracing
 
@@ -137,7 +141,7 @@ void AshraOptics()
 
   const int kN = 22; // 0 to 22 [deg]
   TH2D* hist[kN][3];
-  
+
   TNtuple* nt = new TNtuple("nt", "", "x:y:z");
 
   for(Int_t n=0; n<kN; n++){
@@ -152,10 +156,10 @@ void AshraOptics()
 
     for(Int_t i=0; i<kLambdaN; i++){
       ARayArray* array = ARayShooter::Rectangle(kSpectrum[i][0], 1200*mm, 1200*mm, 20, 20, rayrot, raytr);
-   
+
       manager->TraceNonSequential(*array);
       TObjArray* focused = array->GetFocused();
-      
+
       for(Int_t j=0; j<=focused->GetLast(); j++){
         ARay* ray = (ARay*)(*focused)[j];
         if(!ray) continue;
@@ -249,14 +253,14 @@ void AddMirror(AOpticalComponent* opt)
         cut2[i]->SetVertex(1 + j*4, r_*TMath::Cos(-8.6*deg), r_*TMath::Sin(-8.6*deg));
         cut2[i]->SetVertex(2 + j*4, r_*TMath::Cos(188.6*deg), r_*TMath::Sin(188.6*deg));
         cut2[i]->SetVertex(3 + j*4, r_*TMath::Cos(120*deg), r_*TMath::Sin(120*deg));
-      
+
         cut3[i]->SetVertex(0 + j*4, r_*TMath::Cos(351.4*deg), r_*TMath::Sin(351.4*deg));
         cut3[i]->SetVertex(1 + j*4, 0, r_/r*-10000*mm);
         cut3[i]->SetVertex(2 + j*4, r_*TMath::Cos(188.6*deg), r_*TMath::Sin(188.6*deg));
         cut3[i]->SetVertex(3 + j*4, 0, 0);
       } // j
     } // if
-      
+
     tr[i] = new TGeoTranslation(Form("mir_tr%d", i), 0, 0, R_/2.);
     tr[i]->RegisterYourself();
 
@@ -367,7 +371,7 @@ void AddPipeline(AOpticalComponent* opt)
     -206.943475*mm, 103.056525*mm,
     103.056525*mm, 405.056525*mm,
     479.056525*mm, 703.056525*mm};
-    const Double_t kHaubeRmax[kHaubeN] = {50*mm, 50*mm, 81*mm, 81*mm, 
+    const Double_t kHaubeRmax[kHaubeN] = {50*mm, 50*mm, 81*mm, 81*mm,
     128*mm, 227*mm, 315*mm, 320*mm};
     const Double_t kHaubeRmin[kHaubeN] = { 0*mm,  0*mm,  0*mm, 0*mm,
     0*mm, 0*mm, 0*mm, 319*mm};
@@ -554,7 +558,7 @@ void AddStewart(AOpticalComponent* opt)
   TGeoPgon* pgon1 = new TGeoPgon("st_pgon1", 0, 360, 6, 2);
   pgon1->DefineSection(0, -3.75*mm, 0, 6.5*2/sqrt(3)*mm);
   pgon1->DefineSection(1, 3.75*mm, 0, 6.5*2/sqrt(3)*mm);
-  
+
   // SW-006
   TGeoPgon* pgon2 = new TGeoPgon("st_pgon2", 0, 360, 6, 2);
   pgon2->DefineSection(0, -50*mm, 0, 6.5*2/sqrt(3)*mm);
@@ -770,10 +774,10 @@ void Add30Frame(AOpticalComponent* opt)
   tr10->RegisterYourself();
   TGeoCompositeShape* composite4 = new TGeoCompositeShape("30_cs4", "30_xtru3+30_box1:30_tr9+30_box1:30_tr10");
   AObscuration* F30_001 = new AObscuration("F30_001", composite4);
-  
+
   TGeoRotation* rot4 = new TGeoRotation("30_rot4", 90, 90, 90);
   comp->AddNode(F30_001, 1, new TGeoCombiTrans(0, -2050*mm, -1116*mm, rot1));
-  comp->AddNode(F30_001, 2, new TGeoCombiTrans(0, -2050*mm, 225*mm, rot4));  
+  comp->AddNode(F30_001, 2, new TGeoCombiTrans(0, -2050*mm, 225*mm, rot4));
 
   comp->AddNode(F30_015, 3, new TGeoCombiTrans(0, -362*mm, 1214*mm, rot1));
   comp->AddNode(F30_015, 4, new TGeoCombiTrans(0, -2050*mm, 1214*mm, rot1));
@@ -831,7 +835,7 @@ void Add30Frame(AOpticalComponent* opt)
                     31*mm, -37.5*mm, -37.5*mm, 37.5*mm};
 
   // ASHRA30-0054.dwg ASHRA30-0064.dwg ASHRA30-0121.dwg
-  // ASHRA30-001.dwg ASHRA30-0021.dwg 
+  // ASHRA30-001.dwg ASHRA30-0021.dwg
   // 100x150 and 100x210 plates at the ends of 0054/0056 are not implemented
   TGeoXtru* xtru7 = new TGeoXtru(2);
   xtru7->SetName("30_xtru7");
@@ -877,7 +881,7 @@ void Add30Frame(AOpticalComponent* opt)
   xtru8->DefinePolygon(8, x2, y2);
   xtru8->DefineSection(0, -267.5*mm);
   xtru8->DefineSection(1, 267.5*mm);
-  
+
   TGeoArb8* arb5 = new TGeoArb8("30_arb5", 75*r3/2*mm+1*nm);
   arb5->SetVertex(0, 75*mm+1*nm, 37.5*mm+1*nm);
   arb5->SetVertex(1, 75*mm+1*nm, -37.5*mm-1*nm);
@@ -890,10 +894,10 @@ void Add30Frame(AOpticalComponent* opt)
   TGeoTranslation* tr17 = new TGeoTranslation("30_tr17", 0, 0, (-267.5+75*r3/2)*mm);
   tr17->RegisterYourself();
 
-  TGeoRotation* rot7 = new TGeoRotation("30_rot7", 0, -120, 0);  
+  TGeoRotation* rot7 = new TGeoRotation("30_rot7", 0, -120, 0);
   TGeoCombiTrans* cm6 = new TGeoCombiTrans("30_cm6", 0, (-75+267.5*r3/2+75/2./2.)*mm, (-4.5-267.5/2+75*r3/2/2)*mm-1*nm, rot7);
   cm6->RegisterYourself();
-  
+
   TGeoBBox* box6 = new TGeoBBox("30_box6", 150*mm, 5*mm, 150*mm);
   TGeoTranslation* tr18 = new TGeoTranslation("30_tr18", 0, (37.5+5)*mm+1*nm, (267.5-150)*mm);
   tr18->RegisterYourself();
