@@ -79,7 +79,7 @@ UNITTEST:= $(wildcard unittest/*.py)
 .PHONY:		all clean test doc htmldoc
 
 ifeq ($(ROOTCLING_FOUND),)
-all:		$(LIB)
+all:		$(LIB) $(RMAP)
 else
 all:		$(LIB) $(PCM)
 endif
@@ -134,7 +134,7 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 
 $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.c
 		@echo "Compiling" $<
-		$(CC) $(CCFLAGS) -I$(BINCDIR) -c $< -o $@
+		$(CC) $(CCFLAGS) -I$(BINCDIR) -fPIC -c $< -o $@
 
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
@@ -155,7 +155,7 @@ htmldoc:
 		sh mkhtml.sh
 
 clean:
-		rm -rf $(LIB) $(MODS) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(PCM) $(SRCDIR)/$(PCM)
+		rm -rf $(LIB) $(MODS) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(PCM) $(SRCDIR)/$(PCM) $(RMAP)
 
 test:		all
 		@for script in $(UNITTEST);\
