@@ -32,28 +32,24 @@ ClassImp(AGeoAsphericDisk)
 
 //_____________________________________________________________________________
 AGeoAsphericDisk::AGeoAsphericDisk()
+ : fConic1(0), fConic2(0), fKappa1(1), fKappa2(1),
+   fNPol1(0), fNPol2(0), fK1(0), fK2(0), fSteps(100), fRepeat(4)
 {
   // Default constructor
   SetShapeBit(TGeoShape::kGeoBox);
   SetAsphDimensions(0, 0, 0, 0, 0, 0);
-  SetPolynomials(0, 0, 0, 0);
-
-  SetFineness(100, 4);
+  ComputeBBox();
 }
-
 
 //_____________________________________________________________________________
 AGeoAsphericDisk::AGeoAsphericDisk(Double_t z1, Double_t curve1,
                                    Double_t z2, Double_t curve2,
                                    Double_t rmax, Double_t rmin)
-  : TGeoBBox(0, 0, 0)
+  : TGeoBBox(0, 0, 0), fConic1(0), fConic2(0), fKappa1(1), fKappa2(1),
+    fNPol1(0), fNPol2(0), fK1(0), fK2(0), fSteps(100), fRepeat(4)
 {
   SetShapeBit(TGeoShape::kGeoBox);
   SetAsphDimensions(z1, curve1, z2, curve2, rmax, rmin);
-  SetPolynomials(0, 0, 0, 0);
-
-  SetFineness(100, 4);
-
   ComputeBBox();
 }
 
@@ -62,14 +58,11 @@ AGeoAsphericDisk::AGeoAsphericDisk(const char *name,
                                    Double_t z1, Double_t curve1,
                                    Double_t z2, Double_t curve2,
                                    Double_t rmax, Double_t rmin)
-  : TGeoBBox(name, 0, 0, 0)
+  : TGeoBBox(name, 0, 0, 0), fConic1(0), fConic2(0), fKappa1(1), fKappa2(1),
+    fNPol1(0), fNPol2(0), fK1(0), fK2(0), fSteps(100), fRepeat(4)
 {
   SetShapeBit(TGeoShape::kGeoBox);
   SetAsphDimensions(z1, curve1, z2, curve2, rmax, rmin);
-  SetPolynomials(0, 0, 0, 0);
-
-  SetFineness(100, 4);
-
   ComputeBBox();
 }
 
@@ -83,24 +76,24 @@ AGeoAsphericDisk::~AGeoAsphericDisk()
 //_____________________________________________________________________________
 Double_t AGeoAsphericDisk::CalcdF1dr(Double_t r) const throw(std::exception)
 {
-  // Caculate dF1/dr
-  Double_t p = r*r*fCurve1*fCurve1;
+  // Calculate dF1/dr
+  Double_t p = r*r*fCurve1*fCurve1*fKappa1;
   if(1 - p <= 0) throw std::exception();
-  
+
   Double_t ret = r*fCurve1/sqrt(1 - p);
-  
+
   for(Int_t i = 0; i < fNPol1; i++){
     ret += 2*(i+1)*fK1[i]*TMath::Power(r, 2*(i+1)-1);
   } // i
-  
+
   return ret;
 }
 
 //_____________________________________________________________________________
 Double_t AGeoAsphericDisk::CalcdF2dr(Double_t r) const throw(std::exception)
 {
-  // Caculate dF2/dr
-  Double_t p = r*r*fCurve2*fCurve2;
+  // Calculate dF2/dr
+  Double_t p = r*r*fCurve2*fCurve2*fKappa2;
   if(1 - p <= 0) throw std::exception();
 
   Double_t ret = r*fCurve2/sqrt(1 - p);
@@ -116,10 +109,10 @@ Double_t AGeoAsphericDisk::CalcdF2dr(Double_t r) const throw(std::exception)
 Double_t AGeoAsphericDisk::CalcF1(Double_t r) const throw(std::exception)
 {
   // Calculate z value of surface 1 at given r
-  Double_t p = r*r*fCurve1;
-  if(1 - p*fCurve1 < 0) throw std::exception();
+  Double_t p = r*r*fCurve1*fCurve1*fKappa1;
+  if(1 - p < 0) throw std::exception();
 
-  Double_t ret = fZ1 + p/(1 + sqrt(1 - p*fCurve1));
+  Double_t ret = fZ1 + r*r*fCurve1/(1 + sqrt(1 - p));
 
   for(Int_t i = 0; i < fNPol1; i++){
     ret += fK1[i]*pow(r, 2*(i+1));
@@ -132,10 +125,10 @@ Double_t AGeoAsphericDisk::CalcF1(Double_t r) const throw(std::exception)
 Double_t AGeoAsphericDisk::CalcF2(Double_t r) const throw(std::exception)
 {
   // Calculate z value of surface 1 at given r
-  Double_t p = r*r*fCurve2;
-  if(1 - p*fCurve2 < 0) throw std::exception();
+  Double_t p = r*r*fCurve2*fCurve2*fKappa2;
+  if(1 - p < 0) throw std::exception();
 
-  Double_t ret = fZ2 + p/(1 + sqrt(1 - p*fCurve2));
+  Double_t ret = fZ2 + r*r*fCurve2/(1 + sqrt(1 - p));
 
   for(Int_t i = 0; i < fNPol2; i++){
     ret += fK2[i]*pow(r, 2*(i+1));
@@ -241,7 +234,7 @@ void AGeoAsphericDisk::ComputeNormal(CONST53410 Double_t* point, CONST53410 Doub
 {
   // Compute normal to closest surface from POINT.
 
-  // Following calculation assumes that the point is very close to surfaces. 
+  // Following calculation assumes that the point is very close to surfaces.
 
   Double_t r = sqrt(point[0]*point[0] + point[1]*point[1]);
   Double_t phi = atan2(point[1], point[0]);
@@ -251,7 +244,7 @@ void AGeoAsphericDisk::ComputeNormal(CONST53410 Double_t* point, CONST53410 Doub
   saf[1] = TMath::Abs(r - fRmax);
 
   Double_t f1, f2, df1, df2;
-  try { 
+  try {
     f1 = CalcF1(r);
   } catch (...) {
     f1 = -TGeoShape::Big();
@@ -266,8 +259,8 @@ void AGeoAsphericDisk::ComputeNormal(CONST53410 Double_t* point, CONST53410 Doub
       saf[2] = TGeoShape::Big();
     } // try
   } // if
-  
-  try { 
+
+  try {
     f2 = CalcF2(r);
   } catch (...) {
     f2 = TGeoShape::Big();
@@ -306,7 +299,7 @@ void AGeoAsphericDisk::ComputeNormal(CONST53410 Double_t* point, CONST53410 Doub
 
   TVector3 vec(norm);
   vec.RotateZ(phi);
-  
+
   norm[0] = vec.X();
   norm[1] = vec.Y();
   norm[2] = vec.Z();
@@ -322,7 +315,7 @@ void AGeoAsphericDisk::ComputeNormal(CONST53410 Double_t* point, CONST53410 Doub
 Bool_t AGeoAsphericDisk::Contains(CONST53410 Double_t* point) const
 {
   // Test if point is in this shape
-  
+
   Double_t r = sqrt(point[0]*point[0] + point[1]*point[1]);
   if(r > fRmax or r < fRmin) return kFALSE;
 
@@ -359,21 +352,21 @@ Double_t AGeoAsphericDisk::DistFromInside(CONST53410 Double_t* point, CONST53410
                                           Double_t* safe) const
 {
   // compute distance from inside point to surface of the sphere
-  
+
   // compute safe distance
   if(iact < 3 and safe){
     *safe = Safety(point, kFALSE);
     if (iact==0) return TGeoShape::Big();
     if (iact==1 && step < *safe) return TGeoShape::Big();
   } // if
-  
+
   // calculate distance
   Double_t d[4];
   d[0] = DistToAsphere(1, point, dir);
   d[1] = DistToAsphere(2, point, dir);
-  d[2] = DistToInner(point, dir); 
-  d[3] = DistToOuter(point, dir); 
-  
+  d[2] = DistToInner(point, dir);
+  d[3] = DistToOuter(point, dir);
+
   return d[TMath::LocMin(4, d)];
 }
 
@@ -383,26 +376,26 @@ Double_t AGeoAsphericDisk::DistFromOutside(CONST53410 Double_t* point, CONST5341
                                            Double_t* safe) const
 {
   // compute distance from outside point to surface of the sphere
-  
+
   // Check if the bounding box is crossed within the requested distance
   Double_t point_[3] = {point[0], point[1], point[2] - fOrigin[2]};
   Double_t sdist = TGeoTube::DistFromOutsideS(point_, dir, fRmin, fRmax, fDZ);
   if(sdist >= step) return TGeoShape::Big();
-  
+
   // compute safe distance
   if(iact < 3 and safe){
     *safe = Safety(point, kFALSE);
     if (iact == 0) return TGeoShape::Big();
     if (iact == 1 && step < *safe) return TGeoShape::Big();
   } // if
-  
+
   // calculate distance
   Double_t d[4];
   d[0] = DistToAsphere(1, point, dir);
   d[1] = DistToAsphere(2, point, dir);
-  d[2] = DistToInner(point, dir); 
-  d[3] = DistToOuter(point, dir); 
-  
+  d[2] = DistToInner(point, dir);
+  d[3] = DistToOuter(point, dir);
+
   return d[TMath::LocMin(4, d)];
 }
 
@@ -446,22 +439,22 @@ Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, CONST53410 Double_t* point, CO
       return TGeoShape::Big();
     } // if
     H2 = npoint[0]*npoint[0] + npoint[1]*npoint[1];
-    check = n == 1 ? 1 - H2*fCurve1*fCurve1 : 1 - H2*fCurve2*fCurve2;
+    check = n == 1 ? (1 - fKappa1*H2*fCurve1*fCurve1) : (1 - fKappa2*H2*fCurve2*fCurve2);
     if(check < 0){
       // This is a limitation too
       return TGeoShape::Big();
     } // if
-    
+
     Double_t l = sqrt(check);
 
     Double_t x = 0;
     if(n == 1){
-      if(fCurve1!=0) x += (1 - l)/fCurve1;
+      if(fCurve1 != 0) x += (1 - l)/fCurve1/fKappa1;
       for(Int_t j = 0; j < fNPol1; j++){
         x += fK1[j]*TMath::Power(H2, j + 1);
       } // j
     } else {
-      if(fCurve2 != 0) x += (1 - l)/fCurve2;
+      if(fCurve2 != 0) x += (1 - l)/fCurve2/fKappa2;
       for(int j = 0; j < fNPol2; j++){
         x += fK2[j]*TMath::Power(H2, j + 1);
       } // j
@@ -472,22 +465,26 @@ Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, CONST53410 Double_t* point, CO
       for(int j = 0; j < fNPol1; j++){
         v += 2*(j + 1)*fK1[j]*TMath::Power(H2, j);
       } // i
-      v = fCurve1 + l*v;
+      v = fCurve1*fKappa1 + l*v;
     } else {
       for(Int_t j = 0; j < fNPol2; j++){
-        v += 2*(j+1)*fK2[j]*TMath::Power(H2, j);
+        v += 2*(j + 1)*fK2[j]*TMath::Power(H2, j);
       } // i
-      v = fCurve2 + l*v;
+      v = fCurve2*fKappa2 + l*v;
     } // if
-    
+
     Double_t m = -npoint[0]*v;
     Double_t n = -npoint[1]*v;
+    Double_t norm = TMath::Sqrt(l*l + m*m + n*n);
+    l /= norm;
+    m /= norm;
+    n /= norm;
 
     check = dir[2]*l + dir[0]*m + dir[1]*n;
     if(check == 0){
       return TGeoShape::Big();
     } // if
-    
+
     Double_t e = l*(x - npoint[2])/check;
 
     for(Int_t j = 0; j < 3; j++){
@@ -496,7 +493,7 @@ Double_t AGeoAsphericDisk::DistToAsphere(Int_t n, CONST53410 Double_t* point, CO
 
     if(TMath::Abs(e) < 1e-10) break;
   } // i
-  
+
   npoint[2] += d;
   check = dir[0]*(npoint[0] - point[0]) + dir[1]*(npoint[1] - point[1])
     + dir[2]*(npoint[2] - point[2]);
@@ -572,10 +569,10 @@ Double_t AGeoAsphericDisk::DistToInner(CONST53410 Double_t* point, CONST53410 Do
     if(z2 < zmin or zmax < z2){
       t2 = TGeoShape::Big();
     } // if
-    
+
     return t1 < t2 ? t1 : t2;
   } // if
-    
+
   return TGeoShape::Big();
 }
 
@@ -633,10 +630,10 @@ Double_t AGeoAsphericDisk::DistToOuter(CONST53410 Double_t* point, CONST53410 Do
     if(z2 < zmin or zmax < z2){
       t2 = TGeoShape::Big();
     } // if
-    
+
     return t1 < t2 ? t1 : t2;
   } // if
-    
+
   return TGeoShape::Big();
 }
 
@@ -667,13 +664,13 @@ const TBuffer3D& AGeoAsphericDisk::GetBuffer3D(Int_t reqSections,
   static TBuffer3D buffer(TBuffer3DTypes::kGeneric);
 
   TGeoBBox::FillBuffer3D(buffer, reqSections, localFrame);
-  
+
   if(reqSections & TBuffer3D::kRawSizes){
     Int_t n = gGeoManager->GetNsegments();
     Int_t nbPnts = 2*n*(n + 1); // Number of points
     Int_t nbSegs = 4*n*(n + 1); // Number of segments
     Int_t nbPols = 2*n*(n + 1); // Number of polygons
-    
+
     if(!TestShapeBit(kGeoRSeg)){
       nbPnts = 2*(n*n + 1);
       nbSegs = n*(4*n + 1);
@@ -783,23 +780,23 @@ Double_t AGeoAsphericDisk::Safety(CONST53410 Double_t* point, Bool_t in) const
 
   Double_t rad2 = point[0]*point[0] + point[1]*point[1];
   Double_t rad  = sqrt(rad2);
-  
+
   Double_t dist[4];
-  
+
   if(!in){
     Double_t f1rmax, f1rmin, f2rmax, f2rmin;
     try { f1rmax = CalcF1(fRmax);} catch (...) { f1rmax = -TGeoShape::Big();}
     try { f1rmin = CalcF1(fRmin);} catch (...) { f1rmin = -TGeoShape::Big();}
     try { f2rmax = CalcF2(fRmax);} catch (...) { f2rmax =  TGeoShape::Big();}
     try { f2rmin = CalcF2(fRmin);} catch (...) { f2rmin =  TGeoShape::Big();}
-    
+
     if(rad < fRmin and (f1rmin < point[2] or point[2] < f2rmin)){
       return fRmin - rad;
     } else if(rad > fRmax and (f1rmax < point[2] or point[2] < f2rmax)){
       return rad - fRmax;
     } // if
   } // if
-  
+
   // calc distance between point and lower surface
   Double_t r1 = fRmin;
   Double_t r2 = fRmax;
@@ -825,7 +822,7 @@ Double_t AGeoAsphericDisk::Safety(CONST53410 Double_t* point, Bool_t in) const
     r2 = r_==fRmax ? fRmax : r_ + step;
   } // i
   dist[0] = TMath::Sqrt(dist[0]);
-  
+
   // calc distance between point and upper surface
   r1 = fRmin;
   r2 = fRmax;
@@ -852,7 +849,7 @@ Double_t AGeoAsphericDisk::Safety(CONST53410 Double_t* point, Bool_t in) const
   } // i
   dist[1] = sqrt(dist[1]);
 
-  if(in){  
+  if(in){
     dist[2] = rad - fRmin; // distance to rmin
     dist[3] = fRmax - rad; // distance to rmax
 
@@ -876,8 +873,10 @@ void AGeoAsphericDisk::SavePrimitive(std::ostream& out, Option_t* )
   out << "   // Shape: " << GetName() << " type: " << ClassName() << std::endl;
   out << "   rmin   = " << fRmin << ";" << std::endl;
   out << "   rmax   = " << fRmax << ";" << std::endl;
-  out << "   curve1 = " << fCurve1<< ";" << std::endl;
+  out << "   curve1 = " << fCurve1 << ";" << std::endl;
   out << "   curve2 = " << fCurve2 << ";" << std::endl;
+  out << "   conic1 = " << fConic1 << ";" << std::endl;
+  out << "   conic2 = " << fConic2 << ";" << std::endl;
   out << "   z1     = " << fZ1 << ";" << std::endl;
   out << "   z2     = " << fZ2 << ";" << std::endl;
   out << "   AGeoAsphericDisk* asph = new AGeoAsphericDisk(\"" << GetName() << "\",z1, curve1, z2, curve2, rmax, rmin);" << std::endl;
@@ -903,6 +902,7 @@ void AGeoAsphericDisk::SavePrimitive(std::ostream& out, Option_t* )
   } else if(fNPol1 > 0 and fNPol2 == 0){
     out << "asph->SetPolynomials(" << fNPol1 << ", k1, " << fNPol2 << ", 0);" << std::endl;
   } // if
+  out << "asph->SetConicConstants(conic1, conic2);" << std::endl;
   out << "   TGeoShape* " << GetPointerName() << " = asph;" << std::endl;
   TObject::SetBit(TGeoShape::kGeoSavePrimitive);
 }
@@ -922,7 +922,7 @@ void AGeoAsphericDisk::SetAsphDimensions(Double_t z1, Double_t curve1,
     fZ2 = z1;
     fCurve1 = curve2;
     fCurve2 = curve1;
-  } // if    
+  } // if
 
   if(rmax < 0) rmax *= -1;
   if(rmin < 0) rmin *= -1;
@@ -942,6 +942,16 @@ void AGeoAsphericDisk::SetAsphDimensions(Double_t z1, Double_t curve1,
   fNPol2 = 0;
   fK1 = 0;
   fK2 = 0;
+}
+
+//_____________________________________________________________________________
+void AGeoAsphericDisk::SetConicConstants(Double_t conic1, Double_t conic2)
+{
+  fConic1 = conic1;
+  fConic2 = conic2;
+  fKappa1 = fConic1 + 1;
+  fKappa2 = fConic2 + 1;
+  ComputeBBox();
 }
 
 //_____________________________________________________________________________
@@ -1128,13 +1138,13 @@ void AGeoAsphericDisk::SetPolynomials(Int_t n1, const Double_t* k1,
   fNPol2 = n2;
 
   if(fNPol1 > 0){
-    fK1 = new Double_t[n1];
-    for(Int_t i = 0; i < n1; i++) fK1[i] = k1[i];
+    fK1 = new Double_t[fNPol1];
+    for(Int_t i = 0; i < fNPol1; i++) fK1[i] = k1[i];
   } // if
 
   if(fNPol2 > 0){
-    fK2 = new Double_t[n2];
-    for(Int_t i = 0; i < n2; i++) fK2[i] = k2[i];
+    fK2 = new Double_t[fNPol2];
+    for(Int_t i = 0; i < fNPol2; i++) fK2[i] = k2[i];
   } // if
 
   ComputeBBox();

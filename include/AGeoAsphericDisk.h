@@ -33,6 +33,10 @@ protected:
   Double_t  fZ2;     // Z of the center of surface 2 (upper)
   Double_t  fCurve1; // Curvature of surface 1 (=1/R1)
   Double_t  fCurve2; // Curvature of surface 2 (=1/R2)
+  Double_t  fConic1; // Conic constant of surface 1
+  Double_t  fConic2; // Conic constant of surface 2
+  Double_t  fKappa1; // conic1 + 1
+  Double_t  fKappa2; // conic2 + 1
   Double_t  fRmin;   // inner radius
   Double_t  fRmax;   // outer radius
   Int_t     fNPol1;  // Order of polynomial of surface 1 (=Nmax/2)
@@ -102,6 +106,7 @@ public:
                                         Double_t x2, Double_t curve2,
                                         Double_t rmax, Double_t rmin);
   virtual void        SetDimensions(Double_t* param);
+  virtual void        SetConicConstants(Double_t conic1, Double_t conic2);
   virtual void        SetPoints(Double_t* points) const;
   virtual void        SetPoints(Float_t* points) const;
   virtual void        SetPolynomials(Int_t n1, const Double_t* k1, Int_t n2, const Double_t* k2);
