@@ -37,7 +37,7 @@
 #include "TNtuple.h"
 
 #include "TCanvas.h"
-#include "TGLView.h"
+#include "TGLViewer.h"
 #include "TH2D.h"
 #include "TMath.h"
 #include "TStyle.h"
