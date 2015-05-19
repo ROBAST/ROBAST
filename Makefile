@@ -14,11 +14,11 @@
 # checked here 
 
 # older version
-MAKEARCH	:=	$(shell find $(ROOTSYS)/test -name Makefile.arch)
+MAKEARCH	:=	$(shell find -L $(ROOTSYS)/test -name Makefile.arch)
 
 ifeq ($(MAKEARCH), )
 # 41594 or later
-MAKEARCH	:=	$(shell find $(ROOTSYS)/etc -name Makefile.arch)
+MAKEARCH	:=	$(shell find -L $(ROOTSYS)/etc -name Makefile.arch)
 endif
 
 ifeq ($(MAKEARCH), )
