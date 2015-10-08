@@ -66,7 +66,8 @@ void Add30Frame(AOpticalComponent* opt);
 void AshraOptics()
 {
   AOpticsManager* manager = new AOpticsManager("manager", "Ashra Optics");
-  manager->SetNsegments(100);
+  manager->DisableFresnelReflection(kTRUE);
+  manager->SetNsegments(50);
   // Make the world
   TGeoBBox* box1 = new TGeoBBox("box1", 2*m, 2*m, 2*m);
   AOpticalComponent *top = new AOpticalComponent("top", box1);
@@ -100,9 +101,6 @@ void AshraOptics()
 
   TCanvas* can = new TCanvas("can", "", 640+4, 480+28);
   top->Draw("ogl");
-  // Rotate the camera angles in OpenGL View
-  TGLViewer* gl = (TGLViewer*)gPad->GetViewer3D();
-  gl->SetPerspectiveCamera(TGLViewer::kCameraPerspXOZ, 25., 0, 0, -75*TMath::DegToRad(), 210.*TMath::DegToRad());
 
   // Start ray-tracing
 
@@ -167,6 +165,13 @@ void AshraOptics()
         ray->GetLastPoint(p);
         ray->SetLineWidth(1);
 
+        if(n == 0 && i == 0 && j%3 == 0){
+          TPolyLine3D* pol = ray->MakePolyLine3D();
+          pol->SetLineColor(2);
+          pol->SetLineWidth(2);
+          pol->Draw();
+        } // if
+
         Double_t y = kInputR[0]*TMath::Sin(n*TMath::Pi()/180);
         hist[n][0]->Fill(p[1]/mm, p[2]/mm - y/mm);
         hist[n][1]->Fill(p[1]/mm, p[2]/mm - y/mm, kSpectrum[i][1]);
@@ -180,6 +185,11 @@ void AshraOptics()
     delete raytr;
     delete rayrot;
   } // n
+
+  // Rotate the camera angles in OpenGL View
+  can->Update();
+  TGLViewer* gl = (TGLViewer*)can->GetViewer3D();
+  gl->SetPerspectiveCamera(TGLViewer::kCameraPerspXOZ, 25., 0, 0, -75*TMath::DegToRad(), 210.*TMath::DegToRad());
 
   TCanvas* can2 = new TCanvas("can2", "", 600+4, 600+28);
   can2->Divide(5, 5);
