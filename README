@@ -11,10 +11,17 @@ The advantages of using ROBAST are
 - Direct analysis of simulation results in ROOT
 
 For more details, read the following papers.
-[1] A. Okumura et al. (2011) "Development of Non-sequential Ray-tracing Software for Cosmic-ray Telescopes"
-    http://arxiv.org/abs/1110.4448
-[2] A. Okumura (2012) "Optimization of the Collection Efficiency of a Hexagonal Light Collector using Quadratic and Cubic B�zier Curves"
+[1] A. Okumura, K. Noda, C. Rulten "ROBAST: Development of a ROOT-Based Ray-Tracing Library for Cosmic-Ray Telescopes and its Applications in the Cherenkov Telescope Array"
+    Submitted to Astroparticle Physics (2015)
+[2] A. Okumura, K. Noda, C. Rulten "ROBAST: Development of a Non-Sequential Ray-Tracing Simulation Library and its Applications in the Cherenkov Telescope Array"
+    In Proceedings of the 34th International Cosmic Ray Conference (ICRC2015) (2015)
+    http://arxiv.org/abs/1508.07803
+[3] A. Okumura "Optimization of the Collection Efficiency of a Hexagonal Light Collector using Quadratic and Cubic Bézier Curves"
+    Astroparticle Physics 38, 18–24 (2012)
     http://arxiv.org/abs/1205.3968
+[4] A. Okumura et al. "Development of Non-sequential Ray-tracing Software for Cosmic-ray Telescopes"
+    In Proceedings of the 32nd International Cosmic Ray Conference (ICRC2011) (2011)
+    http://arxiv.org/abs/1110.4448
 
 2. Author
 Akira Okumura (Solar-Terrestrial Environment Laboratory, Nagoya University)
@@ -24,20 +31,20 @@ oxon@mac.com
 LGPL
 
 4. Install
-$ tar zxvf robast_1.0.0.tgz
-$ cd robast_1.0.0
+$ tar zxvf robast_v2.3p1.tgz
+$ cd robast_v2.3p1
 $ make
 $ export LD_LIBRARY_PATH=PATH_TO_YOUR_ROBAST_DIRECTORY:$LD_LIBRARY_PATH
 
 Adding the following line in your $HOME/.rootlogon.C will be useful.
 gInterpreter->AddIncludePath("PATH_TO_YOUR_ROBAST_DIRECTORY/include");
 
-If you would like to read HTML document, generate it yourself.
+If you would like to read HTML documentation, generate it yourself.
 $ make htmldoc
 
 5. Tutorials
 Try e.g.
-$ cd robast_1.0.0/tutorial
+$ cd robast_v2.3p1/tutorial
 $ root
 root [0] .x SC.C
 
@@ -46,3 +53,6 @@ You will see some plots and beautiful 3D images
 - SC.C
 Schwarzschild-Couder optical system for AGIS proposed in
 Vassiliev, et al. (2007) Astropart. Phys. 28 10-27
+
+6. FAQ
+6.1 Build errors
