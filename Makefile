@@ -22,6 +22,7 @@ MAKEARCH	:=	$(shell find -L $(ROOTSYS)/etc -name Makefile.arch)
 endif
 
 ifeq ($(MAKEARCH), )
+RC := root-config
 MAKEARCH	:=	$(wildcard $(shell $(RC) --etcdir)/Makefile.arch)
 endif
 
