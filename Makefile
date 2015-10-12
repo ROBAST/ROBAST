@@ -14,32 +14,20 @@
 # checked here 
 
 # older version
-MAKEARCH	:=	$(shell find -L $(ROOTSYS)/test -name Makefile.arch)
+MAKEARCH	:=	$(shell find $(ROOTSYS)/test -name Makefile.arch)
 
 ifeq ($(MAKEARCH), )
 # 41594 or later
-MAKEARCH	:=	$(shell find -L $(ROOTSYS)/etc -name Makefile.arch)
-endif
-
-ifeq ($(MAKEARCH), )
-RC := root-config
-MAKEARCH	:=	$(wildcard $(shell $(RC) --etcdir)/Makefile.arch)
+MAKEARCH	:=	$(shell find $(ROOTSYS)/etc -name Makefile.arch)
 endif
 
 include $(MAKEARCH)
-
-ifeq ($(ROOTCLING),)
-ROOTCLING	:=	$(ROOTCINT)
-else
-ROOTCLING_FOUND	:= 1
-endif
 
 NAME	:=	ROBAST
 DEPEND	:=	libCore libGeom libGeomPainter libPhysics libGraf libGraf3d
 
 SRCDIR	:=	src
 INCDIR	:=	include
-BINCDIR	:=	$(INCDIR)/bernlohr
 
 DICT	:=	$(NAME)Dict
 DICTS	:=	$(SRCDIR)/$(NAME)Dict.$(SrcSuf)
@@ -49,22 +37,8 @@ DICTO	:=	$(SRCDIR)/$(NAME)Dict.$(ObjSuf)
 INCS	:=	$(filter-out $(INCDIR)/LinkDef.h,$(wildcard $(INCDIR)/*.h))
 SRCS	:=	$(filter-out $(SRCDIR)/$(DICT).%,$(wildcard $(SRCDIR)/*.$(SrcSuf)))
 OBJS	:=	$(patsubst %.$(SrcSuf),%.$(ObjSuf),$(SRCS)) $(DICTO)
-PCM	:=	$(NAME)Dict_rdict.pcm
-
-ORG1	:=	$(SRCDIR)/bernlohr/fileopen.c
-ORG2	:=	$(SRCDIR)/bernlohr/io_simtel.c
-ORG3	:=	$(SRCDIR)/bernlohr/warning.c
-ORGS	:=	$(ORG1) $(ORG2) $(ORG3)
-MOD1	:=	$(patsubst %.c,%_mod.c,$(ORG1))
-MOD2	:=	$(patsubst %.c,%_mod.c,$(ORG2))
-MOD3	:=	$(patsubst %.c,%_mod.c,$(ORG3))
-MODS	:=	$(MOD1) $(MOD2) $(MOD3)
-BSRCS	:=	$(filter-out $(ORGS),$(wildcard $(SRCDIR)/bernlohr/*.c)) $(MODS)
-BOBJS	:=	$(patsubst %.c,%.$(ObjSuf),$(BSRCS))
 
 LIB	=	lib$(NAME).$(DllSuf)
-
-CXXFLAGS	+= $(ROBASTFLAGS)
 
 #CXXFLAGS	+= -fopenmp
 ifneq ($(EXPLLINKLIBS), )
@@ -79,29 +53,9 @@ UNITTEST:= $(wildcard unittest/*.py)
 .SUFFIXES:	.$(SrcSuf) .$(ObjSuf) .$(DllSuf)
 .PHONY:		all clean test doc htmldoc
 
-ifeq ($(ROOTCLING_FOUND),)
-all:		$(LIB) $(RMAP)
-else
-all:		$(LIB) $(PCM)
-endif
+all:		$(RMAP)
 
-$(MOD1): $(ORG1)
-		sed -e 's/s = malloc(/s = (char\*)malloc(/g' $< | \
-		sed -e 's/root_path = calloc(/root_path = (struct incpath\*)calloc(/g' | \
-		sed -e 's/last->next = calloc(/last->next = (struct incpath\*)calloc(/g' | \
-		sed -e 's/s = strchr(fname/s = (char\*)strchr(fname/g' > $@
-
-$(MOD2): $(ORG2)
-		sed -e 's/xl->text = malloc(/xl->text = (char\*)malloc(/g' $< | \
-		sed -e 's/xln->text = malloc(/xln->text = (char\*)malloc(/g' | \
-		sed -e 's/ep->iparam = calloc(/ep->iparam = (int\*)calloc(/g' | \
-		sed -e 's/ep->fparam = calloc(/ep->fparam = (int\*)calloc(/g' | \
-		sed -e 's/xln = calloc(/xln = (struct linked_string\*)calloc(/g' > $@
-
-$(MOD3): $(ORG3)
-		sed -e 's/struct warn_specific_data \*wt = get_warn_specific();/struct warn_specific_data \*wt = (struct warn_specific_data\*)get_warn_specific();/g' $< > $@
-
-$(LIB):		$(OBJS) $(BOBJS)
+$(LIB):		$(OBJS)
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
 		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
@@ -133,16 +87,9 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.$(SrcSuf) $(INCDIR)/%.h
 		@echo "Compiling" $<
 		$(CXX) $(CXXFLAGS) -Wall -g -I$(INCDIR) -c $< -o $@
 
-$(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.c
-		@echo "Compiling" $<
-		$(CC) $(CCFLAGS) -I$(BINCDIR) -fPIC -c $< -o $@
-
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
-		$(ROOTCLING) -f $@ -c -p $^
-
-$(PCM):		$(SRCDIR)/$(PCM)
-		cp $^ $@
+		$(ROOTCINT) -f $@ -c -p $^
 
 $(DICTO):	$(DICTS)
 		@echo "Compiling" $<
@@ -156,7 +103,7 @@ htmldoc:
 		sh mkhtml.sh
 
 clean:
-		rm -rf $(LIB) $(MODS) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(PCM) $(SRCDIR)/$(PCM) $(RMAP)
+		rm -rf $(LIB) $(OBJS) $(DICTI) $(DICTS) $(DICTO) $(RMAP)
 
 test:		all
 		@for script in $(UNITTEST);\

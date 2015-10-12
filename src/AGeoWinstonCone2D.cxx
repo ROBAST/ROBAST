@@ -126,7 +126,7 @@ void AGeoWinstonCone2D::ComputeBBox()
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonCone2D::ComputeNormal(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+void AGeoWinstonCone2D::ComputeNormal(Double_t* point, Double_t* dir,
                                       Double_t* norm)
 {
   // Compute normal to closest surface from POINT.
@@ -181,7 +181,7 @@ void AGeoWinstonCone2D::ComputeNormal(CONST53410 Double_t* point, CONST53410 Dou
 }
 
 //_____________________________________________________________________________
-Bool_t AGeoWinstonCone2D::Contains(CONST53410 Double_t* point) const
+Bool_t AGeoWinstonCone2D::Contains(Double_t* point) const
 {
   // Test if point is in this shape
   Double_t x = point[0];
@@ -211,7 +211,7 @@ Int_t AGeoWinstonCone2D::DistancetoPrimitive(Int_t px, Int_t py)
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistFromInside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+Double_t AGeoWinstonCone2D::DistFromInside(Double_t* point, Double_t* dir,
                                            Int_t iact, Double_t step,
                                            Double_t* safe) const
 {
@@ -223,7 +223,7 @@ Double_t AGeoWinstonCone2D::DistFromInside(CONST53410 Double_t* point, CONST5341
     if (iact==0) return TGeoShape::Big();
     if (iact==1 && step < *safe) return TGeoShape::Big();
   } // if
-
+  
   // calculate distance
   Double_t dz = TGeoShape::Big();
   if(dir[2] < 0){
@@ -249,7 +249,7 @@ Double_t AGeoWinstonCone2D::DistFromInside(CONST53410 Double_t* point, CONST5341
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistFromOutside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+Double_t AGeoWinstonCone2D::DistFromOutside(Double_t* point, Double_t* dir,
                                             Int_t iact, Double_t step,
                                             Double_t* safe) const
 {
@@ -333,7 +333,7 @@ Double_t AGeoWinstonCone2D::DistFromOutside(CONST53410 Double_t* point, CONST534
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::DistToParabola(CONST53410 Double_t* point, CONST53410 Double_t* dir, Double_t phi, Double_t open) const
+Double_t AGeoWinstonCone2D::DistToParabola(Double_t* point, Double_t* dir, Double_t phi, Double_t open) const
 {
   Double_t x = TMath::Cos(phi)*point[0] + TMath::Sin(phi)*point[1];
   Double_t y =-TMath::Sin(phi)*point[0] + TMath::Cos(phi)*point[1];
@@ -363,14 +363,8 @@ Double_t AGeoWinstonCone2D::DistToParabola(CONST53410 Double_t* point, CONST5341
     dist[0] = TGeoShape::Big();
     dist[1] = TGeoShape::Big();
   } else {
-    Double_t X_cross_p, X_cross_m;
-    if(fDZ*2/TMath::Abs(tanA) < TGeoShape::Tolerance()){ // direction is almost parallel to Z axis
-      X_cross_p = X;
-      X_cross_m = X;
-    } else {
-      X_cross_p = 2*fF*(tanA + TMath::Sqrt(tmp));
-      X_cross_m = 2*fF*(tanA - TMath::Sqrt(tmp));
-    } // if
+    Double_t X_cross_p = 2*fF*(tanA + TMath::Sqrt(tmp));
+    Double_t X_cross_m = 2*fF*(tanA - TMath::Sqrt(tmp));
     Double_t Z_cross_p = X_cross_p*X_cross_p/4./fF;
     Double_t Z_cross_m = X_cross_m*X_cross_m/4./fF;
 
@@ -458,7 +452,7 @@ const TBuffer3D& AGeoWinstonCone2D::GetBuffer3D(Int_t reqSections,
   static TBuffer3D buffer(TBuffer3DTypes::kGeneric);
 
   TGeoBBox::FillBuffer3D(buffer, reqSections, localFrame);
-
+  
   if(reqSections & TBuffer3D::kRawSizes){
     Int_t n = gGeoManager->GetNsegments();
     Int_t nbPnts = 4*(n + 1); // Number of points
@@ -534,25 +528,25 @@ TBuffer3D* AGeoWinstonCone2D::MakeBuffer3D() const
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::Safety(CONST53410 Double_t*, Bool_t) const
+Double_t AGeoWinstonCone2D::Safety(Double_t* point, Bool_t in) const
 {
   // Not implemented yet. But keep this as is.
   return TGeoShape::Big();
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonCone2D::SavePrimitive(std::ostream& out, Option_t* )
+void AGeoWinstonCone2D::SavePrimitive(ostream& out, Option_t* )
 {
   // Save a primitive as a C++ statement(s) on output stream "out".
   if (TObject::TestBit(kGeoSavePrimitive)) return;
 
-  out << "   // Shape: " << GetName() << " type: " << ClassName() << std::endl;
-  out << "   r1 = " << fR1 << ";" << std::endl;
-  out << "   r2 = " << fR2 << ";" << std::endl;
-  out << "   dy = " << fDY << ";" << std::endl;
-  out << "   AGeoWinstonCone2D* cone = new AGeoWinstonCone2D(\"" << GetName() << "\", r1, r2, dy);" << std::endl;
+  out << "   // Shape: " << GetName() << " type: " << ClassName() << endl;
+  out << "   r1 = " << fR1 << ";" << endl;
+  out << "   r2 = " << fR2 << ";" << endl;
+  out << "   dy = " << fDY << ";" << endl;
+  out << "   AGeoWinstonCone2D* cone = new AGeoWinstonCone2D(\"" << GetName() << "\", r1, r2, dy);" << endl;
 
-  out << "   TGeoShape* " << GetPointerName() << " = cone;" << std::endl;
+  out << "   TGeoShape* " << GetPointerName() << " = cone;" << endl;
   TObject::SetBit(TGeoShape::kGeoSavePrimitive);
 }
 

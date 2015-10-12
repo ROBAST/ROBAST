@@ -1,3 +1,6 @@
+// $Id: ARefractiveIndex.h 3 2010-11-26 17:17:31Z oxon $
+// Author: Akira Okumura 2007/09/24
+
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -18,22 +21,29 @@
 #ifndef ROOT_TObject
 #include "TObject.h"
 #endif
-
-class AOpticalComponent;
+#ifndef ROOT_TObjArray
+#include "TObjArray.h"
+#endif
+#ifndef ROOT_TGeoVolume
+#include "TGeoVolume.h"
+#endif
 
 class ABorderSurfaceCondition : public TObject {
 private:
-  AOpticalComponent* fComponent[2];
-  Double_t           fSigma;
+  static TObjArray fSurfaceArray;
+  TGeoVolume*      fVolume[2];
+  Double_t         fSigma;
 
 public:
-  ABorderSurfaceCondition(AOpticalComponent* component1, AOpticalComponent* component2);
+  ABorderSurfaceCondition(TGeoVolume* volume1, TGeoVolume* volume2);
   virtual ~ABorderSurfaceCondition();
 
-  const AOpticalComponent* GetComponent1() const {return fComponent[0];}
-  const AOpticalComponent* GetComponent2() const {return fComponent[1];}
-  Double_t                 GetGaussianRoughness() const {return fSigma;}
-  void                     SetGaussianRoughness(Double_t sigma /* (rad) */);
+  const TGeoVolume* GetVolume1() const {return fVolume[0];}
+  const TGeoVolume* GetVolume2() const {return fVolume[1];}
+  Double_t          GetGaussianRoughness() const {return fSigma;}
+  static ABorderSurfaceCondition* GetSurfaceCondition(TGeoVolume* volume1, TGeoVolume* volume2);
+
+  void              SetGaussianRoughness(Double_t sigma /* (rad) */);
 
   ClassDef(ABorderSurfaceCondition, 1)
 };

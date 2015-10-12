@@ -1,3 +1,6 @@
+// $Id: AOpticalComponent.h 3 2010-11-26 17:17:31Z oxon $
+// Author: Akira Okumura 2007/09/24
+
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -14,21 +17,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#ifndef ROOT_TGeoVolume
 #include "TGeoVolume.h"
-#include "TObjArray.h"
-#include "ABorderSurfaceCondition.h"
+#endif
 
 class AOpticalComponent : public TGeoVolume {
  private:
-  TObjArray* fSurfaceArray;
 
  public:
   AOpticalComponent();
   AOpticalComponent(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
   virtual ~AOpticalComponent();
-
-  void AddSurfaceCondition(ABorderSurfaceCondition* condition);
-  ABorderSurfaceCondition* FindSurfaceCondition(AOpticalComponent* component2);
 
   ClassDef(AOpticalComponent, 1)
 };

@@ -72,7 +72,7 @@ void AGeoWinstonConePoly::ComputeBBox()
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonConePoly::ComputeNormal(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+void AGeoWinstonConePoly::ComputeNormal(Double_t* point, Double_t* dir,
                                         Double_t* norm)
 {
   // Compute normal to closest surface from POINT.
@@ -128,7 +128,7 @@ void AGeoWinstonConePoly::ComputeNormal(CONST53410 Double_t* point, CONST53410 D
 }
 
 //_____________________________________________________________________________
-Bool_t AGeoWinstonConePoly::Contains(CONST53410 Double_t* point) const
+Bool_t AGeoWinstonConePoly::Contains(Double_t* point) const
 {
   // Test if point is in this shape
   Double_t x = point[0];
@@ -155,7 +155,7 @@ Int_t AGeoWinstonConePoly::DistancetoPrimitive(Int_t px, Int_t py)
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonConePoly::DistFromInside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+Double_t AGeoWinstonConePoly::DistFromInside(Double_t* point, Double_t* dir,
                                              Int_t iact, Double_t step,
                                              Double_t* safe) const
 {
@@ -185,9 +185,9 @@ Double_t AGeoWinstonConePoly::DistFromInside(CONST53410 Double_t* point, CONST53
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonConePoly::DistFromOutside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
-                                              Int_t iact, Double_t step,
-                                              Double_t* safe) const
+Double_t AGeoWinstonConePoly::DistFromOutside(Double_t* point, Double_t* dir,
+                                            Int_t iact, Double_t step,
+                                            Double_t* safe) const
 {
   // compute distance from outside point to surface of the sphere
 
@@ -345,18 +345,18 @@ TBuffer3D* AGeoWinstonConePoly::MakeBuffer3D() const
 }
 
 //_____________________________________________________________________________
-void AGeoWinstonConePoly::SavePrimitive(std::ostream& out, Option_t* )
+void AGeoWinstonConePoly::SavePrimitive(ostream& out, Option_t* )
 {
   // Save a primitive as a C++ statement(s) on output stream "out".
   if (TObject::TestBit(kGeoSavePrimitive)) return;
 
-  out << "   // Shape: " << GetName() << " type: " << ClassName() << std::endl;
-  out << "   r1 = " << fR1 << ";" << std::endl;
-  out << "   r2 = " << fR2 << ";" << std::endl;
-  out << "   n  = " << fPolyN << ";" << std::endl;
-  out << "   AGeoWinstonConePoly* cone = new AGeoWinstonConePoly(\"" << GetName() << "\", r1, r2, n);" << std::endl;
+  out << "   // Shape: " << GetName() << " type: " << ClassName() << endl;
+  out << "   r1 = " << fR1 << ";" << endl;
+  out << "   r2 = " << fR2 << ";" << endl;
+  out << "   n  = " << fPolyN << ";" << endl;
+  out << "   AGeoWinstonConePoly* cone = new AGeoWinstonConePoly(\"" << GetName() << "\", r1, r2, n);" << endl;
 
-  out << "   TGeoShape* " << GetPointerName() << " = cone;" << std::endl;
+  out << "   TGeoShape* " << GetPointerName() << " = cone;" << endl;
   TObject::SetBit(TGeoShape::kGeoSavePrimitive);
 }
 
@@ -401,72 +401,69 @@ void AGeoWinstonConePoly::SetDimensions(Double_t* param)
 void AGeoWinstonConePoly::SetPoints(Double_t* points) const
 {
   // create mesh points
-  if(!points){
-    return;
-  } // if
-
   Int_t n = gGeoManager->GetNsegments();
 
-  Int_t index = 0;
-  for(int i = 0; i <= n; i++){
-    // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
-    Double_t t = 2.*fDZ*i/n;
-    Double_t z = -fDZ + t;
-    Double_t r = CalcR(z)/TMath::Cos(TMath::Pi()/fPolyN);
+  if(points){
+    for(int i = 0; i <= n; i++){
+      // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
+      Double_t t = 2.*fDZ*i/n;
+      Double_t z = -fDZ + t;
+      Double_t r = CalcR(z)/TMath::Cos(TMath::Pi()/fPolyN);
 
-    for(Int_t j = 0; j < fPolyN; j++){
-      Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
-      Double_t x = r*TMath::Cos(theta);
-      Double_t y = r*TMath::Sin(theta);
-      points[index++] = x;
-      points[index++] = y;
-      points[index++] = z;
-    } // j
-  } // i
+      for(Int_t j = 0; j < fPolyN; j++){
+        Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
+        Double_t x = r*TMath::Cos(theta);
+        Double_t y = r*TMath::Sin(theta);
+        Int_t index = (i*fPolyN + j)*3;
+        points[index    ] = x;
+        points[index + 1] = y;
+        points[index + 2] = z;
+      } // j
+    } // i
 
-  points[index++] = 0;
-  points[index++] = 0;
-  points[index++] = -fDZ;
+    Int_t index = (n + 1)*fPolyN*3;
+    points[index + 0] = 0;
+    points[index + 1] = 0;
+    points[index + 2] = -fDZ;
 
-  points[index++] = 0;
-  points[index++] = 0;
-  points[index++] = fDZ;
+    points[index + 3] = 0;
+    points[index + 4] = 0;
+    points[index + 5] = fDZ;
+  } // if
 }
 
 //_____________________________________________________________________________
 void AGeoWinstonConePoly::SetPoints(Float_t* points) const
 {
   // create mesh points
-  if(!points){
-    return;
-  } // if
-
   Int_t n = gGeoManager->GetNsegments();
 
-  Int_t index = 0;
-  for(int i = 0; i <= n; i++){
-    // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
-    Double_t t = 2.*fDZ*i/n;
-    Double_t z = -fDZ + t;
-    Double_t r = CalcR(z)/TMath::Cos(TMath::TwoPi()/fPolyN);;
+  if(points){
+    Int_t index = 0;
+    for(int i = 0; i <= n; i++){
+      // see http://cherenkov.physics.iastate.edu/research/LightconeStudies-collector_optimization.pdf
+      Double_t t = 2.*fDZ*i/n;
+      Double_t z = -fDZ + t;
+      Double_t r = CalcR(z)/TMath::Cos(TMath::TwoPi()/fPolyN);;
 
-    for(Int_t j = 0; j < fPolyN; j++){
-      Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
-      Double_t x = r*TMath::Cos(theta);
-      Double_t y = r*TMath::Sin(theta);
-      points[index++] = x;
-      points[index++] = y;
-      points[index++] = z;
-    } // j
-  } // i
+      for(Int_t j = 0; j < fPolyN; j++){
+        Double_t theta = (j + 0.5)*TMath::TwoPi()/fPolyN;
+        Double_t x = r*TMath::Cos(theta);
+        Double_t y = r*TMath::Sin(theta);
+        points[index++] = x;
+        points[index++] = y;
+        points[index++] = z;
+      } // j
+    } // i
 
-  points[index++] = 0;
-  points[index++] = 0;
-  points[index++] = -fDZ;
+    points[index++] = 0;
+    points[index++] = 0;
+    points[index++] = -fDZ;
 
-  points[index++] = 0;
-  points[index++] = 0;
-  points[index++] = fDZ;
+    points[index++] = 0;
+    points[index++] = 0;
+    points[index++] = fDZ;
+  } // if
 }
 
 //_____________________________________________________________________________
@@ -480,7 +477,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
   // segments
   Int_t index = 0;
   for(Int_t i = 0; i < n; i++){
-    // segments on parabola�
+    // segments on parabola
     for(Int_t j = 0; j < fPolyN; j++){
       buff.fSegs[index++] = c;
       buff.fSegs[index++] = fPolyN*i + j;
@@ -513,10 +510,10 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
   index = 0;
   for(Int_t i = 0; i < n; i++){
     for(Int_t j = 0; j < fPolyN; j++){
-      // polygon on parabola
+    // polygon on parabola
       buff.fPols[index++] = c;
       buff.fPols[index++] = 4;
-      buff.fPols[index++] = fPolyN*i + j; // this is a segment number
+      buff.fPols[index++] = j == fPolyN*i + j;
       buff.fPols[index++] = fPolyN*n + fPolyN*i + j + fPolyN;
       buff.fPols[index++] = j == (fPolyN - 1) ? fPolyN*i : fPolyN*i + j + 1;
       buff.fPols[index++] = fPolyN*n + fPolyN*i + j;
@@ -528,7 +525,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
     buff.fPols[index++] = c;
     buff.fPols[index++] = 3;
     buff.fPols[index++] = fPolyN*n + i;
-    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 1) + i + 1 - fPolyN : fPolyN*(2*n + 1) + i + 1;
+    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 1) + i + 1 - fPolyN: fPolyN*(2*n + 1) + i + 1;
     buff.fPols[index++] = fPolyN*(2*n + 1) + i;
   } // i
 
@@ -538,7 +535,7 @@ void AGeoWinstonConePoly::SetSegsAndPols(TBuffer3D& buff) const
     buff.fPols[index++] = 3;
     buff.fPols[index++] = fPolyN*2*n + i;
     buff.fPols[index++] = fPolyN*(2*n + 2) + i;
-    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 2) + i + 1 - fPolyN : fPolyN*(2*n + 2) + i + 1;
+    buff.fPols[index++] = i == (fPolyN - 1) ? fPolyN*(2*n + 2) + i + 1 - fPolyN: fPolyN*(2*n + 2) + i + 1;
   } // i
 }
 

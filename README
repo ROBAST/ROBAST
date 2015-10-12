@@ -1,58 +1,42 @@
-ROot-BAsed Simulator for ray Tracing (ROBAST)
+$Id$
+ROBAST (ROot-BAsed Simulator for ray Tracing)
 
 1. About
-ROBAST is a non-sequential ray-tracing simulator program which is based on the ROOT framework. ROBAST fully utilizes its 3D geometry library to offer several functionalities required for ray-tracing simulations of cosmic-ray telescopes. 
+ROBAST is a non-sequential ray trace program which utilizes ROOT's 3D geometry library. Since the ROOT library includes most of functions which are needed for ray tracing, code written by the author in this program is very small.
 
-The advantages of using ROBAST are
-- Easy to build complex telescope geometries using TGeo* and AGeo* classes
-- Runs on both OS X and Linux
-- Scriptable in C++ and Python
-- Easy to learn even if you could not be a Geant4 expert
-- Direct analysis of simulation results in ROOT
+Commercial software is optimized for optics design, but it is not flexible when being combined with other UN*X software such as CORSIKA. The author had been using ZEMAX to design a cosmic-ray telescope. However it was difficault to use ZEMAX to propagate Cherenkov light emitted by very-high-energy cosmi-ray air showersin CORSIKA simulations. That's why he developed ROBAST.
 
-For more details, read the following papers.
-[1] A. Okumura, K. Noda, C. Rulten "ROBAST: Development of a ROOT-Based Ray-Tracing Library for Cosmic-Ray Telescopes and its Applications in the Cherenkov Telescope Array"
-    Submitted to Astroparticle Physics (2015)
-[2] A. Okumura, K. Noda, C. Rulten "ROBAST: Development of a Non-Sequential Ray-Tracing Simulation Library and its Applications in the Cherenkov Telescope Array"
-    In Proceedings of the 34th International Cosmic Ray Conference (ICRC2015) (2015)
-    http://arxiv.org/abs/1508.07803
-[3] A. Okumura "Optimization of the Collection Efficiency of a Hexagonal Light Collector using Quadratic and Cubic Bézier Curves"
-    Astroparticle Physics 38, 18–24 (2012)
-    http://arxiv.org/abs/1205.3968
-[4] A. Okumura et al. "Development of Non-sequential Ray-tracing Software for Cosmic-ray Telescopes"
-    In Proceedings of the 32nd International Cosmic Ray Conference (ICRC2011) (2011)
-    http://arxiv.org/abs/1110.4448
+The biggest advantages in using ROOT are;
+- Implementation of complex telescop structure is easy by using TGeo* classes.
+- Direct analysis of ray trace results in ROOT scripts
+- Scriptable C++
+
+If you are familiar with Geant4, you would think "Why not Geant4 optical?". The answer is simple. Geant4 is too hard to learn for standard ROOT users. If you have an experience in using Geant4, especially in Geant4 optical, you can opt Geant4 which has some advanced features (roughness of surfaces, absorption, ...).
 
 2. Author
-Akira Okumura (Institute for Space-Earht Environmental Research, Nagoya University)
-oxon@mac.com
+Akira Okumura (ISAS/JAXA and SLAC)
+oxon@astro.isas.jaxa.jp, oxon@stanford.edu
 
 3. License
 LGPL
 
 4. Install
-$ tar zxvf robast_v2.3p1.tgz
-$ cd robast_v2.3p1
+$ tar zxvf robast_1.0.0.tgz
+$ cd robast_1.0.0
 $ make
-$ export LD_LIBRARY_PATH=PATH_TO_YOUR_ROBAST_DIRECTORY:$LD_LIBRARY_PATH
+$ export LD_LIBRARY_PATH=../robast_1.0.0
 
-Adding the following line in your $HOME/.rootlogon.C will be useful.
-gInterpreter->AddIncludePath("PATH_TO_YOUR_ROBAST_DIRECTORY/include");
-
-If you would like to read HTML documentation, generate it yourself.
+If you would like to read HTML document, generate it by yourself.
 $ make htmldoc
 
 5. Tutorials
 Try e.g.
-$ cd robast_v2.3p1/tutorial
+$ cd robast_1.0.0/tutorial
 $ root
 root [0] .x SC.C
 
-You will see some plots and beautiful 3D images
+You will see some plots and beatiful 3D image
 
 - SC.C
 Schwarzschild-Couder optical system for AGIS proposed in
 Vassiliev, et al. (2007) Astropart. Phys. 28 10-27
-
-6. FAQ
-6.1 Build errors

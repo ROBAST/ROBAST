@@ -14,9 +14,6 @@
 
 #pragma link C++ class ABorderSurfaceCondition;
 #pragma link C++ class ACauchyFormula;
-#pragma link C++ class ACorsikaIACTEventHeader;
-#pragma link C++ class ACorsikaIACTFile;
-#pragma link C++ class ACorsikaIACTRunHeader;
 #pragma link C++ class AFocalSurface;
 #pragma link C++ class AGeoAsphericDisk;
 #pragma link C++ class AGeoBezierPcon;
@@ -37,7 +34,4 @@
 #pragma link C++ class ASchottFormula;
 #pragma link C++ class ASellmeierFormula;
 
-#pragma link C++ namespace AGeoUtil;
-#pragma link C++ global A_GEO_UTIL_H;
-#pragma link C++ function AGeoUtil::MakePointToPointTube(const char*, TVector3&, TVector3&, Double_t, TGeoTube**, TGeoCombiTrans**);
 #endif

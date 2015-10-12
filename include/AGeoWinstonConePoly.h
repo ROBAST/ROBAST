@@ -33,14 +33,14 @@ public:
    virtual ~AGeoWinstonConePoly();
 
    virtual void        ComputeBBox();
-   virtual void        ComputeNormal(CONST53410 Double_t* point, CONST53410 Double_t* dir, Double_t* norm);
-   virtual Bool_t      Contains(CONST53410 Double_t* point) const;
+   virtual void        ComputeNormal(Double_t* point, Double_t* dir, Double_t* norm);
+   virtual Bool_t      Contains(Double_t* point) const;
    virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
-   virtual Double_t    DistFromInside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+   virtual Double_t    DistFromInside(Double_t* point, Double_t* dir,
                                       Int_t iact = 1,
                                       Double_t step = TGeoShape::Big(),
                                       Double_t *safe = 0) const;
-   virtual Double_t    DistFromOutside(CONST53410 Double_t* point, CONST53410 Double_t* dir,
+   virtual Double_t    DistFromOutside(Double_t* point, Double_t* dir,
                                        Int_t iact = 1,
                                        Double_t step = TGeoShape::Big(),
                                        Double_t* safe = 0) const;
@@ -51,7 +51,7 @@ public:
    virtual Bool_t      InsidePolygon(Double_t x, Double_t y, Double_t r) const;
    virtual void        InspectShape() const;
    virtual TBuffer3D*  MakeBuffer3D() const;
-   virtual void        SavePrimitive(std::ostream& out, Option_t* option = "");
+   virtual void        SavePrimitive(ostream& out, Option_t* option = "");
    virtual void        SetWinstonDimensions(Double_t r1, Double_t r2, Int_t n);
    virtual void        SetDimensions(Double_t* param);
    virtual void        SetPoints(Double_t* points) const;

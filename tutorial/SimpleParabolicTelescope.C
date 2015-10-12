@@ -121,11 +121,11 @@ void SimpleParabolicTelescope()
 
       // Draw only some selected photons in 3D
       if(((i == 0) || (i == kN - 1)) && (TMath::Abs(first[0]) < 1*cm || TMath::Abs(first[1]) < 1*cm)){
-        TPolyLine3D* pol = ray->MakePolyLine3D();
-        if(i == 0){
-          pol->SetLineColor(3);
-        }
-        pol->Draw();
+	TPolyLine3D* pol = ray->MakePolyLine3D();
+	if(i == 0){
+	  pol->SetLineColor(3);
+	} 
+	pol->Draw();
       } // ij
     } // if
   } // i

@@ -38,7 +38,7 @@ class AMirror : public AOpticalComponent {
   AMirror(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
   virtual ~AMirror();
 
-  virtual Double_t GetReflectivity(Double_t lambda, Double_t angle /* (rad) */);
+  virtual Double_t GetReflectivity(Double_t lambda, Double_t angle /*(deg)*/);
   virtual void     SetReflectivity(TGraph* ref) {fReflectivity1D = ref;}
   virtual void     SetReflectivity(TGraph2D* ref) {fReflectivity2D = ref;}
 

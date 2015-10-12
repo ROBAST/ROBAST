@@ -44,7 +44,6 @@ class ARayArray : public TObject {
   virtual TObjArray* GetRunning() { return &fRunning;};
   virtual TObjArray* GetStopped() { return &fStopped;};
   virtual TObjArray* GetSuspended() { return &fSuspended;};
-  virtual void       Merge(ARayArray* array);
 
   ClassDef(ARayArray, 1)
 };
