@@ -1,6 +1,3 @@
-// $Id$
-// Author: Akira Okumura 2007/09/24
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -17,9 +14,7 @@
 #ifndef A_GEO_ASPHERIC_DISK_H
 #define A_GEO_ASPHERIC_DISK_H
 
-#ifndef ROOT_TGeoBBox
 #include "TGeoBBox.h"
-#endif
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,10)
 #define CONST53410 const

@@ -1,6 +1,3 @@
-// $Id: AGlassCatalog.h 3 2010-11-26 17:17:31Z oxon $
-// Author: Akira Okumura 2007/10/01
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -17,18 +14,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef ROOT_TObject
 #include "TObject.h"
-#endif
-#ifndef A_CAUCHY_FORMULA_H
 #include "ACauchyFormula.h"
-#endif
-#ifndef A_SCHOTT_FORMULA_H
 #include "ASchottFormula.h"
-#endif
-#ifndef A_SELLMEIER_FORMULA_H
 #include "ASellmeierFormula.h"
-#endif
 
 class AGlassCatalog : public TObject {
  private:

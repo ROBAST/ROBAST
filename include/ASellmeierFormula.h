@@ -1,6 +1,3 @@
-// $Id: ASellmeierFormula.h 6 2010-11-26 17:33:15Z oxon $
-// Author: Akira Okumura 2007/10/01
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -18,12 +15,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef A_REFRACTIVE_INDEX_H
-#include "ARefractiveIndex.h"
-#endif
-
 #include "TF1.h"
 #include "TGraph.h"
+
+#include "ARefractiveIndex.h"
 
 class ASellmeierFormula : public ARefractiveIndex {
  private:

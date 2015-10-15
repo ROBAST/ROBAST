@@ -1,6 +1,3 @@
-// $Id: AGeoWinstonConePoly.h 10 2010-11-28 06:35:46Z oxon $
-// Author: Akira Okumura 2011/03/05
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -18,9 +15,7 @@
 #ifndef A_GEO_WINSTON_CONE_POLY_H
 #define A_GEO_WINSTON_CONE_POLY_H
 
-#ifndef A_GEO_WINSTON_CONE_2D_H
 #include "AGeoWinstonCone2D.h"
-#endif
 
 class AGeoWinstonConePoly : public AGeoWinstonCone2D {
 protected:

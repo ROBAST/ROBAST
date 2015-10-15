@@ -1,6 +1,3 @@
-// $Id: ARay.h 3 2010-11-26 17:17:31Z oxon $
-// Author: Akira Okumura 2007/09/24
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *

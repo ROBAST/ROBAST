@@ -1,6 +1,3 @@
-// $Id: AGeoWinstonCone2D.h 10 2010-11-28 06:35:46Z oxon $
-// Author: Akira Okumura 2011/03/05
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -19,9 +16,7 @@
 #ifndef A_GEO_WINSTON_CONE_2D_H
 #define A_GEO_WINSTON_CONE_2D_H
 
-#ifndef ROOT_TGeoBBox
 #include "TGeoBBox.h"
-#endif
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION(5,34,10)
 #define CONST53410 const

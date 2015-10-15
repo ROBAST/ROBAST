@@ -1,6 +1,3 @@
-// $Id$
-// Author: Akira Okumura 2007/09/24
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -22,7 +19,6 @@
 #pragma link C++ class AGeoBezierPcon;
 #pragma link C++ class AGeoBezierPgon;
 #pragma link C++ class AGeoWinstonCone2D;
-//#pragma link C++ class AGeoWinstonCone3D;
 #pragma link C++ class AGeoWinstonConePoly;
 #pragma link C++ class AGlassCatalog;
 #pragma link C++ class ALens;

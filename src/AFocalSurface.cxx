@@ -1,6 +1,3 @@
-// $Id$
-// Author: Akira Okumura 2007/10/01
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *

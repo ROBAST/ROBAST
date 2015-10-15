@@ -1,6 +1,3 @@
-// $Id: AGeoBezierPgon.h 10 2010-11-28 06:35:46Z oxon $
-// Author: Akira Okumura 2011/07/08
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -18,13 +15,8 @@
 #ifndef A_GEO_BEZIER_PGON_H
 #define A_GEO_BEZIER_PGON_H
 
-#ifndef ROOT_TGeoPgon
 #include "TGeoPgon.h"
-#endif
-
-#ifndef ROOT_TVector2
 #include "TVector2.h"
-#endif
 
 class AGeoBezierPgon : public TGeoPgon {
 protected:

@@ -1,6 +1,3 @@
-// $Id: AFocalSurface.h 3 2010-11-26 17:17:31Z oxon $
-// Author: Akira Okumura 2007/10/01
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -19,9 +16,7 @@
 
 #include "TGraph.h"
 
-#ifndef A_OPTICAL_COMPONENT_H
 #include "AOpticalComponent.h"
-#endif
 
 class AFocalSurface : public AOpticalComponent {
  private:

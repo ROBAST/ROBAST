@@ -1,6 +1,3 @@
-// $Id: ASchottFormula.h 7 2010-11-28 01:42:20Z oxon $
-// Author: Akira Okumura 2007/09/24
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -18,9 +15,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef A_REFRACTIVE_INDEX_H
 #include "ARefractiveIndex.h"
-#endif
 
 class ASchottFormula : public ARefractiveIndex {
  private:

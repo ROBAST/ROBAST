@@ -1,6 +1,3 @@
-// $Id: AOpticsManager.h 3 2010-11-26 17:17:31Z oxon $
-// Author: Akira Okumura 2007/09/24
-
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -17,34 +14,16 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef ROOT_TGeoManager
 #include "TGeoManager.h"
-#endif
-#ifndef ROOT_TMath
 #include "TMath.h"
-#endif
-#ifndef ROOT_TThread
 #include "TThread.h"
-#endif
 
-#ifndef A_RAY_ARRAY_H
 #include "ARayArray.h"
-#endif
-#ifndef A_FOCAL_SURFACE_H
 #include "AFocalSurface.h"
-#endif
-#ifndef A_LENS_H
 #include "ALens.h"
-#endif
-#ifndef A_MIRROR_H
 #include "AMirror.h"
-#endif
-#ifndef A_OPTICAL_COMPONENT_H
 #include "AOpticalComponent.h"
-#endif
-#ifndef A_OBSCURATION_H
 #include "AObscuration.h"
-#endif
 
 class AOpticsManager : public TGeoManager {
  private:
