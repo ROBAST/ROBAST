@@ -29,6 +29,11 @@ class AOpticalComponent : public TGeoVolume {
 
   void AddSurfaceCondition(ABorderSurfaceCondition* condition);
   ABorderSurfaceCondition* FindSurfaceCondition(AOpticalComponent* component2);
+  TGeoMaterial* GetOpaqueVacuumMaterial() const;
+  TGeoMaterial* GetTransparentVacuumMaterial() const;
+  TGeoMedium* GetOpaqueVacuumMedium() const;
+  TGeoMedium* GetTransparentVacuumMedium() const;
+
 
   ClassDef(AOpticalComponent, 1)
 };
