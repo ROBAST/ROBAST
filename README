@@ -1,27 +1,17 @@
-ROot-BAsed Simulator for ray Tracing (ROBAST)
+ROOT-Based Simulator for Ray Tracing (ROBAST)
 
 1. About
-ROBAST is a non-sequential ray-tracing simulator program which is based on the ROOT framework. ROBAST fully utilizes its 3D geometry library to offer several functionalities required for ray-tracing simulations of cosmic-ray telescopes. 
+ROBAST is a non-sequential ray-tracing simulation library which is aimed for wide use in optical simulations of cosmic-ray and gamma-ray telescopes. The library is written in C++ and fully utilizes the geometry library of the ROOT analysis framework. ROBAST offers several functionalities required for ray-tracing simulations of cosmic-ray telescopes. 
 
 The advantages of using ROBAST are
-- Easy to build complex telescope geometries using TGeo* and AGeo* classes
+- Easy to build complex telescope geometries using TGeo* and AGeo* classes (ROOT and ROBAST classes, respectively)
 - Runs on both OS X and Linux
 - Scriptable in C++ and Python
 - Easy to learn even if you could not be a Geant4 expert
 - Direct analysis of simulation results in ROOT
 
-For more details, read the following papers.
-[1] A. Okumura, K. Noda, C. Rulten "ROBAST: Development of a ROOT-Based Ray-Tracing Library for Cosmic-Ray Telescopes and its Applications in the Cherenkov Telescope Array"
-    Submitted to Astroparticle Physics (2015)
-[2] A. Okumura, K. Noda, C. Rulten "ROBAST: Development of a Non-Sequential Ray-Tracing Simulation Library and its Applications in the Cherenkov Telescope Array"
-    In Proceedings of the 34th International Cosmic Ray Conference (ICRC2015) (2015)
-    http://arxiv.org/abs/1508.07803
-[3] A. Okumura "Optimization of the Collection Efficiency of a Hexagonal Light Collector using Quadratic and Cubic Bézier Curves"
-    Astroparticle Physics 38, 18–24 (2012)
-    http://arxiv.org/abs/1205.3968
-[4] A. Okumura et al. "Development of Non-sequential Ray-tracing Software for Cosmic-ray Telescopes"
-    In Proceedings of the 32nd International Cosmic Ray Conference (ICRC2011) (2011)
-    http://arxiv.org/abs/1110.4448
+For more details, please visit the ROBAST website.
+http://robast.github.io/
 
 2. Author
 Akira Okumura (Institute for Space-Earht Environmental Research, Nagoya University)
@@ -29,30 +19,3 @@ oxon@mac.com
 
 3. License
 LGPL
-
-4. Install
-$ tar zxvf robast_v2.3p1.tgz
-$ cd robast_v2.3p1
-$ make
-$ export LD_LIBRARY_PATH=PATH_TO_YOUR_ROBAST_DIRECTORY:$LD_LIBRARY_PATH
-
-Adding the following line in your $HOME/.rootlogon.C will be useful.
-gInterpreter->AddIncludePath("PATH_TO_YOUR_ROBAST_DIRECTORY/include");
-
-If you would like to read HTML documentation, generate it yourself.
-$ make htmldoc
-
-5. Tutorials
-Try e.g.
-$ cd robast_v2.3p1/tutorial
-$ root
-root [0] .x SC.C
-
-You will see some plots and beautiful 3D images
-
-- SC.C
-Schwarzschild-Couder optical system for AGIS proposed in
-Vassiliev, et al. (2007) Astropart. Phys. 28 10-27
-
-6. FAQ
-6.1 Build errors
