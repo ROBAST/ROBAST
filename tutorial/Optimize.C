@@ -79,12 +79,9 @@ double Func(const double* par)
   gOpticsManager = new AOpticsManager("manager", "manager");
   gOpticsManager->DisableFresnelReflection(kTRUE);
 
-  TGeoMaterial* dummyMaterial = new TGeoMaterial("dummyMaterial", 0, 0, 0);
-  TGeoMedium* dummyMedium = new TGeoMedium("dummyMedium", 1, dummyMaterial);
-
   // Make the world
   TGeoBBox* box = new TGeoBBox("box", 100*mm, 100*mm, 100*mm);
-  AOpticalComponent* top = new AOpticalComponent("top", box, dummyMedium);
+  AOpticalComponent* top = new AOpticalComponent("top", box);
   gOpticsManager->SetTopVolume(top);
 
   AGeoAsphericDisk* disk = new AGeoAsphericDisk("disk", 0*mm, 0., par[0], par[1], kRadius, 0.*mm);
@@ -95,21 +92,17 @@ double Func(const double* par)
     return 1e100;
   } // if
 
-  TGeoMaterial* lensMaterial = new TGeoMaterial("lensMaterial", 0, 0, 0);
-  lensMaterial->SetTransparency(70);
-  TGeoMedium* lensMedium = new TGeoMedium("lensMedium", 1, lensMaterial);
-
-  ALens* lens = new ALens("lens", disk, lensMedium);
+  ALens* lens = new ALens("lens", disk);
   lens->SetRefractiveIndex(AGlassCatalog::GetRefractiveIndex("N-BK7"));
   gOpticsManager->GetTopVolume()->AddNode(lens, 1);
   
   double origin[3] = {0, 0, 50*mm + 1*um};
   TGeoBBox* box2 = new TGeoBBox("box2", 10*mm, 10*mm, 1*um, origin);
-  AFocalSurface* screen = new AFocalSurface("screen", box2, dummyMedium);
+  AFocalSurface* screen = new AFocalSurface("screen", box2);
   top->AddNode(screen, 1);
 
   AGeoAsphericDisk* disk2 = new AGeoAsphericDisk("disk2", 0*mm, 0., par[0], 0., kRadius*1.2, kRadius);
-  AObscuration* obs = new AObscuration("obs", disk2, dummyMedium);
+  AObscuration* obs = new AObscuration("obs", disk2);
   gOpticsManager->GetTopVolume()->AddNode(obs, 1);
   
   gOpticsManager->CloseGeometry();

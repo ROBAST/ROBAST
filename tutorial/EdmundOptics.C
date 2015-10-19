@@ -1,4 +1,3 @@
-// $Id$
 // Author: Akira Okumura 2012/11/26
 
 // Examples for simple optical systems which use products by Edmund Optics.
@@ -54,10 +53,6 @@ void NT49665()
   //Double_t coefficients[3] = {4.66252900195e-6/(mm*mm), -8.02842124899e-9/(mm*mm*mm*mm), 0};
   disk3->SetPolynomials(0, 0, 3, coefficients);
 
-  TGeoMaterial* dummyMaterial = new TGeoMaterial("dummyMaterial", 0, 0, 0);
-  dummyMaterial->SetTransparency(70);
-  TGeoMedium* dummyMedium = new TGeoMedium("dummyMedium", 1, dummyMaterial);
-
   // Ohara S-FSL5
   // http://www.ohara-inc.co.jp/jp/product/optical/dl/data/jsfsl05.pdf
   ASellmeierFormula* FSL5
@@ -76,11 +71,11 @@ void NT49665()
   // should be 1.74077
   std::cout << TIH13->GetIndex(0.58756*um) << std::endl;
 
-  ALens* lens1 = new ALens("lens1", disk1, dummyMedium);
+  ALens* lens1 = new ALens("lens1", disk1);
   lens1->SetRefractiveIndex(FSL5);
-  ALens* lens2 = new ALens("lens2", disk2, dummyMedium);
+  ALens* lens2 = new ALens("lens2", disk2);
   lens2->SetRefractiveIndex(TIH13);
-  ALens* lens3 = new ALens("lens3", disk3, dummyMedium);
+  ALens* lens3 = new ALens("lens3", disk3);
   lens3->SetConstantRefractiveIndex(1.517);
 
   top->AddNode(lens1, 1);

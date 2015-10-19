@@ -49,21 +49,13 @@ void SchmidtCassegrain()
                        3.20036892E-14/TMath::Power(inch, 7)};
   disk->SetPolynomials(0, 0, 4, coeff);
 
-  TGeoMaterial* mat = new TGeoMaterial("mat", 0, 0, 0);
-  mat->SetTransparency(70);
-  TGeoMedium* med = new TGeoMedium("med", 1, mat);
-
   ARefractiveIndex* bk7 = AGlassCatalog::GetRefractiveIndex("N-BK7");
-  ALens* lens = new ALens("lens", disk, med);
+  ALens* lens = new ALens("lens", disk);
   lens->SetRefractiveIndex(bk7);
   top->AddNode(lens, 1);
 
-  TGeoMaterial* mat2 = new TGeoMaterial("mat2", 0, 0, 0);
-  mat2->SetTransparency(100);
-  TGeoMedium* med2 = new TGeoMedium("med2", 1, mat2);
-
   TGeoTube* tube = new TGeoTube("tube", 12*inch, 18*inch, disk->GetDZ());
-  AObscuration* obs = new AObscuration("aperture", tube, med2);
+  AObscuration* obs = new AObscuration("aperture", tube);
   top->AddNode(obs, 1, new TGeoTranslation(0, 0, disk->GetOrigin()[2]));
 
   tube = new TGeoTube("tube2", 0*inch, 4.5*inch, 0.01*mm);

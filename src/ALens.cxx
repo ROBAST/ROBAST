@@ -34,7 +34,8 @@ ALens::ALens(const char* name, const TGeoShape* shape,
   fConstantIndex = 1;
   fConstantAbsorptionLength = -1;
   SetLineColor(7);
-  if(GetMedium() == TGeoVolume::DummyMedium()){
+  if(GetMedium() == TGeoVolume::DummyMedium() ||
+     GetMedium() == GetOpaqueVacuumMedium() ){
     SetMedium(GetTransparentVacuumMedium());
   }
 }

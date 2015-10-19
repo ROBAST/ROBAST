@@ -323,11 +323,6 @@ void AddLens(AOpticalComponent* opt)
                                                 +7.215869e-3, +1.657987e-3,
                                                 -2.122694e-4, +1.173515e-5);
 
-  // Dummy vacuum
-  TGeoMaterial *matVacuum = new TGeoMaterial("Vacuum", 0, 0, 0);
-  matVacuum->SetTransparency(70); // needed in OpenGL view
-  TGeoMedium *Vacuum = new TGeoMedium("Vacuum", 1, matVacuum);
-
   AGeoAsphericDisk* a[3];
   ALens* lens[3];
   for(Int_t i=0; i<3; i++){
@@ -335,7 +330,7 @@ void AddLens(AOpticalComponent* opt)
                                 kLensZ[i][1], 1/kLensR[i],
                                 kLensRadius[i][0], kLensRadius[i][1]);
     a[i]->SetPolynomials(0, 0, 4, &kLensPol[i][0]);
-    lens[i] = new ALens(Form("lens%d", i+1), a[i], Vacuum);
+    lens[i] = new ALens(Form("lens%d", i+1), a[i]);
     lens[i]->SetRefractiveIndex(acrylite);
     opt->AddNode(lens[i], 1);
   } // i
