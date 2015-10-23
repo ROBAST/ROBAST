@@ -16,7 +16,7 @@ static const Double_t um = AOpticsManager::um();
 static const Double_t nm = AOpticsManager::nm();
 static const Double_t  m = AOpticsManager::m();
 
-void SC()
+void SchwarzschildCouder()
 {
   AOpticsManager* manager = new AOpticsManager("manager", "SC");
   manager->SetNsegments(100);
