@@ -24,8 +24,8 @@
    @brief Pass warning messages to the screen or a usr function as set up.
 
     @author  Konrad Bernloehr
-    @date    @verbatim CVS $Date: 2010/07/20 13:37:45 $ @endverbatim
-    @version @verbatim CVS $Revision: 1.8 $ @endverbatim
+    @date    @verbatim CVS $Date: 2014/02/20 10:53:06 $ @endverbatim
+    @version @verbatim CVS $Revision: 1.9 $ @endverbatim
 
    One of the most import parameter for setting up the bevaviour
    is the warning level:
@@ -118,7 +118,7 @@ static int delete_warn_specific(void);
 static void warn_destructor (void *whatever);
 static void warn_func_once(void);
 static int create_warn_specific(void);
-static void *get_warn_specific(void);
+static struct warn_specific_data *get_warn_specific(void);
 
 static int delete_warn_specific()
 {
@@ -174,7 +174,7 @@ static int create_warn_specific()
    return 0;
 }
 
-static void *get_warn_specific()
+static struct warn_specific_data *get_warn_specific()
 {
    void *specific;
    
@@ -194,7 +194,7 @@ static void *get_warn_specific()
       specific = pthread_getspecific(warn_tsd_key);
    }
    
-   return specific;
+   return (struct warn_specific_data *) specific;
 }
 
 #else

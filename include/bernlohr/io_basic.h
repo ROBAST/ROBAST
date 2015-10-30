@@ -1,6 +1,6 @@
 /* ============================================================================
 
-   Copyright (C) 1991, 2001, 2007, 2009, 2010  Konrad Bernloehr
+   Copyright (C) 1991, 2001, 2007, 2009, 2010, 2014  Konrad Bernloehr
 
    This file is part of the eventio/hessio library.
 
@@ -23,9 +23,9 @@
     @short Basic header file for eventio data format.
     
     @author  Konrad Bernloehr
-    @date    1991 to 2010
-    @date    @verbatim CVS $Date: 2011/01/18 15:55:51 $ @endverbatim
-    @version @verbatim CVS $Revision: 1.17 $ @endverbatim
+    @date    1991 to 2014
+    @date    @verbatim CVS $Date: 2014/08/04 13:05:28 $ @endverbatim
+    @version @verbatim CVS $Revision: 1.22 $ @endverbatim
 
 
     Header file for structures and function prototypes for
@@ -57,6 +57,7 @@ extern "C" {
 
 #define HAVE_EVENTIO_USER_FLAG 1
 #define HAVE_EVENTIO_EXTENDED_LENGTH 1
+#define HAVE_EVENTIO_HEADER_LENGTH 1
 
 /* Flag bits to be used with put_item_begin_with_flag(): */
 #define EVENTIO_USER_FLAG 1
@@ -76,6 +77,7 @@ struct _struct_IO_ITEM_HEADER
    long ident;          /**< Identity number. */
    int user_flag;       /**< One more bit in the header available for user data. */
    int use_extension;   /**< Non-zero if the extension header field should be used. */
+   size_t length;       /**< Length of data field, for information only. */
 };
 typedef struct _struct_IO_ITEM_HEADER IO_ITEM_HEADER;
 
@@ -257,6 +259,7 @@ void get_vector_of_double (double *vec, int num, IO_BUFFER *iobuf);
 
 /* ... 16 bits floating point ... */
 void dbl_to_sfloat (double dnum, uint16_t *snum);
+void fltp_to_sfloat (const float *fnum, uint16_t *snum);
 void put_sfloat (double dnum, IO_BUFFER *iobuf);
 double dbl_from_sfloat(const uint16_t *snum);
 double get_sfloat (IO_BUFFER *iobuf);
@@ -279,7 +282,7 @@ int search_sub_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header,
 int rewind_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header);
 int remove_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header);
 int list_sub_items (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header,
-    int maxlevel);
+    int maxlevel, int verbosity);
 
 /* File I/O: */
 int reset_io_block (IO_BUFFER *iobuf);
@@ -287,12 +290,35 @@ int write_io_block (IO_BUFFER *iobuf);
 int find_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header);
 int read_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header);
 int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header);
-int list_io_blocks (IO_BUFFER *iobuf);
+int list_io_blocks (IO_BUFFER *iobuf, int verbosity);
 
 int copy_item_to_io_block (IO_BUFFER *iobuf2, IO_BUFFER *iobuf,
     const IO_ITEM_HEADER *item_header);
 int append_io_block_as_item (IO_BUFFER *iobuf,
     IO_ITEM_HEADER *item_header, BYTE *_buffer, long length);
+    
+/* Registry hook: */
+
+struct ev_reg_entry
+{
+   unsigned long type; /**< The data block type number */
+   char *name;         /**< The data block name (short) */
+   char *description;  /**< Optional longer description of the data block */
+};
+
+/** This optionally available function is implemented externally */
+struct ev_reg_entry *find_ev_reg(unsigned long t);
+
+typedef struct ev_reg_entry *(*EVREGSEARCH)(unsigned long t);
+
+/** This function should be used to set the find_ev_reg_ptr function pointer. */
+void set_eventio_registry_hook(EVREGSEARCH fptr);
+
+/** This functions using the stored function pointer are now in the core eventio code. */
+
+const char *eventio_registered_typename(unsigned long type);
+const char *eventio_registered_description(unsigned long type);
+
 
 #ifdef __cplusplus
 }

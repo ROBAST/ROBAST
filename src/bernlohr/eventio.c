@@ -25,8 +25,8 @@
  *   
  *  @author  Konrad Bernloehr
  *  @date    1991 to 2010
- *  @date    @verbatim CVS $Date: 2013/02/27 13:32:04 $ @endverbatim
- *  @version @verbatim CVS $Revision: 1.33 $ @endverbatim
+ *  @date    @verbatim CVS $Date: 2014/11/14 15:37:00 $ @endverbatim
+ *  @version @verbatim CVS $Revision: 1.43 $ @endverbatim
     
 @verbatim
  ================ General comments to eventio.c ======================
@@ -2694,10 +2694,14 @@ void get_vector_of_double (double *dvec, int num, IO_BUFFER *iobuf)
 
 #endif /* IEEE_FLOAT_FORMAT */
 
+void fltp_to_sfloat (const float *fnum, uint16_t *snum);
+
 /* ------------------------- dbl_to_sfloat ---------------------------- */
 /** 
  *  @short Convert a double to the internal representation of a 16 bit
- *    floating point number as specified in the OpenGL 3.1 standard.
+ *    floating point number as specified in the OpenGL 3.1 standard,
+ *    also called a half-float.
+ *    This is done via an intermediate float representation.
  *
  *  @param dnum The number to be converted.
  *  @param snum Pointer for the resulting representation, as stored in
@@ -2706,6 +2710,26 @@ void get_vector_of_double (double *dvec, int num, IO_BUFFER *iobuf)
  */
 
 void dbl_to_sfloat (double dnum, uint16_t *snum)
+{
+   float fnum = dnum;
+   fltp_to_sfloat (&fnum, snum);
+   return;
+}
+
+/* ------------------------- fltp_to_sfloat ---------------------------- */
+/** 
+ *  @short Convert a float to the internal representation of a 16 bit
+ *    floating point number as specified in the OpenGL 3.1 standard,
+ *    also called a half-float.
+ *    Both input and output come as pointers to avoid extra conversions.
+ *
+ *  @param fnum Pointer to the number to be converted.
+ *  @param snum Pointer for the resulting representation, as stored in
+ *              an unsigned 16-bit integer (1 bit sign, 5 bits exponent,
+ *              10 bits mantissa).
+ */
+
+void fltp_to_sfloat (const float *fnum, uint16_t *snum)
 {
 #ifdef IEEE_FLOAT_FORMAT
    union
@@ -2716,24 +2740,34 @@ void dbl_to_sfloat (double dnum, uint16_t *snum)
    int exponent_d;
    uint16_t sign = 0, exponent, mantissa;
    
-   val.fnum = (float) dnum;
+   val.fnum = *fnum; /* Use float as an intermediate step */
 
    if ( (val.lnum & 0x80000000U) ) /* IEEE float sign bit test */
    {
       sign = 0x8000;
-      val.fnum *= -1.;
+      // val.fnum *= -1.; /* Or perhaps better: val.lnum ^= 0x80000000U or &= 0x7fffffff */
    }
 
-   if ( dnum == 0. )
+   if ( *fnum == 0. )
       exponent = mantissa = 0;
    else
    {
-      exponent = (uint16_t) ((((val.lnum & 0x7f800000U) >> 23) - 127 + 15) & 0x1fU);
-      exponent_d = (((int)((val.lnum & 0x7f800000U) >> 23) - 127 + 15));
-      mantissa = (uint16_t) ((val.lnum & 0x007fe000U) >> 13);
-      if ( exponent_d < 0 ) // outside range, convert to zero
-         exponent = mantissa = 0;
-      else if ( exponent_d > 31 ) // convert to +- infinity
+      uint32_t expflt = ((val.lnum & 0x7f800000U) >> 23); /* The float exponent */
+      uint32_t mntflt = (val.lnum & 0x007fe000U); /* The relevant part of the float mantissa */
+      exponent = (uint16_t) ((expflt - 127 + 15) & 0x1fU);
+      exponent_d = (((int)expflt - 127 + 15));
+      mantissa = (uint16_t) (mntflt >> 13);
+      if ( expflt == 255 ) /* Infinity or NaN: */
+         exponent = 31; /* Mantissa should take care which of those. */
+      else if ( exponent_d <= 0 ) /* outside range, use zero or de-normalized */
+      {
+         exponent = 0;
+         if ( exponent_d < -10 )
+            mantissa = 0;
+         else
+            mantissa = (mantissa+1024) >> (1-exponent_d);
+      }
+      else if ( exponent_d > 31 ) /* convert to +- infinity */
       {
          exponent = 31;
          mantissa = 0;
@@ -2743,9 +2777,11 @@ void dbl_to_sfloat (double dnum, uint16_t *snum)
    *snum = sign | (exponent << 10) | mantissa;
 
 #else
+   /* Thisa path will rarely get compiled, after the demise of the VAX ... */
    uint16_t sign = 0, exponent, mantissa;
    static double log2 = 0.6931471805599453;
    static double two10 = 1024.;
+   double dnum = *fnum;
 
    /* Don't worry about NaN (E=31, M!=0) and +-Inf (E=31, M=0) yet. */
 
@@ -2796,7 +2832,7 @@ double dbl_from_sfloat (const uint16_t *snum)
    uint16_t exponent = ((*snum) & 0x7c00U) >> 10;
    uint16_t mantissa = ((*snum) & 0x03ffU);
    double s = (sign == 0) ? 1. : -1.;
-   if ( exponent == 0 )
+   if ( exponent == 0 ) /* De-normalized */
    {
       if ( mantissa == 0 )
          return s * 0.0;
@@ -2882,6 +2918,7 @@ int put_item_begin_with_flags (IO_BUFFER *iobuf,
    item_header->use_extension = 
          (extended != 0) || (iobuf->extended != 0);
    item_header->can_search = 0;
+   item_header->length = 0;
 
    ilevel = item_header->level = iobuf->item_level;
    iobuf->r_remaining = -1;
@@ -2997,6 +3034,7 @@ int put_item_end (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
          put_byte(0,iobuf);
       length += padding;
       iobuf->item_length[ilevel] = length;
+      item_header->length = (size_t) length;
       /* In order to keep track if an item can be searched for sub-items, */
       /* the sub-item length must be increased also by the no. of bytes padded. */
       iobuf->sub_item_length[ilevel] += padding;
@@ -3132,6 +3170,7 @@ int get_item_begin (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
       return -1;
 
    iobuf->w_remaining = -1;
+   item_header->length = 0;
 
    previous_position = iobuf->data;
    previous_remaining = iobuf->r_remaining;
@@ -3201,6 +3240,12 @@ int get_item_begin (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
    this_type = (unsigned long) get_long(iobuf);
    item_header->type = this_type & 0x0000ffffUL;
    item_header->version = (unsigned) (this_type >> 20) & 0xfff;
+   if ( (item_header->version & 0x800) != 0 )
+   {
+      /* Encountering corrupted data seems more likely than having version numbers above 2047 */
+      Warning("Version number invalid - may be corrupted data");
+      return -1;
+   }
    item_header->user_flag = ((this_type & 0x00010000UL) != 0);
    item_header->use_extension = ((this_type & 0x00020000UL) != 0);
 
@@ -3209,6 +3254,10 @@ int get_item_begin (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
 
    /* If bit 30 of length is set the item consists only of sub-items. */
    length = get_uint32(iobuf);
+   if ( (length & 0x40000000UL) != 0 )
+      item_header->can_search = 1;
+   else
+      item_header->can_search = 0;
    if ( (length & 0x80000000UL) != 0 )
    {
       item_header->use_extension = 1;
@@ -3218,13 +3267,12 @@ int get_item_begin (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
            iobuf->item_start_offset[ilevel-1] + iobuf->item_length[ilevel-1] )
          return -2;
       extension = get_uint32(iobuf);
+      /* Actual length consists of bits 0-29 of length field plus bits 0-11 of extension field. */
+      length = (length & 0x3FFFFFFFUL) | ((extension & 0x0FFFUL) << 30);
    }
-   if ( (length & 0x40000000UL) != 0 )
-      item_header->can_search = 1;
    else
-      item_header->can_search = 0;
-   /* Actual length consists of bits 0-29 of length field plus bits 0-11 of extension field. */
-   length = (length & 0x3FFFFFFFUL) | ((extension & 0x0FFFUL) << 30);
+      length = (length & 0x3FFFFFFFUL);
+   item_header->length = length;
    iobuf->item_length[ilevel] = (long) length;
    if ( item_header->can_search )
       iobuf->sub_item_length[ilevel] = (long) length;
@@ -3564,12 +3612,16 @@ int search_sub_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header,
       }
       if ( sub_item_header->type == type || type <= 0 )
       {
+         /* Similar to unget_item() we set the data pointing back
+            to the beginning of the (sub-)block. */
          iobuf->data = iobuf->buffer +
             iobuf->item_start_offset[iobuf->item_level-1] - 
                12 - (iobuf->item_extension[iobuf->item_level-1]?4:0);
          iobuf->r_remaining = iobuf->item_length[0] + 16 + 
             (iobuf->item_extension[0]?4:0) -
             (long) (iobuf->data-iobuf->buffer);
+         iobuf->w_remaining = -1;
+         /* That is different from unget_item(): */
          iobuf->item_level = old_level + 1;
          return 0;   /* This is the right type of item. */
       }
@@ -3646,7 +3698,7 @@ int remove_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
    for (jlevel=ilevel-1; jlevel>=0; jlevel--)
    {
       long lenx = iobuf->item_length[ilevel] + 12 + (iobuf->item_extension[ilevel]?4:0);
-      uint32_t len1, len2, xbit;
+      uint32_t len1, len2, xbit = 0;
       if (iobuf->item_length[jlevel] >= iobuf->item_length[ilevel] )
          iobuf->item_length[jlevel] -= lenx;
       else
@@ -3724,15 +3776,16 @@ int remove_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
  *  @param  item_header  Header of the item from which to show contents.
  *  @param  maxlevel     The maximum nesting depth to show contents
  *                       (counted from the top-level item on).
+ *  @param  verbosity    Try showing type name at >=1, description at >=2.
  *
  *  @return  0 (ok), -1 (error)
  */
 
 int list_sub_items (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header, 
-   int maxlevel)
+   int maxlevel, int verbosity)
 {
    IO_ITEM_HEADER sub_item_header;
-   int rc, i;
+   int rc=-9, i;
    char msg[512];
 
    if ( iobuf->item_level == 0 )
@@ -3752,6 +3805,18 @@ int list_sub_items (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header,
             item_header->user_flag?"*":"",
 	    item_header->ident,item_header->ident);
          Output(msg);
+      }
+      if ( verbosity >= 1 )
+      {
+         const char *name = eventio_registered_typename(item_header->type);
+         const char *description = "";
+         if ( verbosity >= 2 )
+            description = eventio_registered_description(item_header->type);
+         if ( name != NULL && *name != '\0' )
+         {
+            snprintf(msg,sizeof(msg)-1,"\t[%s] %s", name, description);
+            Output(msg);
+         }
       }
       Output("\n");
    }
@@ -3785,9 +3850,21 @@ int list_sub_items (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header,
             sub_item_header.ident, sub_item_header.ident);
          Output(msg);
       }
+      if ( verbosity >= 1 )
+      {
+         const char *name = eventio_registered_typename(sub_item_header.type);
+         const char *description = "";
+         if ( verbosity >= 2 )
+            description = eventio_registered_description(sub_item_header.type);
+         if ( name != NULL && *name != '\0' )
+         {
+            snprintf(msg,sizeof(msg)-1,"\t[%s] %s", name, description);
+            Output(msg);
+         }
+      }
       Output("\n");
       if ( sub_item_header.can_search )
-         if ( (i=list_sub_items(iobuf,&sub_item_header,maxlevel)) < 0 )
+         if ( (i=list_sub_items(iobuf,&sub_item_header,maxlevel,verbosity)) < 0 )
          {
             sprintf(msg,"  (rc=%d)\n",i);
             Output(msg);
@@ -4165,8 +4242,12 @@ int find_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
    {
       char msg[256];
       (void) sprintf(msg,
-         "Synchronization error. %ld bytes of data have been skipped",
+         "Synchronization error. %ld bytes of data have been skipped.",
          sync_count);
+      Warning(msg);
+      (void) sprintf(msg,"Now at %sitem type %lu, version %u, ID %ld, length %ld.",
+         item_header->use_extension?"extended ":"",  item_header->type,
+         item_header->version, item_header->ident, iobuf->item_length[0]);
       Warning(msg);
       if ( iobuf->sync_err_count++ >= iobuf->sync_err_max )
       {
@@ -4324,13 +4405,17 @@ int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
    length = iobuf->item_length[0];
    if ( length == 0 ) /* We don't need to skip anything for blocks without data */
    {
-      iobuf->item_length[0] = 0;
+      iobuf->item_length[0] = iobuf->sub_item_length[0] = -1;
       iobuf->data_pending = 0;
       return 0;
    }
 
    if ( iobuf->input_fileno < 0 && iobuf->user_function != NULL )
+   {
+      iobuf->item_length[0] = iobuf->sub_item_length[0] = -1;
+      iobuf->data_pending = 0;
       return((iobuf->user_function)(iobuf->buffer,length,4));
+   }
 
 #ifndef FSTAT_NOT_AVAILABLE
    if ( iobuf->regular >= 0 )
@@ -4362,7 +4447,7 @@ int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
 #endif
                return -1;
 #endif
-            iobuf->item_length[0] = 0;
+            iobuf->item_length[0] = iobuf->sub_item_length[0] = -1;
             iobuf->data_pending = 0;
             return 0;
          }
@@ -4390,7 +4475,7 @@ int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
             if ( fseek(iobuf->input_file,length,SEEK_CUR) == -1 )
                return -1;
 #endif
-            iobuf->item_length[0] = 0;
+            iobuf->item_length[0] = iobuf->sub_item_length[0] = -1;
             iobuf->data_pending = 0;
             return 0;
          }
@@ -4417,6 +4502,9 @@ int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
          rc = -1;
    }
 
+   iobuf->item_length[0] = iobuf->sub_item_length[0] = -1;
+   iobuf->data_pending = 0;
+
    if ( rc <= 0 )  /* End-of-file or read error */
    {
       item_header->type = 0;
@@ -4425,8 +4513,6 @@ int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
       else           /* input error */
          return -1;
    }
-
-   iobuf->data_pending = 0;
    return 0;
 }
 
@@ -4438,12 +4524,13 @@ int skip_io_block (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header)
  *  I/O blocks in input file onto standard output.
  *
  *  @param  iobuf        The I/O buffer descriptor.
+ *  @param  verbosity    Try showing type name at >=1, description at >=2.
  *
  *  @return  0 (O.k.),  -1 (error)
  *
  */
 
-int list_io_blocks (IO_BUFFER *iobuf)
+int list_io_blocks (IO_BUFFER *iobuf, int verbosity)
 {
    IO_ITEM_HEADER item_header;
    int rc;
@@ -4469,6 +4556,18 @@ int list_io_blocks (IO_BUFFER *iobuf)
       }
       if ( iobuf->byte_order )
          Output(" with inverse byte order");
+      if ( verbosity >= 1 )
+      {
+         const char *name = eventio_registered_typename(item_header.type);
+         const char *description = "";
+         if ( verbosity >= 2 )
+            description = eventio_registered_description(item_header.type);
+         if ( name != NULL && *name != '\0' )
+         {
+            snprintf(msg,sizeof(msg)-1,"\t[%s] %s", name, description);
+            Output(msg);
+         }
+      }
       Output("\n");
       if ( (rc = skip_io_block(iobuf,&item_header)) < 0 )
       {
@@ -4651,3 +4750,72 @@ int append_io_block_as_item (IO_BUFFER *iobuf, IO_ITEM_HEADER *item_header,
 
    return 0;
 }
+
+/* ======== Interface to registry of well-known data block type ========= */
+/* The implementation is available outside of the core eventio code and */
+/* a function pointer has to be set up before it is used. */
+
+/** We just keep a pointer to such a function in the core eventio code */
+static EVREGSEARCH find_ev_reg_ptr;
+
+/* ------------------ set_eventio_registry_hook ----------------- */
+/**
+ *  A single function for setting a registry search function is the
+ *  interface between the eventio core code and any code implementing
+ *  the registry. This search function is also responsible for initializing
+ *  the registry. By default, no such registry is used.
+ *
+ *  @param fptr  A pointer to the registry search function.
+ */
+
+void set_eventio_registry_hook(struct ev_reg_entry * (* fptr)(unsigned long t))
+{
+   if ( fptr == &find_ev_reg )
+   {
+      fprintf(stderr,"Th generic eventio registry search function is not a valid implementation.\n");
+      fprintf(stderr,"This would result in infinite recursion (up to stack overflow)\n");
+   }
+   else
+      find_ev_reg_ptr = fptr;
+}
+
+/** ------------------  find_ev_reg  ------------------------- */
+/*
+ *  Generic registry search function checks for presence of the function
+ *  pointer before starting the search. 
+ */
+
+static const char *none="";
+
+struct ev_reg_entry *find_ev_reg(unsigned long t)
+{
+   if ( find_ev_reg_ptr != NULL )
+      return (*find_ev_reg_ptr)(t);
+   else
+      return (struct ev_reg_entry *) NULL;
+}
+
+/** Extract the name for a given type number, if available */
+
+const char *eventio_registered_typename(unsigned long type)
+{
+   struct ev_reg_entry *e = find_ev_reg(type);
+   if ( e == NULL )
+      return none;
+   if ( e->name != NULL )
+      return e->name;
+   return none;
+}
+
+/** Extract the optional description for a given type number, if available */
+
+const char *eventio_registered_description(unsigned long type)
+{
+   struct ev_reg_entry *e = find_ev_reg(type);
+   if ( e == NULL )
+      return none;
+   if ( e->description != NULL )
+      return e->description;
+   return none;
+}
+

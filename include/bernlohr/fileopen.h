@@ -1,6 +1,6 @@
 /* ============================================================================
 
-   Copyright (C) 2000, 2009, 2010  Konrad Bernloehr
+   Copyright (C) 2000, 2009, 2010, 2014  Konrad Bernloehr
 
    This file is part of the eventio/hessio library.
 
@@ -23,8 +23,8 @@
  *  @short Function prototypes for fileopen.c.
  *
  *  @author  Konrad Bernloehr 
- *  @date    @verbatim CVS $Date: 2010/07/20 13:37:45 $ @endverbatim
- *  @version @verbatim CVS $Revision: 1.6 $ @endverbatim
+ *  @date    @verbatim CVS $Date: 2014/06/23 09:34:45 $ @endverbatim
+ *  @version @verbatim CVS $Revision: 1.7 $ @endverbatim
  */
 
 #ifndef FILEOPEN_H__LOADED
@@ -36,10 +36,16 @@ extern "C" {
 
 /* fileopen.c */
 void initpath(const char *default_path);
+void initexepath(const char *default_path);
 void listpath (char *buffer, size_t bufsize);
 void addpath(const char *name);
+void addexepath(const char *name);
 FILE *fileopen(const char *fname, const char *mode);
 int fileclose(FILE *f);
+
+void set_permissive_pipes(int p);
+void enable_permissive_pipes(void);
+void disable_permissive_pipes(void);
 
 #ifdef __cplusplus
 }

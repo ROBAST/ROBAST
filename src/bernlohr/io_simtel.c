@@ -30,8 +30,8 @@
  *
  *  @author  Konrad Bernloehr
  *  @date    1997 to 2010
- *  @date    @verbatim CVS $Date: 2013/02/26 16:23:19 $ @endverbatim
- *  @version @verbatim CVS $Revision: 1.22 $ @endverbatim
+ *  @date    @verbatim CVS $Date: 2015/04/27 10:10:29 $ @endverbatim
+ *  @version @verbatim CVS $Revision: 1.26 $ @endverbatim
  */
 
 /* ================================================================ */
@@ -210,8 +210,8 @@ int print_tel_block (IO_BUFFER *iobuf)
          printf(", profile %d).\n", (iv>>10)&0x3ff);
          if ( data[6] > 0. )
             printf("   TSTART is off.\n");
-         printf("   Cherenkov bunch size %4.2f from %1.0f to %1.0f nm, events used %d times.\n",
-           data[84], data[95], data[96], (int)(data[97]+0.1));
+         printf("   Cherenkov bunch size %4.2f from %1.0f to %1.0f nm.\n",
+           data[84], data[95], data[96]);
          printf("   Interaction: SIBYLL %d/%d, QGSJET %d/%d, DPMJET %d/%d, V/N/E %d\n",
             (int)(data[138]+0.1), (int)(data[139]+0.1),
             (int)(data[140]+0.1), (int)(data[141]+0.1),
@@ -256,11 +256,13 @@ int write_input_lines (IO_BUFFER *iobuf, struct linked_string *list)
    if ( list == NULL )
       return -1;
    
-   for (n=0, xl=list; xl->text != NULL && xl->next != NULL; xl=xl->next)
+   for ( n=0, xl=list; xl != NULL; xl=xl->next )
+   {
+      if ( xl->text == NULL )
+         break;
       n++;
-   if ( xl != NULL )
-      if ( xl->text != NULL )
-      	 n++;
+   }
+
    if ( n<=0 )
       return 0;
 
@@ -273,13 +275,13 @@ int write_input_lines (IO_BUFFER *iobuf, struct linked_string *list)
    put_item_begin(iobuf,&item_header);
    
    put_long(n,iobuf);
-   for ( xl=list; xl->next != NULL; xl=xl->next )
+   for ( n=0, xl=list; xl != NULL; xl=xl->next )
    {
       if ( xl->text == NULL )
-      	 break;
+         break;
       put_string(xl->text,iobuf);
    }
-   
+
    return put_item_end(iobuf,&item_header);
 }
 
@@ -327,14 +329,14 @@ int read_input_lines (IO_BUFFER *iobuf, struct linked_string *list)
       	 continue;
       if ( xl->text == NULL )
       {
-      	 if ( (xl->text = malloc(l+1)) == NULL )
+      	 if ( (xl->text = (char *) malloc(l+1)) == NULL )
 	    break;
       }
       else
       {
-      	 if ( (xln = calloc(1,sizeof(struct linked_string))) == NULL )
+      	 if ( (xln = (struct linked_string *) calloc(1,sizeof(struct linked_string))) == NULL )
 	    break;
-	 if ( (xln->text = malloc(l+1)) == NULL )
+	 if ( (xln->text = (char *) malloc(l+1)) == NULL )
 	    break;
 	 xl->next = xln;
 	 xl = xln;
@@ -1629,6 +1631,7 @@ int write_photo_electrons (IO_BUFFER *iobuf, int array, int tel, int npe, int fl
       {
 	 if ( pe_counts[i] <= 0 )
             continue;
+         /* FIXME: limiting number of pixels to <= 32767 */
 	 put_short(i,iobuf);
 	 put_long(pe_counts[i],iobuf);
 	 put_vector_of_real(t+tstart[i],pe_counts[i],iobuf);
@@ -1699,15 +1702,20 @@ int read_photo_electrons (IO_BUFFER *iobuf, int max_pixels, int max_pe,
       return -10;
    }
 
-   if ( *pixels > max_pixels || *npe > max_pe )
+   if ( (*pixels) > max_pixels || (*npe) > max_pe || 
+        (*pixels) < 0 || (*npe) < 0 ||
+        nonempty > (*pixels) || nonempty < 0 )
    {
-      if ( *pixels > max_pixels )
+      if ( *pixels > max_pixels || *pixels < 0 )
          fprintf(stderr,
             "Too many pixels specified in photo-electrons block: %d > %d\n",
             *pixels, max_pixels);
-      if ( *npe > max_pe )
+      if ( *npe > max_pe || *npe < 0 )
          fprintf(stderr,"Number of photo-electrons exceeds list size: %d > %d\n",
             *npe, max_pe);
+      if ( nonempty > (*pixels) || nonempty < 0 )
+         fprintf(stderr,"Number of non-empty pixels not consistent with total number: %d / %d\n",
+            nonempty, *pixels);
       get_item_end(iobuf,&item_header);
       return -4;
    }
@@ -1715,12 +1723,22 @@ int read_photo_electrons (IO_BUFFER *iobuf, int max_pixels, int max_pe,
       pe_counts[ipix] = tstart[ipix] = 0;
    for (i=it=0; i<nonempty; i++)
    {
+      /* FIXME: limiting number of pixels to <= 32767 */
       ipix = get_short(iobuf);
       if ( ipix < 0 || ipix >= max_pixels )
       {
       	 Warning("Invalid pixel number for photo-electron list");
+	 get_item_end(iobuf,&item_header);
+	 return -5;
       }
       pe_counts[ipix] = get_long(iobuf);
+      if ( pe_counts[ipix] < 0 || pe_counts[ipix] > max_pe )
+      {
+         fprintf(stderr,"Invalid number of photo-electrons for pixel %d: %d\n",
+            ipix, pe_counts[ipix]);
+	 get_item_end(iobuf,&item_header);
+	 return -5;
+      }
       if ( it + pe_counts[ipix] > max_pe )
       {
       	 pe_counts[ipix] = 0;
@@ -1904,7 +1922,7 @@ int read_shower_extra_parameters (IO_BUFFER *iobuf,
       {
          if ( ep->iparam != NULL )
             free(ep->iparam);
-         if ( (ep->iparam = calloc(ni,sizeof(int))) == NULL )
+         if ( (ep->iparam = (int *) calloc(ni,sizeof(int))) == NULL )
          {
             get_item_end(iobuf,&item_header);
             return -2;
@@ -1921,7 +1939,7 @@ int read_shower_extra_parameters (IO_BUFFER *iobuf,
       {
          if ( ep->fparam != NULL )
             free(ep->fparam);
-         if ( (ep->fparam = calloc(nf,sizeof(float))) == NULL )
+         if ( (ep->fparam = (float *) calloc(nf,sizeof(float))) == NULL )
          {
             get_item_end(iobuf,&item_header);
             return -2;
@@ -2037,7 +2055,7 @@ int init_shower_extra_parameters (struct shower_extra_parameters *ep,
       ep->iparam = NULL;
       if ( ni_max > 0 )
       {
-         if ( (ep->iparam = calloc(ni_max,sizeof(int))) == NULL )
+         if ( (ep->iparam = (int *) calloc(ni_max,sizeof(int))) == NULL )
             return -1;
          ep->niparam = ni_max;
       }
@@ -2057,7 +2075,7 @@ int init_shower_extra_parameters (struct shower_extra_parameters *ep,
       ep->fparam = NULL;
       if ( nf_max > 0 )
       {
-         if ( (ep->fparam = calloc(nf_max,sizeof(float))) == NULL )
+         if ( (ep->fparam = (float *) calloc(nf_max,sizeof(float))) == NULL )
             return -1;
          ep->nfparam = nf_max;
       }
