@@ -1,5 +1,7 @@
 # ROOT-Based Simulator for Ray Tracing (ROBAST)
 
+[![DOI](https://zenodo.org/badge/19034/ROBAST/ROBAST.svg)](https://zenodo.org/badge/latestdoi/19034/ROBAST/ROBAST)
+
 ## 1. About
 ROBAST is a non-sequential ray-tracing simulation library which is aimed for wide use in optical simulations of cosmic-ray and gamma-ray telescopes. The library is written in C++ and fully utilizes the geometry library of the ROOT analysis framework. ROBAST offers several functionalities required for ray-tracing simulations of cosmic-ray telescopes. 
 
