@@ -328,4 +328,3 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
     can->Update();
   } // i
 }
-
