@@ -54,7 +54,7 @@
 */
 
 int write_tel_block (IO_BUFFER *iobuf, int type, int num, 
-    real *data, int len)
+    bernlohr_real *data, int len)
 {
    IO_ITEM_HEADER item_header;
    int i;
@@ -86,7 +86,7 @@ int write_tel_block (IO_BUFFER *iobuf, int type, int num,
  *  @return 0 (o.k.), -1, -2, -3 (error, as usual in eventio)
 */
 
-int read_tel_block (IO_BUFFER *iobuf, int type, real *data, int maxlen)
+int read_tel_block (IO_BUFFER *iobuf, int type, bernlohr_real *data, int maxlen)
 {
    IO_ITEM_HEADER item_header;
    int i, len, rc;

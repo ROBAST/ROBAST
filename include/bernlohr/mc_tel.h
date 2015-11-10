@@ -48,9 +48,9 @@ extern "C" {
 /* Data types: */
 
 #ifdef DOUBLEPREC
-typedef double real;
+typedef double bernlohr_real;
 #else
-typedef float real;
+typedef float bernlohr_real;
 #endif
 
 typedef short INT16;
@@ -179,8 +179,8 @@ struct shower_extra_parameters
 
 /* io_telescope.c */
 int write_tel_block (IO_BUFFER *iobuf, int type, int num,
-      real *data, int len);
-int read_tel_block (IO_BUFFER *iobuf, int type, real *data,
+      bernlohr_real *data, int len);
+int read_tel_block (IO_BUFFER *iobuf, int type, bernlohr_real *data,
       int maxlen);
 int print_tel_block (IO_BUFFER *iobuf);
 
