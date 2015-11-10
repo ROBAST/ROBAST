@@ -70,8 +70,19 @@ UNITTEST:= $(wildcard unittest/*.py)
 
 ifeq ($(ROOTCLING_FOUND),)
 all:		$(LIB) $(RMAP)
+
+$(RMAP):	$(LIB) $(INCDIR)/LinkDef.h
+		rlibmap -f -o $@ -l $(LIB) -d $(DEPEND) -c $(INCDIR)/LinkDef.h
+
+$(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
+		@echo "Generating dictionary ..."
+		 $(ROOTCLING) -f $@ -c -p $^
 else
 all:		$(LIB) $(PCM)
+
+$(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
+		@echo "Generating dictionary ..."
+		$(ROOTCLING) -f $@ -c -p -I$(INCDIR) -rmf $(RMAP) -rml $(LIB) $^
 endif
 
 $(LIB):		$(OBJS) $(BOBJS)
@@ -110,10 +121,6 @@ $(SRCDIR)/%.$(ObjSuf):	$(SRCDIR)/%.c
 		@echo "Compiling" $<
 		$(CC) $(CCFLAGS) -I$(BINCDIR) -fPIC -c $< -o $@
 
-$(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
-		@echo "Generating dictionary ..."
-		$(ROOTCLING) -f $@ -c -p $^
-
 $(PCM):		$(SRCDIR)/$(PCM)
 		cp $^ $@
 
@@ -121,8 +128,6 @@ $(DICTO):	$(DICTS)
 		@echo "Compiling" $<
 		$(CXX) $(CXXFLAGS) -I. -c $< -o $@
 
-$(RMAP):	$(LIB) $(INCDIR)/LinkDef.h
-		rlibmap -f -o $@ -l $(LIB) -d $(DEPEND) -c $(INCDIR)/LinkDef.h
 doc:	all htmldoc
 
 htmldoc:
