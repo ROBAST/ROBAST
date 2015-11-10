@@ -222,7 +222,7 @@ void AddCamera(AOpticalComponent* opt)
 void AddMasts(AOpticalComponent* opt)
 {
   // Main camera masts
-  const kNMasts = 32;
+  const int kNMasts = 32;
   double pos[kNMasts][7] = {
     { 342.3,  593.0,  122.4,   57.7,  100.0, 1555.5, 16.83},
     {-342.3,  593.0,  122.4,  -57.7,  100.0, 1555.5, 16.83},
@@ -299,7 +299,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
     dir.SetMagThetaPhi(1, TMath::Pi() - deg*TMath::DegToRad(), 0);
     double lambda = 400*nm; // dummy
 
-    h2[i] = new TH2D(Form("h", i), Form("#it{#theta} = %3.1f#circ;x (mm); y (mm)", deg), 500, -50, 100, 500, -75, 75);
+    h2[i] = new TH2D(Form("h%d", i), Form("#it{#theta} = %3.1f#circ;x (mm); y (mm)", deg), 500, -50, 100, 500, -75, 75);
     
     ARayArray* array = ARayShooter::RandomCircle(lambda, 7.5*m, 100000, 0, &raytr, &dir);
     
