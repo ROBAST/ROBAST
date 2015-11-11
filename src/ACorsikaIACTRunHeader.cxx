@@ -18,9 +18,15 @@ ACorsikaIACTRunHeader::~ACorsikaIACTRunHeader()
 TDatime ACorsikaIACTRunHeader::GetDateOfBeginRun() const
 {
   Int_t yymmdd = (Int_t)fRunHeader[2];
-  Int_t year  = yymmdd/10000; // Y2K problem may be happened.
+  Int_t year  = yymmdd/10000;
   Int_t month = (yymmdd - year*10000)/100;
   Int_t day   = yymmdd - year*10000 - month*100;
+
+  if(year >= 95) {
+    year += 1900;
+  } else {
+    year += 2000;
+  } // if
 
   return TDatime(year, month, day, 0, 0, 0);
 }
