@@ -13,7 +13,7 @@
 # checked here 
 
 # older version
-MAKEARCH	:=	$(shell find -L $(ROOTSYS)/test -name Makefile.arch)
+MAKEARCH	:=	$(shell find -L $(ROOTSYS)/test -name Makefile.arch 2> /dev/null)
 
 ifeq ($(MAKEARCH), )
 # 41594 or later
