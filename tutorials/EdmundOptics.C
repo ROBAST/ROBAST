@@ -9,7 +9,7 @@ static const Double_t um = AOpticsManager::um();
 static const Double_t nm = AOpticsManager::nm();
 static const Double_t  m = AOpticsManager::m();
 
-void NT49665()
+void EdmundOptics()
 {
   // Aspherized achromatic lens.
   // http://www.edmundoptics.com/optics/optical-lenses/aspheric-lenses/aspherized-achromatic-lenses/2953
@@ -50,7 +50,6 @@ void NT49665()
   AGeoAsphericDisk* disk3
     = new AGeoAsphericDisk("disk3", z3, curv3, z4, curv4, rmax, rmin);
   Double_t coefficients[3] = {0, 4.66252900195e-6/(mm*mm*mm), -8.02842124899e-9/(mm*mm*mm*mm*mm)};
-  //Double_t coefficients[3] = {4.66252900195e-6/(mm*mm), -8.02842124899e-9/(mm*mm*mm*mm), 0};
   disk3->SetPolynomials(0, 0, 3, coefficients);
 
   // Ohara S-FSL5
@@ -127,9 +126,8 @@ void NT49665()
   TCanvas* can = new TCanvas("can", "can", 1200, 400);
   can->Divide(3, 1, 1e-10, 1e-10);
 
-  for(Int_t j = 0; j < nColor; j++){
-    can->cd(j + 1);
-    spot[j]->Draw("colz");
-  } // j
-
+  for(int i = 0; i < nColor; i++){
+    can->cd(i + 1);
+    spot[i]->Draw("colz");
+  } // i
 }
