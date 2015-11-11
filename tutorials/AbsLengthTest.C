@@ -39,15 +39,19 @@ void AbsLengthTest()
   manager->TraceNonSequential(*array);
   TObjArray* absorbed = array->GetAbsorbed();
 
-  TH1D* h1 = new TH1D("h1", "h1", 100, 0, 0);
+  TH1D* h1 = new TH1D("h1", ";Track Length (cm)", 100, 0, 100);
 
   for(Int_t i = 0; i <= absorbed->GetLast(); i++){
     ARay* ray = (ARay*)(*absorbed)[i];
     if(!ray) continue;
 
-    Double_t p[4];    
+    Double_t p[4], p0[4];
     ray->GetLastPoint(p);
-    h1->Fill(TMath::Sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2]));
+    ray->GetPoint(0, p0);
+    double d = TMath::Sqrt(p[0]*p[0] + p[1]*p[1] + p[2]*p[2])/cm;
+    //std::cout << d << "\t" << p[0] << "\t" << p[1] << "\t" << p[2] << std::endl;
+    //std::cout << "" << "\t" << p0[0] << "\t" << p0[1] << "\t" << p0[2] << std::endl;
+    h1->Fill(d);
   } // i
 
   TCanvas* canHist = new TCanvas("canHist", "canHist", 800, 600);
