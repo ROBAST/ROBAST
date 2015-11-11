@@ -349,13 +349,10 @@ ARayArray* ARayShooter::RandomSphere(Double_t lambda, Int_t n, TGeoTranslation* 
     gRandom->Sphere(dir[0], dir[1], dir[2], 1);
 
     Double_t p[3] = {0, 0, 0};
-    Double_t new_pos[3];
+    Double_t new_pos[3] = {0, 0, 0};
     if(tr){
       tr->LocalToMaster(p, new_pos);
-    } else {
-      memcpy(p, new_pos, 3*sizeof(Double_t));
     } // if
-
     ARay* ray = new ARay(0, lambda, new_pos[0], new_pos[1], new_pos[2], 0,
                          dir[0], dir[1], dir[2]);
     array->Add(ray);
