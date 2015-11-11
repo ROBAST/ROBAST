@@ -12,7 +12,7 @@ static const Double_t um = AOpticsManager::um();
 static const Double_t nm = AOpticsManager::nm();
 static const Double_t  m = AOpticsManager::m();
 
-const Double_t kMirrorRad = 1.5.*m;
+const Double_t kMirrorRad = 1.5*m;
 const Double_t kFocalLength = 3*m;
 const Double_t kMirrorSag = kMirrorRad*kMirrorRad/4./kFocalLength;
 const Double_t kFocalRad = 20*cm;
@@ -111,7 +111,7 @@ void SimpleParabolicTelescope()
 
     for(Int_t j = 0; j <= focused->GetLast(); j++){
       ARay* ray = (ARay*)(*focused)[j];
-      Double_t* first = ray->GetFirstPoint();
+      const Double_t* first = ray->GetFirstPoint();
       Double_t last[4];
       ray->GetLastPoint(last);
 
