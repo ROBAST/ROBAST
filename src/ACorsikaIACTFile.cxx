@@ -31,6 +31,7 @@ ACorsikaIACTFile::~ACorsikaIACTFile()
     delete [] fTelescopePosition[i];
     fTelescopePosition[i] = 0;
   } // if
+  free_io_buffer(fIOBuffer);
 }
 
 //_____________________________________________________________________________
