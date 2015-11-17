@@ -63,10 +63,8 @@ endif
 
 RMAP	=	lib$(NAME).rootmap
 
-UNITTEST:= $(wildcard unittest/*.py)
-
 .SUFFIXES:	.$(SrcSuf) .$(ObjSuf) .$(DllSuf)
-.PHONY:		all clean test doc htmldoc
+.PHONY:		all clean doc htmldoc
 
 ifeq ($(ROOTCLING_FOUND),)
 all:		$(LIB) $(RMAP)
@@ -135,10 +133,3 @@ htmldoc:
 
 clean:
 		rm -rf $(LIB) $(OBJS) $(BOBJS) $(DICTI) $(DICTS) $(DICTO) $(PCM) $(SRCDIR)/$(PCM) $(RMAP)
-
-test:		all
-		@for script in $(UNITTEST);\
-		do \
-		echo "Executing" $$script "...";\
-		python $$script;\
-		done
