@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -6,6 +7,11 @@
 #ifndef A_GLASS_CALTALOG_H
 #define A_GLASS_CALTALOG_H
 
+#include "TObject.h"
+#include "ACauchyFormula.h"
+#include "ASchottFormula.h"
+#include "ASellmeierFormula.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // AGlassCatalog
@@ -13,11 +19,6 @@
 // Glass catalog
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "TObject.h"
-#include "ACauchyFormula.h"
-#include "ASchottFormula.h"
-#include "ASellmeierFormula.h"
 
 class AGlassCatalog : public TObject {
  private:

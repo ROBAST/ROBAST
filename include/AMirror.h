@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -6,6 +7,11 @@
 #ifndef A_MIRROR_H
 #define A_MIRROR_H
 
+#include "TGraph.h"
+#include "TGraph2D.h"
+
+#include "AOpticalComponent.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // AMirror
@@ -13,11 +19,6 @@
 // Mirror class
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "TGraph.h"
-#include "TGraph2D.h"
-
-#include "AOpticalComponent.h"
 
 class AMirror : public AOpticalComponent {
  private:

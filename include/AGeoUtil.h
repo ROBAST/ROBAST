@@ -1,5 +1,16 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
+/******************************************************************************
+ * Copyright (C) 2006-, Akira Okumura                                         *
+ * All rights reserved.                                                       *
+ *****************************************************************************/
+
 #ifndef A_GEO_UTIL_H
 #define A_GEO_UTIL_H
+
+#include "TGeoMatrix.h"
+#include "TGeoBBox.h"
+#include "TGeoTube.h"
+#include "TVector3.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -7,11 +18,6 @@
 //                                                                            //
 // Utility functions to build complex geometries easily                       //
 ////////////////////////////////////////////////////////////////////////////////
-
-#include "TGeoMatrix.h"
-#include "TGeoBBox.h"
-#include "TGeoTube.h"
-#include "TVector3.h"
 
 namespace AGeoUtil {
 

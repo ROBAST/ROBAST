@@ -1,22 +1,23 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
  *****************************************************************************/
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// AGeoBezierPcon
-//
-// Geometry class for Pcon-like volume, but the side surfaces are defined by
-// a Bezier curve (http://en.wikipedia.org/wiki/BŽzier_curve)
-//
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef A_GEO_BEZIER_PCON_H
 #define A_GEO_BEZIER_PCON_H
 
 #include "TGeoPcon.h"
 #include "TVector2.h"
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// AGeoBezierPcon
+//
+// Geometry class for Pcon-like volume, but the side surfaces are defined by
+// a Bezier curve (https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
+//
+///////////////////////////////////////////////////////////////////////////////
 
 class AGeoBezierPcon : public TGeoPcon {
 protected:

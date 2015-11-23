@@ -1,17 +1,8 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
  *****************************************************************************/
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// AGeoWinstonCone2D
-//
-// Geometry class for 2 dimensional (+ 1D length) Winston cone
-// The 3rd dimention is along with Y axis
-// Roland Winston (1970) J. Opt. Soc.Amer. 60, 245-247
-//
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef A_GEO_WINSTON_CONE_2D_H
 #define A_GEO_WINSTON_CONE_2D_H
@@ -23,6 +14,16 @@
 #else
 #define CONST53410
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// AGeoWinstonCone2D
+//
+// Geometry class for 2 dimensional (+ 1D length) Winston cone
+// The 3rd dimention is along with Y axis
+// Roland Winston (1970) J. Opt. Soc.Amer. 60, 245-247
+//
+///////////////////////////////////////////////////////////////////////////////
 
 class AGeoWinstonCone2D : public TGeoBBox {
 protected:

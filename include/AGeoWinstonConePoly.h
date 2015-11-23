@@ -1,7 +1,13 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
  *****************************************************************************/
+
+#ifndef A_GEO_WINSTON_CONE_POLY_H
+#define A_GEO_WINSTON_CONE_POLY_H
+
+#include "AGeoWinstonCone2D.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -11,11 +17,6 @@
 // Roland Winston (1970) J. Opt. Soc.Amer. 60, 245-247
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#ifndef A_GEO_WINSTON_CONE_POLY_H
-#define A_GEO_WINSTON_CONE_POLY_H
-
-#include "AGeoWinstonCone2D.h"
 
 class AGeoWinstonConePoly : public AGeoWinstonCone2D {
 protected:

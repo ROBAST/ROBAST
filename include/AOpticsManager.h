@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -5,14 +6,6 @@
 
 #ifndef A_OPTICS_MANAGER_H
 #define A_OPTICS_MANAGER_H
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// AOpticsManager
-//
-// Manager of optics
-//
-///////////////////////////////////////////////////////////////////////////////
 
 #include "TGeoManager.h"
 #include "TMath.h"
@@ -24,6 +17,14 @@
 #include "AMirror.h"
 #include "AOpticalComponent.h"
 #include "AObscuration.h"
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// AOpticsManager
+//
+// Manager of optics
+//
+///////////////////////////////////////////////////////////////////////////////
 
 class AOpticsManager : public TGeoManager {
  private:
