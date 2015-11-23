@@ -1,7 +1,21 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
+/******************************************************************************
+ * Copyright (C) 2006-, Akira Okumura                                         *
+ * All rights reserved.                                                       *
+ *****************************************************************************/
+
 #ifndef A_CORSIKA_IACT_EVENT_HEADER_H
 #define A_CORSIKA_IACT_EVENT_HEADER_H
 
 #include "TDatime.h"
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ACorsikaIACTEventHeader
+//
+// A calss providing getters for CORSIKA IACT evenet headers.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 class ACorsikaIACTEventHeader {
  private:

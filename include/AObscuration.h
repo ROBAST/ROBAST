@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -6,6 +7,8 @@
 #ifndef A_OBSCURATION_H
 #define A_OBSCURATION_H
 
+#include "AOpticalComponent.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // AObscuration
@@ -13,8 +16,6 @@
 // Obscuration class
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "AOpticalComponent.h"
 
 class AObscuration : public AOpticalComponent {
  private:

@@ -1,3 +1,9 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
+/******************************************************************************
+ * Copyright (C) 2006-, Akira Okumura                                         *
+ * All rights reserved.                                                       *
+ *****************************************************************************/
+
 #ifndef A_CORSIKA_IACT_FILE_H
 #define A_CORSIKA_IACT_FILE_H
 
@@ -15,6 +21,14 @@
 #include "ACorsikaIACTEventHeader.h"
 #include "ACorsikaIACTRunHeader.h"
 #include "ARayArray.h"
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ACorsikaIACTFile
+//
+// Wrapper class for I/O functions of CORSIKA IACT files.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 class ACorsikaIACTFile : public TObject {
  private:

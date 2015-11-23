@@ -1,7 +1,21 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
+/******************************************************************************
+ * Copyright (C) 2006-, Akira Okumura                                         *
+ * All rights reserved.                                                       *
+ *****************************************************************************/
+
 #ifndef A_CORSIKA_IACT_RUN_HEADER_H
 #define A_CORSIKA_IACT_RUN_HEADER_H
 
 #include "TDatime.h"
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// ACorsikaIACTRunHeader
+//
+// A class providing getters for the run header of CORSIKA IACT files.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 class ACorsikaIACTRunHeader {
  private:

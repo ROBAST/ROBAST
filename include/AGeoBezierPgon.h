@@ -1,22 +1,23 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
  *****************************************************************************/
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// AGeoBezierPgon
-//
-// Geometry class for Pgon-like volume, but the side surfaces are defined by
-// a Bezier curve (http://en.wikipedia.org/wiki/BŽzier_curve)
-//
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef A_GEO_BEZIER_PGON_H
 #define A_GEO_BEZIER_PGON_H
 
 #include "TGeoPgon.h"
 #include "TVector2.h"
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// AGeoBezierPgon
+//
+// Geometry class for Pgon-like volume, but the side surfaces are defined by
+// a Bezier curve (https://en.wikipedia.org/wiki/B%C3%A9zier_curve)
+//
+///////////////////////////////////////////////////////////////////////////////
 
 class AGeoBezierPgon : public TGeoPgon {
 protected:

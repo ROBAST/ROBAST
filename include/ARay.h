@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -6,6 +7,11 @@
 #ifndef A_RAY_H
 #define A_RAY_H
 
+#include "TGeoNode.h"
+#include "TGeoTrack.h"
+#include "TPolyLine3D.h"
+#include "TVector3.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // ARay
@@ -13,11 +19,6 @@
 // Classical ray class
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "TGeoNode.h"
-#include "TGeoTrack.h"
-#include "TPolyLine3D.h"
-#include "TVector3.h"
 
 class ARay : public TGeoTrack {
  private:

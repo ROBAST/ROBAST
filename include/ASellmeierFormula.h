@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -5,6 +6,11 @@
 
 #ifndef A_SELLMEIER_FORMULA_H
 #define A_SELLMEIER_FORMULA_H
+
+#include "TF1.h"
+#include "TGraph.h"
+
+#include "ARefractiveIndex.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -14,11 +20,6 @@
 // See http://en.wikipedia.org/wiki/Sellmeier_equation
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "TF1.h"
-#include "TGraph.h"
-
-#include "ARefractiveIndex.h"
 
 class ASellmeierFormula : public ARefractiveIndex {
  private:

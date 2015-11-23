@@ -1,15 +1,8 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
  *****************************************************************************/
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// AGeoAsphericDisk
-//
-// Geometry class for tubes which have two aspheric surface
-//
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef A_GEO_ASPHERIC_DISK_H
 #define A_GEO_ASPHERIC_DISK_H
@@ -21,6 +14,14 @@
 #else
 #define CONST53410
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// AGeoAsphericDisk
+//
+// Geometry class for tubes which have two aspheric surface
+//
+///////////////////////////////////////////////////////////////////////////////
 
 class AGeoAsphericDisk : public TGeoBBox {
 protected:

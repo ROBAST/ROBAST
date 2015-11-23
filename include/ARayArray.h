@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -6,6 +7,10 @@
 #ifndef A_RAY_ARRAY_H
 #define A_RAY_ARRAY_H
 
+#include "TObjArray.h"
+
+#include "ARay.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // ARayArray
@@ -13,10 +18,6 @@
 // Array of ARay
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "TObjArray.h"
-
-#include "ARay.h"
 
 class ARayArray : public TObject {
  private:

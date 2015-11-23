@@ -1,3 +1,4 @@
+// Author: Akira Okumura <mailto:oxon@mac.com>
 /******************************************************************************
  * Copyright (C) 2006-, Akira Okumura                                         *
  * All rights reserved.                                                       *
@@ -6,6 +7,10 @@
 #ifndef A_OPTICAL_COMPONENT_H
 #define A_OPTICAL_COMPONENT_H
 
+#include "TGeoVolume.h"
+#include "TObjArray.h"
+#include "ABorderSurfaceCondition.h"
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // AOpticalComponent
@@ -13,10 +18,6 @@
 // Abstract class for optical components
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-#include "TGeoVolume.h"
-#include "TObjArray.h"
-#include "ABorderSurfaceCondition.h"
 
 class AOpticalComponent : public TGeoVolume {
  private:
