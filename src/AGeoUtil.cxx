@@ -45,16 +45,24 @@ void MakePointToPointTube(const char* name, TVector3& v1, TVector3& v2,
   Begin_Macro(source)
   {
     Double_t m = AOpticsManager::m();
+    AOpticsManager manager("manager", "manager");
     TGeoBBox* worldbox = new TGeoBBox("worldbox", 10*m, 10*m, 10*m);
     AOpticalComponent* world = new AOpticalComponent("world", worldbox);
+    manager.SetTopVolume(world);
+
     TGeoTube* tube;
     TGeoCombiTrans* combi;
     TVector3 v1(-1*m, -2*m, 3*m);
     TVector3 v2(4*m, 5*m, -1*m);
-    AGeoUtil::MakePointToPointTube("tube",v1, v2, 0.5*m, &tube, &combi);
+    AGeoUtil::MakePointToPointTube("tube", v1, v2, 0.5*m, &tube, &combi);
     ALens* lens = new ALens("lens", tube);
     world->AddNode(lens, 1, combi);
+    manager.CloseGeometry();
+
     world->Draw("ogl");
+    TGLViewer* gl = (TGLViewer*)gPad->GetViewer3D();
+
+    return gl;
   }
   End_Macro
   */
