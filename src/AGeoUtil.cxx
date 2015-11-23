@@ -42,7 +42,7 @@ void MakePointToPointTube(const char* name, TVector3& v1, TVector3& v2,
   // Create a TGeoTube whose both ends are rotated to locate at v1 or v2 by
   // using combi
   /*
-  Begin_Macro(source)
+  Begin_Macro(gui, source)
   {
     Double_t m = AOpticsManager::m();
     AOpticsManager manager("manager", "manager");
