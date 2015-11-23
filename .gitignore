@@ -5,3 +5,7 @@
 /src/bernlohr/*.o
 /src/bernlohr/*_mod.c
 /include/ROBAST
+/tutorials/*.d
+/tutorials/*.so
+/tutorials/*.pcm
+/tutorials/*.pyc
