@@ -24,10 +24,10 @@ Begin_Macro(source)
   Double_t nm = AOpticsManager::nm();
   Double_t  m = AOpticsManager::m();
 
-  ARayArray* array = ARayShooter::Circle(400*nm, 100*m, 20, 6, 0, 0);
+  ARayArray* rays = ARayShooter::Circle(400*nm, 100*m, 20, 6, 0, 0);
   TGraph* circle = new TGraph;
   circle->SetTitle("Circle(400*nm, 100*m, 20, 6, 0, 0);X (m);Y (m)");
-  TObjArray* running = array->GetRunning();
+  TObjArray* running = rays->GetRunning();
 
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(*running)[i];
@@ -37,10 +37,10 @@ Begin_Macro(source)
     circle->SetPoint(i, p[0], p[1]);
   } // i
 
-  array = ARayShooter::Rectangle(400*nm, 100*m, 80*m, 20, 10, 0, 0);
+  rays = ARayShooter::Rectangle(400*nm, 100*m, 80*m, 20, 10, 0, 0);
   TGraph* rectangle = new TGraph;
   rectangle->SetTitle("Rectangle(400*nm, 100*m, 80*m, 20, 10, 0, 0);X (m);Y (m)");
-  running = array->GetRunning();
+  running = rays->GetRunning();
 
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(*running)[i];
@@ -50,10 +50,10 @@ Begin_Macro(source)
     rectangle->SetPoint(i, p[0], p[1]);
   } // i
 
-  array = ARayShooter::Square(400*nm, 90*m, 30, 0, 0);
+  rays = ARayShooter::Square(400*nm, 90*m, 30, 0, 0);
   TGraph* square = new TGraph;
   square->SetTitle("Square(400*nm, 90*m, 30, 0, 0);X (m);Y (m)");
-  running = array->GetRunning();
+  running = rays->GetRunning();
 
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(*running)[i];
@@ -79,11 +79,11 @@ Begin_Macro(source)
   world->AddNode(top, 1);
   manager->CloseGeometry();
 
-  array = ARayShooter::RandomCone(400*nm, 45*m, 10*m, 1000, 0);
+  rays = ARayShooter::RandomCone(400*nm, 45*m, 10*m, 1000, 0);
   TGraph* cone = new TGraph;
   cone->SetTitle("RandomCone(400*nm, 45*m, 10*m, 1000, 0, 0);X (m);Y (m)");
-  manager->TraceNonSequential(*array);
-  running = array->GetFocused();
+  manager->TraceNonSequential(*rays);
+  running = rays->GetFocused();
 
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(*running)[i];
