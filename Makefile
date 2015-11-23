@@ -67,6 +67,7 @@ RMAP	=	lib$(NAME).rootmap
 .PHONY:		all clean doc htmldoc
 
 ifeq ($(ROOTCLING_FOUND),)
+# ROOT 5
 all:		$(LIB) $(RMAP)
 
 $(RMAP):	$(LIB) $(INCDIR)/LinkDef.h
@@ -76,7 +77,10 @@ $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
 		 $(ROOTCLING) -f $@ -c -p $^
 else
+# ROOT 6
 all:		$(LIB) $(PCM)
+
+$(SRCDIR)/$(PCM):	$(DICTS)
 
 $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		@echo "Generating dictionary ..."
