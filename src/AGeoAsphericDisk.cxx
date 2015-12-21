@@ -536,38 +536,54 @@ Double_t AGeoAsphericDisk::DistToInner(CONST53410 Double_t* point, CONST53410 Do
     return TGeoShape::Big();
   } // if
 
-  if(t1 == 0 or t2 == 0){
-    return 0;
-  } // if
-
   Double_t zmin = CalcF1(fRmin);
   Double_t zmax = CalcF2(fRmin);
 
-  if(t1 < 0 and t2 > 0){
-    Double_t z = t2*dir[2] + point[2];
-    if(zmin <= z and z <= zmax){
-      return t2;
+  if(t2 > 0){
+    if(t1 > 0){
+      Double_t z1 = t1*dir[2] + point[2];
+      Double_t z2 = t2*dir[2] + point[2];
+      if(z1 < zmin or zmax < z1){
+        t1 = TGeoShape::Big();
+      } // if
+      if(z2 < zmin or zmax < z2){
+        t2 = TGeoShape::Big();
+      } // if
+      
+      return t1 < t2 ? t1 : t2;
     } else {
-      return TGeoShape::Big();
+      // never happens, because t1 > t2 > 0
     } // if
-  } else if(t1 > 0 and t2 < 0){
-    Double_t z = t1*dir[2] + point[2];
-    if(zmin <= z and z <= zmax){
-      return t1;
+  } else if(t2 == 0){
+    if(t1 > 0){
+      if(zmin <= point[2] and point[2] <= zmax){
+        return 0;
+      } else {
+        Double_t z1 = t1*dir[2] + point[2];
+        if(zmin <= z1 and z1 <= zmax){
+          return t1;
+        } // if
+      } // if
+    } else if(t1 == 0){
+      if(zmin <= point[2] and point[2] <= zmax){
+        return 0;
+      } // if
     } else {
-      return TGeoShape::Big();
+      // never happens, because t1 > t2 = 0
     } // if
-  } else if(t1 > 0 and t2 > 0){
-    Double_t z1 = t1*dir[2] + point[2];
-    Double_t z2 = t2*dir[2] + point[2];
-    if(z1 < zmin or zmax < z1){
-      t1 = TGeoShape::Big();
+  } else { // t2 < 0
+    if(t1 > 0){
+      Double_t z1 = t1*dir[2] + point[2];
+      if(zmin <= z1 and z1 <= zmax){
+        return t1;
+      } // if
+    } else if(t1 == 0){
+      if(zmin <= point[2] and point[2] <= zmax){
+        return 0;
+      } // if
+    } else { // t1 < 0
+      // do nothing here, because this condition has already returned Big
     } // if
-    if(z2 < zmin or zmax < z2){
-      t2 = TGeoShape::Big();
-    } // if
-
-    return t1 < t2 ? t1 : t2;
   } // if
 
   return TGeoShape::Big();
@@ -597,38 +613,54 @@ Double_t AGeoAsphericDisk::DistToOuter(CONST53410 Double_t* point, CONST53410 Do
     return TGeoShape::Big();
   } // if
 
-  if(t1 == 0 or t2 == 0){
-    return 0;
-  } // if
-
   Double_t zmin = CalcF1(fRmax);
   Double_t zmax = CalcF2(fRmax);
 
-  if(t1 < 0 and t2 > 0){
-    Double_t z = t2*dir[2] + point[2];
-    if(zmin <= z and z <= zmax){
-      return t2;
+  if(t2 > 0){
+    if(t1 > 0){
+      Double_t z1 = t1*dir[2] + point[2];
+      Double_t z2 = t2*dir[2] + point[2];
+      if(z1 < zmin or zmax < z1){
+        t1 = TGeoShape::Big();
+      } // if
+      if(z2 < zmin or zmax < z2){
+        t2 = TGeoShape::Big();
+      } // if
+      
+      return t1 < t2 ? t1 : t2;
     } else {
-      return TGeoShape::Big();
+      // never happens, because t1 > t2 > 0
     } // if
-  } else if(t1 > 0 and t2 < 0){
-    Double_t z = t1*dir[2] + point[2];
-    if(zmin <= z and z <= zmax){
-      return t1;
+  } else if(t2 == 0){
+    if(t1 > 0){
+      if(zmin <= point[2] and point[2] <= zmax){
+        return 0;
+      } else {
+        Double_t z1 = t1*dir[2] + point[2];
+        if(zmin <= z1 and z1 <= zmax){
+          return t1;
+        } // if
+      } // if
+    } else if(t1 == 0){
+      if(zmin <= point[2] and point[2] <= zmax){
+        return 0;
+      } // if
     } else {
-      return TGeoShape::Big();
+      // never happens, because t1 > t2 = 0
     } // if
-  } else if(t1 > 0 and t2 > 0){
-    Double_t z1 = t1*dir[2] + point[2];
-    Double_t z2 = t2*dir[2] + point[2];
-    if(z1 < zmin or zmax < z1){
-      t1 = TGeoShape::Big();
+  } else { // t2 < 0
+    if(t1 > 0){
+      Double_t z1 = t1*dir[2] + point[2];
+      if(zmin <= z1 and z1 <= zmax){
+        return t1;
+      } // if
+    } else if(t1 == 0){
+      if(zmin <= point[2] and point[2] <= zmax){
+        return 0;
+      } // if
+    } else { // t1 < 0
+      // do nothing here, because this condition has already returned Big
     } // if
-    if(z2 < zmin or zmax < z2){
-      t2 = TGeoShape::Big();
-    } // if
-
-    return t1 < t2 ? t1 : t2;
   } // if
 
   return TGeoShape::Big();
