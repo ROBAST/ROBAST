@@ -3,6 +3,21 @@
  * This script shows how to simulate a HESS CT3 by ROBAST.
  ******************************************************************************/
 
+#include "TCanvas.h"
+#include "TGeoBBox.h"
+#include "TGeoSphere.h"
+#include "TGeoTube.h"
+#include "TGeoCompositeShape.h"
+#include "TH2.h"
+#include "TThread.h"
+
+#include "AFocalSurface.h"
+#include "AMirror.h"
+#include "AGeoUtil.h"
+#include "ARayShooter.h"
+#include "AObscuration.h"
+#include "AOpticsManager.h"
+
 // define useful units
 const double cm = AOpticsManager::cm();
 const double mm = AOpticsManager::mm();
