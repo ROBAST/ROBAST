@@ -1,5 +1,6 @@
 /htmldoc/
 /libROBAST.*
+/ROBASTDict_rdict.pcm
 /src/*.o
 /src/ROBASTDict*
 /src/bernlohr/*.o
