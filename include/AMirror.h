@@ -9,6 +9,7 @@
 
 #include "TGraph.h"
 #include "TGraph2D.h"
+#include "TH2.h"
 
 #include "AOpticalComponent.h"
 
@@ -22,17 +23,27 @@
 
 class AMirror : public AOpticalComponent {
  private:
-  TGraph*   fReflectivity1D; // Reflectivity data (ref v.s. wavelength)
-  TGraph2D* fReflectivity2D; // Reflectivity data (ref v.s. angle v.s. wavelength)
+  Double_t  fReflectance;
+  TGraph*   fReflectance1D; // Reflectance data (ref v.s. wavelength)
+  TGraph2D* fReflectance2D; // Reflectance data (ref v.s. angle v.s. wavelength)
+  TH2*      fReflectanceTH2; // Reflectance data (ref v.s. angle v.s. wavelength)
 
  public:
   AMirror();
   AMirror(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
   virtual ~AMirror();
 
-  virtual Double_t GetReflectivity(Double_t lambda, Double_t angle /* (rad) */);
-  virtual void     SetReflectivity(TGraph* ref) {fReflectivity1D = ref;}
-  virtual void     SetReflectivity(TGraph2D* ref) {fReflectivity2D = ref;}
+  Double_t GetReflectance(Double_t lambda, Double_t angle /* (rad) */);
+  Double_t GetReflectivity(Double_t lambda, Double_t angle /* (rad) */) {
+    return GetReflectance(lambda, angle);
+  }
+  void     SetReflectance(Double_t ref) {fReflectance = ref;}
+  void     SetReflectance(TGraph* ref) {fReflectance1D = ref;}
+  void     SetReflectivity(TGraph* ref) {SetReflectance(ref);}
+  void     SetReflectance(TGraph2D* ref) {fReflectance2D = ref;}
+  void     SetReflectivity(TGraph2D* ref) {SetReflectance(ref);}
+  void     SetReflectance(TH2* ref) {fReflectanceTH2 = ref;}
+  void     SetReflectivity(TH2* ref) {SetReflectance(ref);}
 
   ClassDef(AMirror, 1)
 };
