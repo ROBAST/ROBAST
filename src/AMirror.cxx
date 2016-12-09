@@ -21,8 +21,10 @@ ClassImp(AMirror)
 AMirror::AMirror()
 {
   // Default constructor
-  fReflectivity1D = 0;
-  fReflectivity2D = 0;
+  fReflectance = 1.0;
+  fReflectance1D = 0;
+  fReflectance2D = 0;
+  fReflectanceTH2 = 0;
   SetLineColor(16);
 }
 
@@ -30,31 +32,35 @@ AMirror::AMirror()
 AMirror::AMirror(const char* name, const TGeoShape* shape,
                  const TGeoMedium* med) : AOpticalComponent(name, shape, med)
 {
-  fReflectivity1D = 0;
-  fReflectivity2D = 0;
-  SetLineColor(16);
-}
+  fReflectance = 1.0;
+  fReflectance1D = 0;
+  fReflectance2D = 0;
+  fReflectanceTH2 = 0;
+  SetLineColor(16);}
 
 //_____________________________________________________________________________
 AMirror::~AMirror()
 {
-  SafeDelete(fReflectivity1D);
-  SafeDelete(fReflectivity2D);
+  SafeDelete(fReflectance1D);
+  SafeDelete(fReflectance2D);
+  SafeDelete(fReflectanceTH2);
 }
 
 //_____________________________________________________________________________
-Double_t AMirror::GetReflectivity(Double_t lambda, Double_t angle)
+Double_t AMirror::GetReflectance(Double_t lambda, Double_t angle)
 {
   // Return mirror reflectivity for a photon whose wavelength is lambda, and
   // whose incident angle is "angle" (rad)
   Double_t ret;
 
-  if(fReflectivity2D){
-    ret = fReflectivity2D->Interpolate(lambda, angle);
-  } else if(fReflectivity1D){
-    ret = fReflectivity1D->Eval(lambda);
+  if(fReflectance2D){
+    ret = fReflectance2D->Interpolate(lambda, angle);
+  } else if(fReflectanceTH2){
+    ret = fReflectanceTH2->Interpolate(lambda, angle);
+  } else if(fReflectance1D){
+    ret = fReflectance1D->Eval(lambda);
   } else {
-    ret = 1.;
+    ret = fReflectance;
   } // if
 
   ret = ret > 1 ? 1 : ret;
