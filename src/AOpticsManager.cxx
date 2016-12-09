@@ -117,7 +117,7 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav, TG
   if(IsMirror(nextNode)){
     Double_t angle = TMath::ACos(cosi);
     Double_t lambda = ray.GetLambda();
-    Double_t ref = ((AMirror*)nextNode->GetVolume())->GetReflectivity(lambda, angle);
+    Double_t ref = ((AMirror*)nextNode->GetVolume())->GetReflectance(lambda, angle);
     if(ref < gRandom->Uniform(1)){
       absorbed = kTRUE;
       ray.Absorb();
