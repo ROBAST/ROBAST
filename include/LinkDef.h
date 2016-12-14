@@ -32,6 +32,8 @@
 #pragma link C++ class ARefractiveIndex;
 #pragma link C++ class ASchottFormula;
 #pragma link C++ class ASellmeierFormula;
+#pragma link C++ class ATelescope;
+#pragma link C++ class ATelescopeFactory;
 
 #pragma link C++ namespace AGeoUtil;
 #pragma link C++ global A_GEO_UTIL_H;
