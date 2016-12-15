@@ -34,19 +34,24 @@ ATelescope::ATelescope(const char* config, UInt_t id)
 //_____________________________________________________________________________
 ATelescope::~ATelescope()
 {
+  TThread::Lock();
   if (fManager) {
     gGeoManager = fManager;
     SafeDelete(fManager);
   }
+  TThread::UnLock();
 }
 
 //_____________________________________________________________________________
 void ATelescope::BuildGeometry(const char* config)
 {
+  TThread::Lock();
   gGeoManager = 0;
   fManager = new AOpticsManager("manager", "Opics Manager");
 
   // Read the config file and build the geometry
+
+  TThread::UnLock();
 }
 
 //_____________________________________________________________________________

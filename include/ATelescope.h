@@ -34,6 +34,8 @@ public:
   void SetPointingDirection(Double_t zenith /* deg */, Double_t azimuth /* deg */);
   void Trace(ARayArray* array);
 
+  // Some 
+
   ClassDef(ATelescope, 1)
 };
 

@@ -22,7 +22,7 @@ private:
   static UInt_t fNTelescopes; // number of telescopes
 
 public:
-  ATelescopeFactory();
+  ATelescopeFactory() {};
   virtual ~ATelescopeFactory() {};
 
   static ATelescope* MakeTelescope(const char* config);

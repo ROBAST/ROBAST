@@ -13,13 +13,9 @@
 
 #include "ATelescopeFactory.h"
 
-ClassImp(ATelescopeFactory)
+UInt_t ATelescopeFactory::fNTelescopes = 0;
 
-//______________________________________________________________________________
-ATelescopeFactory::ATelescopeFactory()
-{
-  fNTelescopes = 0;
-}
+ClassImp(ATelescopeFactory)
 
 //______________________________________________________________________________
 ATelescope* ATelescopeFactory::MakeTelescope(const char* config)
