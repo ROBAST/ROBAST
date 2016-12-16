@@ -57,8 +57,16 @@ void ATelescope::BuildGeometry(const char* config)
 //_____________________________________________________________________________
 void ATelescope::SetPointingDirection(Double_t zenith , Double_t azimuth)
 {
-  fPointingDirection.SetMagThetaPhi(1., zenith*TMath::DegToRad(),
-                                    (90. - azimuth)*TMath::DegToRad());
+  Double_t deg = TMath::DegToRad();
+  fPointingDirection.SetMagThetaPhi(1., zenith*Deg, (90. - azimuth)*deg);
+
+  gGeoManager = fManager;
+  // Get the physical node of the telescope
+  TGeoPhysicalNode* pn = new TGeoPhysicalNode("/top/telescope_1");
+  // Rotate the telescope to the direction of (zenith, azimuth)
+  TGeoRotation* rot = new TGeoRotation("", -azimuth*deg, zenith*deg);
+  pn->Align(rot);
+  SafeDelete(pn);
 }
 
 //_____________________________________________________________________________
