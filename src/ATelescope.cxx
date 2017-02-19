@@ -11,6 +11,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TGeoPhysicalNode.h"
+#include "TGeoMatrix.h"
+
 #include "ATelescope.h"
 
 ClassImp(ATelescope)
@@ -58,14 +61,21 @@ void ATelescope::BuildGeometry(const char* config)
 void ATelescope::SetPointingDirection(Double_t zenith , Double_t azimuth)
 {
   Double_t deg = TMath::DegToRad();
-  fPointingDirection.SetMagThetaPhi(1., zenith*Deg, (90. - azimuth)*deg);
+  fPointingDirection.SetMagThetaPhi(1., zenith*deg, (90. - azimuth)*deg);
 
   gGeoManager = fManager;
   // Get the physical node of the telescope
-  TGeoPhysicalNode* pn = new TGeoPhysicalNode("/top/telescope_1");
+  const char* name = gGeoManager->GetTopVolume()->GetName();
+  TGeoPhysicalNode* pn = new TGeoPhysicalNode(Form("/%s", name));
   // Rotate the telescope to the direction of (zenith, azimuth)
-  TGeoRotation* rot = new TGeoRotation("", -azimuth*deg, zenith*deg);
-  pn->Align(rot);
+  TGeoRotation rot1("", 90*deg, 0*deg, 0*deg);
+  TGeoRotation rot2("", (-90 - azimuth)*deg, -zenith*deg, 0*deg);
+  TGeoTranslation tra(0, 0, 0);
+  TGeoCombiTrans comb1(tra, rot1);
+  TGeoCombiTrans comb2(tra, rot2);
+  TGeoHMatrix* h = new TGeoHMatrix(comb2 * comb1);
+
+  pn->Align(h);
   SafeDelete(pn);
 }
 
