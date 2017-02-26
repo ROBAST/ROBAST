@@ -21,8 +21,12 @@
 
 namespace AGeoUtil {
 
-void MakePointToPointBBox(const char* name, TVector3& v1, TVector3& v2, Double_t dx, Double_t dy, TGeoBBox** box, TGeoCombiTrans** combi);
-void MakePointToPointTube(const char* name, TVector3& v1, TVector3& v2, Double_t radius, TGeoTube** tube, TGeoCombiTrans** combi);
+void MakePointToPointBBox(const char* name, const TVector3& v1,
+			  const TVector3& v2, Double_t dx, Double_t dy,
+			  TGeoBBox** box, TGeoCombiTrans** combi);
+void MakePointToPointTube(const char* name, const TVector3& v1,
+			  const TVector3& v2, Double_t radius, TGeoTube** tube,
+			  TGeoCombiTrans** combi);
 
 } // AGeoUtil
 

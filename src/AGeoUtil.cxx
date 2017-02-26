@@ -17,8 +17,8 @@ NamespaceImp(AGeoUtil)
 namespace AGeoUtil {
 
 //______________________________________________________________________________
-void MakePointToPointBBox(const char* name, TVector3& v1, TVector3& v2,
-                          Double_t dx, Double_t dy,
+void MakePointToPointBBox(const char* name, const TVector3& v1,
+                          const TVector3& v2, Double_t dx, Double_t dy,
                           TGeoBBox** box, TGeoCombiTrans** combi)
 {
   TVector3 v3 = v1 + v2;
@@ -35,8 +35,8 @@ void MakePointToPointBBox(const char* name, TVector3& v1, TVector3& v2,
 }
 
 //______________________________________________________________________________
-void MakePointToPointTube(const char* name, TVector3& v1, TVector3& v2,
-                          Double_t radius, TGeoTube** tube,
+void MakePointToPointTube(const char* name, const TVector3& v1,
+                          const TVector3& v2, Double_t radius, TGeoTube** tube,
                           TGeoCombiTrans** combi)
 {
   // Create a TGeoTube whose both ends are rotated to locate at v1 or v2 by
