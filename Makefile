@@ -53,6 +53,14 @@ PCM	:=	$(NAME)Dict_rdict.pcm
 BSRCS	:=	$(wildcard $(SRCDIR)/bernlohr/*.c)
 BOBJS	:=	$(patsubst %.c,%.$(ObjSuf),$(BSRCS))
 
+# Replace similar lines in Makefile.arch because it does not support 10.10 or
+# later
+ifeq ($(subst $(MACOSX_MINOR),,4321),4321)
+DllSuf        = so
+else
+DllSuf        = dylib
+endif
+
 LIB	=	lib$(NAME).$(DllSuf)
 
 CXXFLAGS	+= $(ROBASTFLAGS)
@@ -91,7 +99,7 @@ $(LIB):		$(OBJS) $(BOBJS)
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
 		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
-ifneq ($(subst $(MACOSX_MINOR),,1234),1234)
+ifneq ($(subst $(MACOSX_MINOR),,4321),4321)
 ifeq ($(MACOSX_MINOR),4)
 		ln -sf $@ $(subst .$(DllSuf),.so,$@)
 else
