@@ -38,7 +38,7 @@ DEPEND	:=	libCore libGeom libGeomPainter libPhysics libGraf libGraf3d
 
 SRCDIR	:=	src
 INCDIR	:=	include
-BINCDIR	:=	$(INCDIR)/bernlohr
+BINCDIR	:=	#$(INCDIR)/bernlohr
 
 DICT	:=	$(NAME)Dict
 DICTS	:=	$(SRCDIR)/$(NAME)Dict.$(SrcSuf)
@@ -50,8 +50,8 @@ SRCS	:=	$(filter-out $(SRCDIR)/$(DICT).%,$(wildcard $(SRCDIR)/*.$(SrcSuf)))
 OBJS	:=	$(patsubst %.$(SrcSuf),%.$(ObjSuf),$(SRCS)) $(DICTO)
 PCM	:=	$(NAME)Dict_rdict.pcm
 
-BSRCS	:=	$(wildcard $(SRCDIR)/bernlohr/*.c)
-BOBJS	:=	$(patsubst %.c,%.$(ObjSuf),$(BSRCS))
+BSRCS	:=	#$(wildcard $(SRCDIR)/bernlohr/*.c)
+BOBJS	:=	#$(patsubst %.c,%.$(ObjSuf),$(BSRCS))
 
 # Replace similar lines in Makefile.arch because it does not support 10.10 or
 # later
@@ -95,7 +95,7 @@ $(DICTS):	$(INCS) $(INCDIR)/LinkDef.h
 		$(ROOTCLING) -f $@ -c -p -I$(INCDIR) -rmf $(RMAP) -rml $(LIB) $^
 endif
 
-$(LIB):		$(OBJS) $(BOBJS)
+$(LIB):		$(OBJS) #$(BOBJS)
 ifeq ($(PLATFORM),macosx)
 # We need to make both the .dylib and the .so
 		$(LD) $(SOFLAGS)$@ $(LDFLAGS) $^ $(OutPutOpt) $@ $(EXPLLINKLIBS)
