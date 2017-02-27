@@ -9,6 +9,9 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ namespace AGeoUtil;
+#pragma link C++ global A_GEO_UTIL_H;
+
 #pragma link C++ class ABorderSurfaceCondition;
 #pragma link C++ class ACauchyFormula;
 #pragma link C++ class ACorsikaIACTEventHeader;
@@ -33,7 +36,6 @@
 #pragma link C++ class ASchottFormula;
 #pragma link C++ class ASellmeierFormula;
 
-#pragma link C++ namespace AGeoUtil;
-#pragma link C++ global A_GEO_UTIL_H;
-#pragma link C++ function AGeoUtil::MakePointToPointTube(const char*, TVector3&, TVector3&, Double_t, TGeoTube**, TGeoCombiTrans**);
+#pragma link C++ function AGeoUtil::MakePointToPointBBox(const char*, const TVector3&, const TVector3&, Double_t, Double_t, TGeoBBox**, TGeoCombiTrans**);
+#pragma link C++ function AGeoUtil::MakePointToPointTube(const char*, const TVector3&, const TVector3&, Double_t, TGeoTube**, TGeoCombiTrans**);
 #endif
