@@ -13,7 +13,9 @@
 
 #include "AFocalSurface.h"
 #include "AMirror.h"
+#ifndef __CINT__
 #include "AGeoUtil.h"
+#endif
 #include "ARayShooter.h"
 #include "AObscuration.h"
 #include "AOpticsManager.h"
