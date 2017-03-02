@@ -36,6 +36,9 @@
 #pragma link C++ class ASchottFormula;
 #pragma link C++ class ASellmeierFormula;
 
-#pragma link C++ function AGeoUtil::MakePointToPointBBox(const char*, const TVector3&, const TVector3&, Double_t, Double_t, TGeoBBox**, TGeoCombiTrans**);
-#pragma link C++ function AGeoUtil::MakePointToPointTube(const char*, const TVector3&, const TVector3&, Double_t, TGeoTube**, TGeoCombiTrans**);
+// for automatic loading
+#ifdef MAKE_MAPS
+#pragma link C++ class AGeoUtil;
+#endif
+
 #endif
