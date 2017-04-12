@@ -76,6 +76,13 @@ TF1* ASellmeierFormula::FitData(TGraph* graph, const char* tf1name, Option_t* op
     f = MakeGraph(tf1name, xmin, xmax);
   } // if
 
+  f->SetParLimits(0, 0, 1e1);
+  f->SetParLimits(1, 0, 1e0);
+  f->SetParLimits(2, 0, 1e1);
+  f->SetParLimits(3, 0, 1e-1);
+  f->SetParLimits(4, 0, 1e-1);
+  f->SetParLimits(5, 0, 1e3);
+
   graph->Fit(f, option);
   for(Int_t i = 0; i < (Int_t)(sizeof(fPar)/sizeof(Double_t)); i++){
     fPar[i] = f->GetParameter(i);
