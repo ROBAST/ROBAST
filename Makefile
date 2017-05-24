@@ -67,6 +67,8 @@ CXXFLAGS	+= $(ROBASTFLAGS)
 
 ifneq ($(EXPLLINKLIBS), )
 EXPLLINKLIBS	+= -lGeom -lGeomPainter
+else
+EXPLLINKLIBS	= $(ROOTGLIBS) $(ROOTLIBS) -lGeom -lGeomPainter
 endif
 
 RMAP	=	lib$(NAME).rootmap
