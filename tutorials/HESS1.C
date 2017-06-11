@@ -54,7 +54,9 @@ void HESS1()
   AddCamera(world);
   AddMasts(world);
   manager->CloseGeometry(); // finalize the geometry construction
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 2, 0)
   manager->SetMultiThread(kTRUE); // enable multi threading
+#endif
   manager->SetMaxThreads(8); // 8 threads
 
   TCanvas* can = new TCanvas("can3D", "can3D", 800, 800);

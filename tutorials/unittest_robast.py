@@ -55,7 +55,9 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
-        manager.SetMultiThread(True);
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
         for j in range(2):
@@ -107,7 +109,9 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
-        manager.SetMultiThread(True);
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
         N = 10000
@@ -132,7 +136,9 @@ class TestROBAST(unittest.TestCase):
         mirror = ROOT.AMirror("mirror", mirrorbox)
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        manager.SetMultiThread(True);
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
         
         graph = ROOT.TGraph()
@@ -195,7 +201,9 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        manager.SetMultiThread(True);
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
         N = 10000
@@ -242,7 +250,9 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        manager.SetMultiThread(True);
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
         ray = ROOT.ARay(0, 400*nm, 0, 0, 0, 0, 0, 0, -1)
@@ -269,7 +279,9 @@ class TestROBAST(unittest.TestCase):
         lens.AddNode(focal, 1)
 
         manager.CloseGeometry()
-        manager.SetMultiThread(True);
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
         manager.DisableFresnelReflection(True)
 
@@ -308,7 +320,9 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(focal, 1)
         manager.CloseGeometry()
-        manager.SetMultiThread(True)
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+            manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
         for i in range(3):

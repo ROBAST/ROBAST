@@ -101,7 +101,9 @@ void SchmidtCassegrain()
 
   manager->DisableFresnelReflection(kTRUE);
 
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 2, 0)
   manager->SetMultiThread(kTRUE);
+#endif
   manager->SetMaxThreads(8);
 
   TCanvas* c1 = new TCanvas("c1");

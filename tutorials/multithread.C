@@ -19,8 +19,12 @@ Double_t multithread(Int_t nthreads)
   world->AddNode(mirror, 1);
 
   manager->CloseGeometry();
-  // two lines are needed for multi-thread support, call after CloseGeometry
+  // Two lines are needed for multi-thread support, call after CloseGeometry
+  // In ROOT 6.02/00 or later, SetMultiThread does not need to be called
+  // Please note that SetMultiThread does not exist in 6.09
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 2, 0)
   manager->SetMultiThread(kTRUE);
+#endif
   manager->SetMaxThreads(nthreads);
 
   ARayArray* rays = ARayShooter::RandomSphere(400*nm, 10000);

@@ -59,7 +59,9 @@ void MST()
   AddMirrors(small_world);
   AddCamera(small_world);
   manager->CloseGeometry(); // finalize the geometry construction
+#if ROOT_VERSION_CODE < ROOT_VERSION(6, 2, 0)
   manager->SetMultiThread(kTRUE); // enable multi threading
+#endif
   manager->SetMaxThreads(8); // 8 threads
 
   TCanvas* can = new TCanvas("can3D", "can3D", 800, 800);
@@ -200,7 +202,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
         pol->SetLineColor(2);
         pol->SetLineWidth(2);
         can3D->cd();
-        //pol->Draw("same");
+        pol->Draw("same");
       } // if
     } // k
     
