@@ -185,7 +185,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
 
     h2[i] = new TH2D(Form("h%d", i), Form("#it{#theta} = %3.1f#circ;x (mm); y (mm)", angle), 500, -50, 100, 500, -75, 75);
     
-    ARayArray* array = ARayShooter::RandomCone(lambda, 7.5*m, dist, 1000000, &rayrot, &raytr);
+    ARayArray* array = ARayShooter::RandomCone(lambda, 7.5*m, dist, 100000, &rayrot, &raytr);
     
     manager->TraceNonSequential(*array);
     
@@ -202,7 +202,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
         pol->SetLineColor(2);
         pol->SetLineWidth(2);
         can3D->cd();
-        pol->Draw("same");
+        //pol->Draw("same");
       } // if
     } // k
     
