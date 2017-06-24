@@ -5,6 +5,7 @@
 
 #include "TCanvas.h"
 #include "TGeoBBox.h"
+#include "TGeoPgon.h"
 #include "TGeoSphere.h"
 #include "TGeoTube.h"
 #include "TGeoCompositeShape.h"
