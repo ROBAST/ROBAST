@@ -388,8 +388,12 @@ Double_t AGeoWinstonCone2D::DistToParabola(CONST53410 Double_t* point, CONST5341
       y_cross_p = y + (x_cross_p - x)*py/px;
       y_cross_m = y + (x_cross_m - x)*py/px;
     } else {
-      y_cross_p = y + (px == 0 ? (z_cross_p - z)*py/pz : (x_cross_p - x)*py/px);
-      y_cross_m = y + (px == 0 ? (z_cross_m - z)*py/pz : (x_cross_m - x)*py/px);
+      // Checking (px == 0) is not enough because x is sometime, e.g., 1e-17,
+      // which makes the y_cross_p/m too big.
+      // In the case of |px| << 1 and |pz| << 1, |py| is almost 1, and thus
+      // the photon will not cross the parabolas
+      y_cross_p = y + (TMath::Abs(px) < 1e-5 ? (z_cross_p - z)*py/pz : (x_cross_p - x)*py/px);
+      y_cross_m = y + (TMath::Abs(px) < 1e-5 ? (z_cross_m - z)*py/pz : (x_cross_m - x)*py/px);
     } // if
 
     Double_t dx = x_cross_p - x;
