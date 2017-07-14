@@ -232,6 +232,10 @@ void AOpticsManager::TraceNonSequential(TObjArray* array)
 {
   TGeoNavigator* nav = GetCurrentNavigator();
   if(!nav){
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 9, 2) && ROOT_VERSION_CODE == ROOT_VERSION(6,10, 2)
+    // This line is missing in TGeoManager::AddNavigator
+    if (IsMultiThread()) TGeoManager::ThreadId();
+#endif
     nav = AddNavigator();
   } // if
 
