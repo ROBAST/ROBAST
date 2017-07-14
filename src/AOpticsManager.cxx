@@ -201,7 +201,6 @@ void* AOpticsManager::Thread(void* args)
   TObjArray* running = array->GetRunning();
   manager->TraceNonSequential(running);
 
-  //TThread::Lock();
   Int_t n = running->GetLast();
 
   for(Int_t i = 0; i <= n; i++){
@@ -211,7 +210,6 @@ void* AOpticsManager::Thread(void* args)
   } // i
 
   running->Expand(0);
-  //TThread::UnLock();
 
   manager->RemoveNavigator(manager->GetCurrentNavigator());
 
