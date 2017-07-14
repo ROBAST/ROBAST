@@ -9,7 +9,6 @@
 
 #include "TGeoManager.h"
 #include "TMath.h"
-#include "TThread.h"
 
 #include "ARayArray.h"
 #include "AFocalSurface.h"
