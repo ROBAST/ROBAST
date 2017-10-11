@@ -171,9 +171,10 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
 {
   const int kNangle = 9;
   TH2D* h2[kNangle];
-  TGraph* graph = new TGraph();
   TCanvas* can = new TCanvas("can", "can", 900, 900);
   can->Divide(3, 3, 1e-10, 1e-10);
+
+  TGraph* graphX = new TGraph;
 
   for(int i = 0; i < kNangle; i++){
     const double dist = 10*km;
@@ -183,20 +184,31 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
                           0, dist*TMath::Cos(angle*TMath::DegToRad()));
 
     double lambda = 400*nm; // dummy
-
-    h2[i] = new TH2D(Form("h%d", i), Form("#it{#theta} = %3.1f#circ;x (mm); y (mm)", angle), 500, -50, 100, 500, -75, 75);
-    
+   
     ARayArray* array = ARayShooter::RandomCone(lambda, 7.5*m, dist, 100000, &rayrot, &raytr);
     
     manager->TraceNonSequential(*array);
     
     TObjArray* focused = array->GetFocused();
         
+    const double platescale = 28.65; // (mm/deg)
+
+    TH1D htmp("", "", 1, -1e10, 1e10);
     for(Int_t k = 0; k <= focused->GetLast(); k++){
       ARay* ray = (ARay*)(*focused)[k];
       Double_t p[4];
       ray->GetLastPoint(p);
-      h2[i]->Fill((p[0] - 28.65*angle)/mm, p[1]/mm); // 28 is a rough plate scale
+      htmp.Fill(p[0]);
+    }
+
+    double meanx = htmp.GetMean();
+    h2[i] = new TH2D(Form("h%d", i), Form("#it{#theta} = %3.1f#circ;x (mm); y (mm)", angle), 300, meanx/mm - 40, meanx/mm + 140, 300, -90, 90);
+
+    for(Int_t k = 0; k <= focused->GetLast(); k++){
+      ARay* ray = (ARay*)(*focused)[k];
+      Double_t p[4];
+      ray->GetLastPoint(p);
+      h2[i]->Fill(p[0]/mm, p[1]/mm);
       
       if (i == kNangle - 1 && k < 30) {
         TPolyLine3D* pol = ray->MakePolyLine3D();
@@ -211,5 +223,37 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D)
     can->cd(i + 1);
     h2[i]->Draw("colz");
     can->Update();
+
+    graphX->SetPoint(graphX->GetN(), angle, meanx/mm);
   } // i
+
+  TCanvas* can2 = new TCanvas("can2", "can2", 800, 600);
+  can2->DrawFrame(0, 0, 4, 1200, ";Field Angle (deg);<#it{x}> (mm);");
+  graphX->SetMarkerStyle(20);
+  graphX->Draw("p same");
+
+  Double_t pscale = graphX->GetY()[graphX->GetN() - 1]*mm/graphX->GetX()[graphX->GetN() - 1]; // plate scale
+
+  TGraph* graphStdX = new TGraph;
+  TGraph* graphStdY = new TGraph;
+
+  for(int i = 0; i < kNangle; i++){
+    Double_t stdx = h2[i]->GetStdDev(1);
+    Double_t stdy = h2[i]->GetStdDev(2);
+    double angle = i*0.5;
+    graphStdX->SetPoint(i, angle, stdx*mm/pscale);
+    graphStdY->SetPoint(i, angle, stdy*mm/pscale);
+  } // i
+
+  TCanvas* can3 = new TCanvas("can3", "can3", 800, 600);
+  can3->DrawFrame(0, 0, 4, 0.11, ";Field Angle (deg);Std. Dev. (deg);");
+  graphStdX->Draw("p same");
+  graphStdX->SetMarkerStyle(20);
+  graphStdY->Draw("p same");
+  graphStdY->SetMarkerStyle(21);
+
+  TLegend* leg = new TLegend(0.15, 0.6, 0.5, 0.85);
+  leg->AddEntry(graphStdX, "Std. Dev. along X", "p");
+  leg->AddEntry(graphStdY, "Std. Dev. along Y", "p");
+  leg->Draw();
 }
