@@ -9,7 +9,7 @@
 	 "| Akira Okumura, Koji Noda, Cameron Rulten (2016)                            |\n"
 	 "| \"ROBAST: Development of a ROOT-Based Ray-Tracing Library for Cosmic-Ray    |\n"
 	 "| Telescopes and its Applications in the Cherenkov Telescope Array\"          |\n"
-	 "| Astroparticle Physics 76 38-47                                             |\n"
+	 "| \e[3mAstroparticle Physics\e[0m \e[1m76\e[0m 38-47                                             |\n"
 	 "|                                                                            |\n"
 	 "| For support & FAQ, please visit https://robast.github.io/support.html      |\n"
 	 "|                                                                            |\n"
