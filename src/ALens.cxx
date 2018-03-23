@@ -15,24 +15,20 @@
 
 ClassImp(ALens)
 
-ALens::ALens()
+ALens::ALens() : fAbsorptionLength(NULL), fIndex(NULL), fIndexGraph(NULL),
+  fConstantIndex(1), fConstantAbsorptionLength(-1)
 {
   // Default constructor
-  fAbsorptionLength = NULL;
-  fIndex = NULL;
-  fConstantIndex = 1;
-  fConstantAbsorptionLength = -1;
   SetLineColor(7);
 }
 
 //_____________________________________________________________________________
 ALens::ALens(const char* name, const TGeoShape* shape,
-             const TGeoMedium* med) : AOpticalComponent(name, shape, med)
+             const TGeoMedium* med) : AOpticalComponent(name, shape, med),
+                                      fAbsorptionLength(NULL), fIndex(NULL),
+                                      fIndexGraph(NULL), fConstantIndex(1),
+                                      fConstantAbsorptionLength(-1)
 {
-  fAbsorptionLength = NULL;
-  fIndex = NULL;
-  fConstantIndex = 1;
-  fConstantAbsorptionLength = -1;
   SetLineColor(7);
   if(GetMedium() == TGeoVolume::DummyMedium() ||
      GetMedium() == GetOpaqueVacuumMedium() ){
@@ -43,6 +39,9 @@ ALens::ALens(const char* name, const TGeoShape* shape,
 //_____________________________________________________________________________
 ALens::~ALens()
 {
+  SafeDelete(fAbsorptionLength);
+  SafeDelete(fIndex);
+  SafeDelete(fIndexGraph);
 }
 
 //_____________________________________________________________________________
@@ -64,7 +63,11 @@ Double_t ALens::GetRefractiveIndex(Double_t lambda) const
 
   if(fIndex){
     ret = fIndex->GetIndex(lambda);
-  } // if
+  }
+
+  if(fIndexGraph){
+    ret = fIndexGraph->Eval(lambda);
+  }
 
   return ret;
 }
