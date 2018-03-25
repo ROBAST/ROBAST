@@ -80,7 +80,7 @@ class TestROBAST(unittest.TestCase):
             
             for i in range(absorbed.GetLast() + 1):
                 ray = absorbed.At(i)
-                p = array.array("d", [0, 0, 0])
+                p = array.array("d", [0, 0, 0, 0])
                 ray.GetLastPoint(p)
                 d = (p[0]*p[0] + p[1]*p[1] + p[2]*p[2])**0.5
                 h.Fill(d/mm)
