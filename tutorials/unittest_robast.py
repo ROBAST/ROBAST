@@ -12,8 +12,6 @@ ROOT.gSystem.Load("libROBAST")
 
 # Hack to avoid a seg fault in ROOT6. To be removed at some point.
 # See https://groups.cern.ch/group/roottalk/Lists/Archive/Flat.aspx?RootFolder=%2Fgroup%2Froottalk%2FLists%2FArchive%2FPyROOT%20Seg%20fault%20with%20a%20custom%20class%20%28only%20in%20ROOT6%29&FolderCTID=0x01200200A201AF59FD011C4E9284C43BF0CDA2A4
-ROOT.ARefractiveIndex
-
 for i in range(ROOT.gClassTable.Classes()):
     cname = ROOT.gClassTable.At(i)
     if cname[:4] == 'TGeo' or (cname[:4] == 'AGeo' and cname != 'AGeoUtil') or \
@@ -261,6 +259,18 @@ class TestROBAST(unittest.TestCase):
 
         n = ray.GetNpoints()
         self.assertEqual(n, 1000)
+
+    def testRefractiveIndex(self):
+        manager = makeTheWorld()
+        lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
+        lens = ROOT.ALens("lens", lensbox)
+
+        graph = ROOT.TGraph()
+        graph.SetPoint(0, 400*nm, 1.6)
+        graph.SetPoint(1, 500*nm, 1.5)
+        lens.SetRefractiveIndex(graph)
+        n = lens.GetRefractiveIndex(450*nm)
+        self.assertEqual(n, 1.55)
 
     def testSnellsLaw(self):
         manager = makeTheWorld()
