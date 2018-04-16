@@ -9,6 +9,7 @@ import time
 ROOT.PyConfig.StartGuiThread = 'inputhook' # for the OpenGL viewer thread
 ROOT.gSystem.Load("libGeom")
 ROOT.gSystem.Load("libROBAST")
+ROOT.gInterpreter.ProcessLine('#include "RVersion.h"') # load ROOT_VERSION
 
 # Hack to avoid a seg fault in ROOT6. To be removed at some point.
 # See https://groups.cern.ch/group/roottalk/Lists/Archive/Flat.aspx?RootFolder=%2Fgroup%2Froottalk%2FLists%2FArchive%2FPyROOT%20Seg%20fault%20with%20a%20custom%20class%20%28only%20in%20ROOT6%29&FolderCTID=0x01200200A201AF59FD011C4E9284C43BF0CDA2A4
@@ -219,7 +220,7 @@ class TestROBAST(unittest.TestCase):
 
         for i in range(N):
             ray = exited.At(i)
-            p = array.array("d", [0, 0, 0])
+            p = array.array("d", [0, 0, 0, 0])
             ray.GetDirection(p)
             px = p[0]
             py = p[1]
@@ -305,7 +306,7 @@ class TestROBAST(unittest.TestCase):
         # calling TraceNonSequential(ARay*) causes a seg fault...
         manager.TraceNonSequential(arr)
 
-        p = array.array("d", [0, 0, 0])
+        p = array.array("d", [0, 0, 0, 0])
         ray.GetDirection(p)
         px = p[0]
         py = p[1]
