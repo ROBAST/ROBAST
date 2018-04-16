@@ -28,9 +28,11 @@ AOpticalComponent::AOpticalComponent(const char* name, const TGeoShape* shape,
   : TGeoVolume(name, shape, med)
 {
   fSurfaceArray = 0;
+#if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
   if(GetMedium() == TGeoVolume::DummyMedium()){
     SetMedium(GetOpaqueVacuumMedium());
   }
+#endif
 }
 
 //_____________________________________________________________________________
