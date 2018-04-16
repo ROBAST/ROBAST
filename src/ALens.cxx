@@ -30,10 +30,12 @@ ALens::ALens(const char* name, const TGeoShape* shape,
                                       fConstantAbsorptionLength(-1)
 {
   SetLineColor(7);
+#if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
   if(GetMedium() == TGeoVolume::DummyMedium() ||
      GetMedium() == GetOpaqueVacuumMedium() ){
     SetMedium(GetTransparentVacuumMedium());
   }
+#endif
 }
 
 //_____________________________________________________________________________
