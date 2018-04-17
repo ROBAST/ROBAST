@@ -21,20 +21,21 @@ class AOpticalComponent;
 ///////////////////////////////////////////////////////////////////////////////
 
 class ABorderSurfaceCondition : public TObject {
-private:
+ private:
   AOpticalComponent* fComponent[2];
-  Double_t           fSigma;
+  Double_t fSigma;
 
-public:
-  ABorderSurfaceCondition(AOpticalComponent* component1, AOpticalComponent* component2);
+ public:
+  ABorderSurfaceCondition(AOpticalComponent* component1,
+                          AOpticalComponent* component2);
   virtual ~ABorderSurfaceCondition();
 
-  const AOpticalComponent* GetComponent1() const {return fComponent[0];}
-  const AOpticalComponent* GetComponent2() const {return fComponent[1];}
-  Double_t                 GetGaussianRoughness() const {return fSigma;}
-  void                     SetGaussianRoughness(Double_t sigma /* (rad) */);
+  const AOpticalComponent* GetComponent1() const { return fComponent[0]; }
+  const AOpticalComponent* GetComponent2() const { return fComponent[1]; }
+  Double_t GetGaussianRoughness() const { return fSigma; }
+  void SetGaussianRoughness(Double_t sigma /* (rad) */);
 
   ClassDef(ABorderSurfaceCondition, 1)
 };
 
-#endif // A_BORDER_SURFACE_CONDITION_H
+#endif  // A_BORDER_SURFACE_CONDITION_H

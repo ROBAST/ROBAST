@@ -19,13 +19,13 @@
 
 class AObscuration : public AOpticalComponent {
  private:
-
  public:
   AObscuration();
-  AObscuration(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
+  AObscuration(const char* name, const TGeoShape* shape,
+               const TGeoMedium* med = 0);
   virtual ~AObscuration();
 
   ClassDef(AObscuration, 1)
 };
 
-#endif // A_OBSCURATION_H
+#endif  // A_OBSCURATION_H

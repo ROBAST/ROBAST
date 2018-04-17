@@ -20,7 +20,7 @@
 
 class ACauchyFormula : public ARefractiveIndex {
  private:
-  Double_t fPar[3]; // Parameters
+  Double_t fPar[3];  // Parameters
 
  public:
   ACauchyFormula();
@@ -32,4 +32,4 @@ class ACauchyFormula : public ARefractiveIndex {
   ClassDef(ACauchyFormula, 1)
 };
 
-#endif // A_CAUCHY_FORMULA_H
+#endif  // A_CAUCHY_FORMULA_H

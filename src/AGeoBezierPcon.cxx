@@ -14,59 +14,53 @@
 
 #include "AGeoBezierPcon.h"
 
-ClassImp(AGeoBezierPcon)
+ClassImp(AGeoBezierPcon);
 
 //_____________________________________________________________________________
-AGeoBezierPcon::AGeoBezierPcon() : TGeoPcon()
-{
+AGeoBezierPcon::AGeoBezierPcon() : TGeoPcon() {
   // Default constructor
 }
 
 //_____________________________________________________________________________
-AGeoBezierPcon::AGeoBezierPcon(Double_t phi, Double_t dphi,
-                               Int_t nz, Double_t r1, Double_t r2, Double_t dz)
-  : TGeoPcon(phi, dphi, nz), fLength(dz*2), fR1(r1), fR2(r2)
-{
+AGeoBezierPcon::AGeoBezierPcon(Double_t phi, Double_t dphi, Int_t nz,
+                               Double_t r1, Double_t r2, Double_t dz)
+    : TGeoPcon(phi, dphi, nz), fLength(dz * 2), fR1(r1), fR2(r2) {
   fNcontrol = 0;
 }
 
 //_____________________________________________________________________________
 AGeoBezierPcon::AGeoBezierPcon(const char* name, Double_t phi, Double_t dphi,
-                               Int_t nz, Double_t r1, Double_t r2,
-                               Double_t dz)
-  : TGeoPcon(name, phi, dphi, nz), fLength(dz*2), fR1(r1), fR2(r2)
-{
+                               Int_t nz, Double_t r1, Double_t r2, Double_t dz)
+    : TGeoPcon(name, phi, dphi, nz), fLength(dz * 2), fR1(r1), fR2(r2) {
   fNcontrol = 0;
 }
 
 //_____________________________________________________________________________
-AGeoBezierPcon::~AGeoBezierPcon()
-{
+AGeoBezierPcon::~AGeoBezierPcon() {
   // destructor
 }
 //_____________________________________________________________________________
-void AGeoBezierPcon::Bezier(Double_t t, Double_t& r, Double_t& z)
-{
+void AGeoBezierPcon::Bezier(Double_t t, Double_t& r, Double_t& z) {
   TVector2 P0(0, 0);
   TVector2 B;
-  if(fNcontrol == 0){
+  if (fNcontrol == 0) {
     TVector2 P1(1, 1);
-    B = (1 - t)*P0 + t*P1;
-  } else if(fNcontrol == 1){
+    B = (1 - t) * P0 + t * P1;
+  } else if (fNcontrol == 1) {
     TVector2 P2(1, 1);
-    B = (1 - t)*(1 - t)*P0 + 2*(1 - t)*t*fP1 + t*t*P2;
-  } else if(fNcontrol == 2){
+    B = (1 - t) * (1 - t) * P0 + 2 * (1 - t) * t * fP1 + t * t * P2;
+  } else if (fNcontrol == 2) {
     TVector2 P3(1, 1);
-    B = (1 - t)*(1 - t)*(1 - t)*P0 + 3*(1 - t)*(1 - t)*t*fP1 + 3*(1 - t)*t*t*fP2 + t*t*t*P3;
-  } // if
+    B = (1 - t) * (1 - t) * (1 - t) * P0 + 3 * (1 - t) * (1 - t) * t * fP1 +
+        3 * (1 - t) * t * t * fP2 + t * t * t * P3;
+  }
 
-  r = fR2 + B.X()*(fR1 - fR2);
-  z = -fLength/2. + B.Y()*fLength;
+  r = fR2 + B.X() * (fR1 - fR2);
+  z = -fLength / 2. + B.Y() * fLength;
 }
 
 //_____________________________________________________________________________
-void AGeoBezierPcon::SetControlPoints(Double_t r1, Double_t z1)
-{
+void AGeoBezierPcon::SetControlPoints(Double_t r1, Double_t z1) {
   // Set the relative coordinates of control point 1
   // (r1, z1) must be given in relative coordinates against P0 and P2
   // For example, when (r1, z1) = (0.6, 0.7), the coordinates of P1 is
@@ -88,8 +82,8 @@ void AGeoBezierPcon::SetControlPoints(Double_t r1, Double_t z1)
 }
 
 //_____________________________________________________________________________
-void AGeoBezierPcon::SetControlPoints(Double_t r1, Double_t z1, Double_t r2, Double_t z2)
-{
+void AGeoBezierPcon::SetControlPoints(Double_t r1, Double_t z1, Double_t r2,
+                                      Double_t z2) {
   // Set the relative coordinates of control points 1 and 2
   // The Bezier curve becomes cubic
   fNcontrol = 2;
@@ -99,12 +93,11 @@ void AGeoBezierPcon::SetControlPoints(Double_t r1, Double_t z1, Double_t r2, Dou
 }
 
 //_____________________________________________________________________________
-void AGeoBezierPcon::SetSections()
-{
-  for(Int_t i = 0; i < fNz; i++){
-    Double_t t = Double_t(i)/(fNz - 1);
+void AGeoBezierPcon::SetSections() {
+  for (Int_t i = 0; i < fNz; i++) {
+    Double_t t = Double_t(i) / (fNz - 1);
     Double_t r, z;
     Bezier(t, r, z);
     DefineSection(i, z, 0, r);
-  } // i
+  }
 }

@@ -15,119 +15,109 @@
 
 #include "AOpticalComponent.h"
 
-ClassImp(AOpticalComponent)
+ClassImp(AOpticalComponent);
 
-AOpticalComponent::AOpticalComponent() : TGeoVolume()
-{
-  fSurfaceArray = 0;
-}
+AOpticalComponent::AOpticalComponent() : TGeoVolume() { fSurfaceArray = 0; }
 
 //_____________________________________________________________________________
 AOpticalComponent::AOpticalComponent(const char* name, const TGeoShape* shape,
                                      const TGeoMedium* med)
-  : TGeoVolume(name, shape, med)
-{
+    : TGeoVolume(name, shape, med) {
   fSurfaceArray = 0;
 #if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
-  if(GetMedium() == TGeoVolume::DummyMedium()){
+  if (GetMedium() == TGeoVolume::DummyMedium()) {
     SetMedium(GetOpaqueVacuumMedium());
   }
 #endif
 }
 
 //_____________________________________________________________________________
-AOpticalComponent::~AOpticalComponent()
-{
-  SafeDelete(fSurfaceArray);
-}
+AOpticalComponent::~AOpticalComponent() { SafeDelete(fSurfaceArray); }
 
 //______________________________________________________________________________
-void AOpticalComponent::AddSurfaceCondition(ABorderSurfaceCondition* condition)
-{
-  if(!fSurfaceArray){
+void AOpticalComponent::AddSurfaceCondition(
+    ABorderSurfaceCondition* condition) {
+  if (!fSurfaceArray) {
     fSurfaceArray = new TObjArray;
     fSurfaceArray->SetOwner(kTRUE);
-  } // if
+  }
 
   fSurfaceArray->Add(condition);
 }
 
 //______________________________________________________________________________
-ABorderSurfaceCondition* AOpticalComponent::FindSurfaceCondition(AOpticalComponent* component2)
-{
-  if(!fSurfaceArray){
+ABorderSurfaceCondition* AOpticalComponent::FindSurfaceCondition(
+    AOpticalComponent* component2) {
+  if (!fSurfaceArray) {
     return 0;
-  } // if
+  }
 
-  for(Int_t i = 0; i < fSurfaceArray->GetEntries(); i++){
-    if(((ABorderSurfaceCondition*)(*fSurfaceArray)[i])->GetComponent2() == component2){
+  for (Int_t i = 0; i < fSurfaceArray->GetEntries(); i++) {
+    if (((ABorderSurfaceCondition*)(*fSurfaceArray)[i])->GetComponent2() ==
+        component2) {
       return (ABorderSurfaceCondition*)(*fSurfaceArray)[i];
-    } // if
-  } // i
+    }
+  }
 
   return 0;
 }
 
 //______________________________________________________________________________
-TGeoMaterial* AOpticalComponent::GetOpaqueVacuumMaterial() const
-{
-  if(!fGeoManager) {
+TGeoMaterial* AOpticalComponent::GetOpaqueVacuumMaterial() const {
+  if (!fGeoManager) {
     return 0;
-  } // if
+  }
 
   TGeoMaterial* mat = fGeoManager->GetMaterial("ROBAST_OpaqueVacuumMaterial");
-  if(!mat){
+  if (!mat) {
     mat = new TGeoMaterial("ROBAST_OpaqueVacuumMaterial", 0, 0, 0);
-  } // if
+  }
 
   return mat;
 }
 
 //______________________________________________________________________________
-TGeoMaterial* AOpticalComponent::GetTransparentVacuumMaterial() const
-{
-  if(!fGeoManager) {
+TGeoMaterial* AOpticalComponent::GetTransparentVacuumMaterial() const {
+  if (!fGeoManager) {
     return 0;
-  } // if
+  }
 
-  TGeoMaterial* mat = fGeoManager->GetMaterial("ROBAST_TransparentVacuumMaterial");
-  if(!mat){
+  TGeoMaterial* mat =
+      fGeoManager->GetMaterial("ROBAST_TransparentVacuumMaterial");
+  if (!mat) {
     mat = new TGeoMaterial("ROBAST_TransparentVacuumMaterial", 0, 0, 0);
     mat->SetTransparency(70);
-  } // if
+  }
 
   return mat;
 }
 
 //______________________________________________________________________________
-TGeoMedium* AOpticalComponent::GetOpaqueVacuumMedium() const
-{
-  if(!fGeoManager) {
+TGeoMedium* AOpticalComponent::GetOpaqueVacuumMedium() const {
+  if (!fGeoManager) {
     return 0;
-  } // if
+  }
 
   TGeoMedium* med = fGeoManager->GetMedium("ROBAST_OpaqueVacuumMedium");
-  if(!med){
+  if (!med) {
     TGeoMaterial* mat = GetOpaqueVacuumMaterial();
     med = new TGeoMedium("ROBAST_OpaqueVacuumMedium", 1, mat);
-  } // if
+  }
 
   return med;
 }
 
 //______________________________________________________________________________
-TGeoMedium* AOpticalComponent::GetTransparentVacuumMedium() const
-{
-  if(!fGeoManager) {
+TGeoMedium* AOpticalComponent::GetTransparentVacuumMedium() const {
+  if (!fGeoManager) {
     return 0;
-  } // if
+  }
 
   TGeoMedium* med = fGeoManager->GetMedium("ROBAST_TransparentVacuumMedium");
-  if(!med){
+  if (!med) {
     TGeoMaterial* mat = GetTransparentVacuumMaterial();
     med = new TGeoMedium("ROBAST_TransparentVacuumMedium", 1, mat);
-  } // if
+  }
 
   return med;
 }
-

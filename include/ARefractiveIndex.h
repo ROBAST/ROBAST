@@ -19,7 +19,6 @@
 
 class ARefractiveIndex : public TObject {
  private:
-
  public:
   ARefractiveIndex();
   virtual ~ARefractiveIndex();
@@ -30,4 +29,4 @@ class ARefractiveIndex : public TObject {
   ClassDef(ARefractiveIndex, 1)
 };
 
-#endif // A_REFRACTIVE_INDEX_H
+#endif  // A_REFRACTIVE_INDEX_H

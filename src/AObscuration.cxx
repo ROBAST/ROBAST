@@ -13,10 +13,9 @@
 
 #include "AObscuration.h"
 
-ClassImp(AObscuration)
+ClassImp(AObscuration);
 
-AObscuration::AObscuration()
-{
+AObscuration::AObscuration() {
   // Default constructor
   SetLineColor(12);
 }
@@ -24,12 +23,9 @@ AObscuration::AObscuration()
 //_____________________________________________________________________________
 AObscuration::AObscuration(const char* name, const TGeoShape* shape,
                            const TGeoMedium* med)
-  : AOpticalComponent(name, shape, med)
-{
+    : AOpticalComponent(name, shape, med) {
   SetLineColor(12);
 }
 
 //_____________________________________________________________________________
-AObscuration::~AObscuration()
-{
-}
+AObscuration::~AObscuration() {}

@@ -16,15 +16,12 @@
 #include "AOpticsManager.h"
 #include "TMath.h"
 
-ClassImp(ACauchyFormula)
+ClassImp(ACauchyFormula);
 
-ACauchyFormula::ACauchyFormula()
-{
-}
+ACauchyFormula::ACauchyFormula() {}
 
 //_____________________________________________________________________________
-ACauchyFormula::ACauchyFormula(Double_t A, Double_t B, Double_t C)
-{
+ACauchyFormula::ACauchyFormula(Double_t A, Double_t B, Double_t C) {
   // n(lambda) = A + B/lambda^2 + C/lambda^4
   // where lambda is measured in (um)
   fPar[0] = A;
@@ -33,18 +30,17 @@ ACauchyFormula::ACauchyFormula(Double_t A, Double_t B, Double_t C)
 }
 
 //_____________________________________________________________________________
-ACauchyFormula::ACauchyFormula(const Double_t* p)
-{
-  for(Int_t i = 0; i < 3; i++){
+ACauchyFormula::ACauchyFormula(const Double_t* p) {
+  for (Int_t i = 0; i < 3; i++) {
     fPar[i] = p[i];
-  } // i
+  }
 }
 
 //_____________________________________________________________________________
-Double_t ACauchyFormula::GetIndex(Double_t lambda) const
-{
+Double_t ACauchyFormula::GetIndex(Double_t lambda) const {
   // Calculate the refractive index at wavelength = lambda (m)
   // Use AOpticsManager::m() to get the unit length in (m)
-  lambda /= AOpticsManager::um(); // Convert (m) to (um)
-  return fPar[0] + fPar[1]*TMath::Power(lambda, -2) + fPar[2]*TMath::Power(lambda, -4);
+  lambda /= AOpticsManager::um();  // Convert (m) to (um)
+  return fPar[0] + fPar[1] * TMath::Power(lambda, -2) +
+         fPar[2] * TMath::Power(lambda, -4);
 }

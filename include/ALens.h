@@ -22,11 +22,11 @@
 
 class ALens : public AOpticalComponent {
  private:
-  TGraph*           fAbsorptionLength; // Absorption length of the material
-  ARefractiveIndex* fIndex; // Refractive index
-  TGraph*           fIndexGraph; // Refractive index data
-  Double_t          fConstantIndex; // Constant refractive index
-  Double_t          fConstantAbsorptionLength; // Absorption length of the material
+  TGraph* fAbsorptionLength;           // Absorption length of the material
+  ARefractiveIndex* fIndex;            // Refractive index
+  TGraph* fIndexGraph;                 // Refractive index data
+  Double_t fConstantIndex;             // Constant refractive index
+  Double_t fConstantAbsorptionLength;  // Absorption length of the material
 
  public:
   ALens();
@@ -35,14 +35,17 @@ class ALens : public AOpticalComponent {
 
   virtual Double_t GetAbsorptionLength(Double_t lambda) const;
   virtual Double_t GetRefractiveIndex(Double_t lambda) const;
-  virtual void     SetAbsorptionLength(TGraph* graph) {fAbsorptionLength = graph;}
-  virtual void     SetConstantAbsorptionLength(Double_t length) {fConstantAbsorptionLength = length;}
-  virtual void     SetConstantRefractiveIndex(Double_t index) {fConstantIndex = index;}
-  virtual void     SetRefractiveIndex(ARefractiveIndex* index) {fIndex = index;}
-  virtual void     SetRefractiveIndex(TGraph* index) {fIndexGraph = index;}
-
+  virtual void SetAbsorptionLength(TGraph* graph) { fAbsorptionLength = graph; }
+  virtual void SetConstantAbsorptionLength(Double_t length) {
+    fConstantAbsorptionLength = length;
+  }
+  virtual void SetConstantRefractiveIndex(Double_t index) {
+    fConstantIndex = index;
+  }
+  virtual void SetRefractiveIndex(ARefractiveIndex* index) { fIndex = index; }
+  virtual void SetRefractiveIndex(TGraph* index) { fIndexGraph = index; }
 
   ClassDef(ALens, 1)
 };
 
-#endif // A_LENS_H
+#endif  // A_LENS_H

@@ -20,7 +20,7 @@
 
 class ASchottFormula : public ARefractiveIndex {
  private:
-  Double_t fPar[6]; // Parameters
+  Double_t fPar[6];  // Parameters
 
  public:
   ASchottFormula();
@@ -33,4 +33,4 @@ class ASchottFormula : public ARefractiveIndex {
   ClassDef(ASchottFormula, 1)
 };
 
-#endif // A_SCHOTT_FORMULA_H
+#endif  // A_SCHOTT_FORMULA_H

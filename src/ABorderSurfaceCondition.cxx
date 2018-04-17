@@ -15,30 +15,26 @@
 #include "ABorderSurfaceCondition.h"
 #include "AOpticalComponent.h"
 
-ClassImp(ABorderSurfaceCondition)
+ClassImp(ABorderSurfaceCondition);
 
-ABorderSurfaceCondition::ABorderSurfaceCondition(AOpticalComponent* component1, AOpticalComponent* component2)
-  : fSigma(0)
-{
+ABorderSurfaceCondition::ABorderSurfaceCondition(AOpticalComponent* component1,
+                                                 AOpticalComponent* component2)
+    : fSigma(0) {
   fComponent[0] = component1;
   fComponent[1] = component2;
 
-  if(!component1){
+  if (!component1) {
     return;
-  } // if
+  }
 
   component1->AddSurfaceCondition(this);
 }
 
 //______________________________________________________________________________
-ABorderSurfaceCondition::~ABorderSurfaceCondition()
-{
-}
-
+ABorderSurfaceCondition::~ABorderSurfaceCondition() {}
 
 //______________________________________________________________________________
-void ABorderSurfaceCondition::SetGaussianRoughness(Double_t sigma /* (rad) */)
-{
+void ABorderSurfaceCondition::SetGaussianRoughness(Double_t sigma /* (rad) */) {
   // Set Gaussian-like roughness in unit of (rad). Works as sigma_alpha in
   // Geant4 optics.
   fSigma = TMath::Abs(sigma);
