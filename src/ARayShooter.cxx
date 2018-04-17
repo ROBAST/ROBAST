@@ -212,13 +212,11 @@ ARayArray* ARayShooter::RandomCircle(Double_t lambda, Double_t rmax, Int_t n,
   } // if
 
   for(Int_t i = 0; i < n; i++){
-    Double_t r = rmax*10;
     Double_t randx, randy;
-    while(r > rmax){
+    do {
       randx = gRandom->Uniform(-rmax, rmax);
       randy = gRandom->Uniform(-rmax, rmax);
-      r = TMath::Sqrt(randx*randx + randy*randy);
-    } // while
+    } while (TMath::Sqrt(randx*randx + randy*randy) > rmax);
 
     Double_t x[3] = {randx, randy, 0};
 
