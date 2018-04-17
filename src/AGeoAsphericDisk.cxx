@@ -240,7 +240,9 @@ void AGeoAsphericDisk::ComputeNormal(CONST53410 Double_t* point, CONST53410 Doub
   saf[0] = TestShapeBit(kGeoRSeg) ? TMath::Abs(r - fRmin) : TGeoShape::Big();
   saf[1] = TMath::Abs(r - fRmax);
 
-  Double_t f1, f2, df1, df2;
+  Double_t f1, f2;
+  // any numbers is OK, just to remove warning
+  Double_t df1(TGeoShape::Big()), df2(TGeoShape::Big());
   try {
     f1 = CalcF1(r);
   } catch (...) {
