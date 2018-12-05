@@ -33,6 +33,7 @@
 #pragma link C++ class ARayArray;
 #pragma link C++ class ARayShooter;
 #pragma link C++ class ARefractiveIndex;
+#pragma link C++ class ARefractiveIndexDotInfo;
 #pragma link C++ class ASchottFormula;
 #pragma link C++ class ASellmeierFormula;
 
