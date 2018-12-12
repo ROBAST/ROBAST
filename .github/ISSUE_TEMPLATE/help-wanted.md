@@ -7,21 +7,21 @@ assignees: akira-okumura
 
 ---
 
-### ROOT Version
+**ROOT Version**
 
 [e.g., 6.14.06]
 
-### ROBAST Version
+**ROBAST Version**
 
 [e.t., v.2.5.0]
 
-### OS
+**OS**
 
 [e.g., macOS 10.14.1]
 
-### Question
+**Question**
 
-### Code
+**Code**
 ```
 void YourCode() {
   // Write your code here if needed for your question
