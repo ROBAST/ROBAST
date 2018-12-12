@@ -7,17 +7,10 @@ assignees: akira-okumura
 
 ---
 
-**ROOT Version**
-
-[e.g., 6.14.06]
-
-**ROBAST Version**
-
-[e.t., v.2.5.0]
-
-**OS**
-
-[e.g., macOS 10.14.1]
+**Environment (please complete the following information):**
+ - OS: [e.g. macOS 10.14.1]
+ - ROOT: [e.g. 6.14.06]
+ - ROBAST: [e.g. v2.5.0]
 
 **Question**
 
