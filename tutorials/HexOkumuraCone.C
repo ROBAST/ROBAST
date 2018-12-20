@@ -51,7 +51,7 @@ TGraph* ConeTrace(Int_t mode, bool del) {
   AGeoWinstonCone2D* coneV =
       new AGeoWinstonCone2D("coneV", kRin, kRout, kRin * 1.733);
   TGeoPgon* pgon = new TGeoPgon("pgon", 0, 360, 6, 4);
-  pgon->DefineSection(0, -coneV->GetDZ() * 0.9999, 0, kRout * 1.001);
+  pgon->DefineSection(0, -coneV->GetDZ() * 0.9999, 0, kRout * 1.1);
   pgon->DefineSection(1, -coneV->GetDZ() * 0.5, 0, kRin * 0.9);
   pgon->DefineSection(2, -coneV->GetDZ() * 0., 0, kRin * 1.001);
   pgon->DefineSection(3, coneV->GetDZ() * 0.9999, 0, kRin * 1.001);
