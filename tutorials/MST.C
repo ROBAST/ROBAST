@@ -85,7 +85,7 @@ void AddMirrors(AOpticalComponent* opt) {
   // copied from cfg/CTA/mirror_CTA-100_1.20-86-0.04.dat
   const int kNMirror = 86;
   double xy[kNMirror][2] =
-  // clang-format off
+      // clang-format off
     {{-620.80,    0.00}, {-558.72,  107.53}, {-496.64,  215.05},
      {-434.56,  322.58}, {-372.48,  430.10}, {-558.72, -107.53},
      {-496.64,    0.00}, {-434.56,  107.53}, {-372.48,  215.05},
@@ -114,7 +114,7 @@ void AddMirrors(AOpticalComponent* opt) {
      { 248.32, -430.10}, { 310.40, -322.58}, { 372.48, -215.05},
      { 434.56, -107.53}, { 496.64,    0.00}, { 558.72,  107.53},
      { 372.48, -430.10}, { 434.56, -322.58}, { 496.64, -215.05},
-     { 558.72, -107.53}, { 620.80,    0.00}};			    
+     { 558.72, -107.53}, { 620.80,    0.00}};
   // clang-format on
   for (int i = 0; i < kNMirror; i++) {
     double x = xy[i][0] * cm;
@@ -157,9 +157,9 @@ void AddMirrors(AOpticalComponent* opt) {
 
 void AddCamera(AOpticalComponent* opt) {
   // parameters taken from sim_telarray/cfg/hess/hess_masts.dat
-  const double kCameraD = 2.5 * m;      // the camera diameter (N/A in cfg)
+  const double kCameraD = 2.5 * m;     // the camera diameter (N/A in cfg)
   const double kCameraBoxD = 3.0 * m;  // the camera box diameter
-  const double kCameraBoxH = 1.5 * m;   // the camera box height (N/A in cfg)
+  const double kCameraBoxH = 1.5 * m;  // the camera box height (N/A in cfg)
   const double kCameraOffset = -2.56 * cm;
 
   // Make a disk focal plane
@@ -209,8 +209,8 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
     double lambda = 400 * nm;  // dummy
 
     // Rmax = 6.90 m so 7.50 m is large enough
-    ARayArray* array =
-        ARayShooter::RandomCone(lambda, 7.5 * m, dist, 1000000, &rayrot, &raytr);
+    ARayArray* array = ARayShooter::RandomCone(lambda, 7.5 * m, dist, 1000000,
+                                               &rayrot, &raytr);
 
     manager->TraceNonSequential(*array);
 
@@ -251,7 +251,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
     delete array;
     can->cd(i + 1)->SetLogz();
     h2[i]->Draw("colz");
-    h2[i]->SetMaximum(h2[0]->GetEntries()/100.);
+    h2[i]->SetMaximum(h2[0]->GetEntries() / 100.);
     can->Update();
 
     graphX->SetPoint(graphX->GetN(), angle, meanx / mm);
