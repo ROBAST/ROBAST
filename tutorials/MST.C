@@ -28,11 +28,13 @@ const double um = AOpticsManager::um();
 const double nm = AOpticsManager::nm();
 
 // optics parameters
+// taken from CTA-PROD4-MST-optics.cfg
 const double kF = 16.00 * m;                // focal length
 const double kDishShapeLength = 19.20 * m;  // dish shape length (rad. of curv)
 const double kMirroF = 16.07 * m;           // mirror focal length
 const double kMirrorR = kMirroF * 2;        // the radius of curvature
 const double kMirrorD = 1.2 * m;            // facet diameter, hexagonal mirror
+
 const double kMirrorT = 0.01 * mm;  // mirror thickness, intentionally use a
                                     // very thin thickness to avoid unnecessary
                                     // reflection on the edges
@@ -80,31 +82,39 @@ void AddMirrors(AOpticalComponent* opt) {
   TGeoSphere* mirSphere = new TGeoSphere(
       "mirSphere", kMirrorR, kMirrorR + kMirrorT, 180. - theta, 180.);
 
-  // copied from cfg/CTA/mirror_CTA-100_1.20-84-0.02.dat
-  const int kNMirror = 84;
+  // copied from cfg/CTA/mirror_CTA-100_1.20-86-0.04.dat
+  const int kNMirror = 86;
   double xy[kNMirror][2] =
-      // clang-format off
-    {{-549.0,  105.7}, {-488.0,  211.3}, {-427.0,  317.0}, {-366.0,  422.6},
-     {-549.0, -105.7}, {-488.0,    0.0}, {-427.0,  105.7}, {-366.0,  211.3},
-     {-305.0,  317.0}, {-244.0,  422.6}, {-183.0,  528.3}, {-488.0, -211.3},
-     {-427.0, -105.7}, {-366.0,    0.0}, {-305.0,  105.7}, {-244.0,  211.3},
-     {-183.0,  317.0}, {-122.0,  422.6}, { -61.0,  528.3}, {-427.0, -317.0},
-     {-366.0, -211.3}, {-305.0, -105.7}, {-244.0,    0.0}, {-183.0,  105.7},
-     {-122.0,  211.3}, { -61.0,  317.0}, {   0.0,  422.6}, {  61.0,  528.3},
-     {-366.0, -422.6}, {-305.0, -317.0}, {-244.0, -211.3}, {-183.0, -105.7},
-     {-122.0,    0.0}, { -61.0,  105.7}, {   0.0,  211.3}, {  61.0,  317.0},
-     { 122.0,  422.6}, { 183.0,  528.3}, {-244.0, -422.6}, {-183.0, -317.0},
-     {-122.0, -211.3}, { -61.0, -105.7}, {  61.0,  105.7}, { 122.0,  211.3},
-     { 183.0,  317.0}, { 244.0,  422.6}, {-183.0, -528.3}, {-122.0, -422.6},
-     { -61.0, -317.0}, {   0.0, -211.3}, {  61.0, -105.7}, { 122.0,    0.0},
-     { 183.0,  105.7}, { 244.0,  211.3}, { 305.0,  317.0}, { 366.0,  422.6},
-     { -61.0, -528.3}, {   0.0, -422.6}, {  61.0, -317.0}, { 122.0, -211.3},
-     { 183.0, -105.7}, { 244.0,    0.0}, { 305.0,  105.7}, { 366.0,  211.3},
-     { 427.0,  317.0}, {  61.0, -528.3}, { 122.0, -422.6}, { 183.0, -317.0},
-     { 244.0, -211.3}, { 305.0, -105.7}, { 366.0,    0.0}, { 427.0,  105.7},
-     { 488.0,  211.3}, { 183.0, -528.3}, { 244.0, -422.6}, { 305.0, -317.0},
-     { 366.0, -211.3}, { 427.0, -105.7}, { 488.0,    0.0}, { 549.0,  105.7},
-     { 366.0, -422.6}, { 427.0, -317.0}, { 488.0, -211.3}, { 549.0, -105.7}};
+  // clang-format off
+    {{-620.80,    0.00}, {-558.72,  107.53}, {-496.64,  215.05},
+     {-434.56,  322.58}, {-372.48,  430.10}, {-558.72, -107.53},
+     {-496.64,    0.00}, {-434.56,  107.53}, {-372.48,  215.05},
+     {-310.40,  322.58}, {-248.32,  430.10}, {-186.24,  537.63},
+     {-496.64, -215.05}, {-434.56, -107.53}, {-372.48,    0.00},
+     {-310.40,  107.53}, {-248.32,  215.05}, {-186.24,  322.58},
+     {-124.16,  430.10}, { -62.08,  537.63}, {-434.56, -322.58},
+     {-372.48, -215.05}, {-310.40, -107.53}, {-248.32,    0.00},
+     {-186.24,  107.53}, {-124.16,  215.05}, { -62.08,  322.58},
+     {   0.00,  430.10}, {  62.08,  537.63}, {-372.48, -430.10},
+     {-310.40, -322.58}, {-248.32, -215.05}, {-186.24, -107.53},
+     {-124.16,    0.00}, { -62.08,  107.53}, {   0.00,  215.05},
+     {  62.08,  322.58}, { 124.16,  430.10}, { 186.24,  537.63},
+     {-248.32, -430.10}, {-186.24, -322.58}, {-124.16, -215.05},
+     { -62.08, -107.53}, {  62.08,  107.53}, { 124.16,  215.05},
+     { 186.24,  322.58}, { 248.32,  430.10}, {-186.24, -537.63},
+     {-124.16, -430.10}, { -62.08, -322.58}, {   0.00, -215.05},
+     {  62.08, -107.53}, { 124.16,    0.00}, { 186.24,  107.53},
+     { 248.32,  215.05}, { 310.40,  322.58}, { 372.48,  430.10},
+     { -62.08, -537.63}, {   0.00, -430.10}, {  62.08, -322.58},
+     { 124.16, -215.05}, { 186.24, -107.53}, { 248.32,    0.00},
+     { 310.40,  107.53}, { 372.48,  215.05}, { 434.56,  322.58},
+     {  62.08, -537.63}, { 124.16, -430.10}, { 186.24, -322.58},
+     { 248.32, -215.05}, { 310.40, -107.53}, { 372.48,    0.00},
+     { 434.56,  107.53}, { 496.64,  215.05}, { 186.24, -537.63},
+     { 248.32, -430.10}, { 310.40, -322.58}, { 372.48, -215.05},
+     { 434.56, -107.53}, { 496.64,    0.00}, { 558.72,  107.53},
+     { 372.48, -430.10}, { 434.56, -322.58}, { 496.64, -215.05},
+     { 558.72, -107.53}, { 620.80,    0.00}};			    
   // clang-format on
   for (int i = 0; i < kNMirror; i++) {
     double x = xy[i][0] * cm;
@@ -148,7 +158,7 @@ void AddMirrors(AOpticalComponent* opt) {
 void AddCamera(AOpticalComponent* opt) {
   // parameters taken from sim_telarray/cfg/hess/hess_masts.dat
   const double kCameraD = 2.5 * m;      // the camera diameter (N/A in cfg)
-  const double kCameraBoxD = 3.39 * m;  // the camera box diameter
+  const double kCameraBoxD = 3.0 * m;  // the camera box diameter
   const double kCameraBoxH = 1.5 * m;   // the camera box height (N/A in cfg)
   const double kCameraOffset = -2.56 * cm;
 
@@ -198,8 +208,9 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
 
     double lambda = 400 * nm;  // dummy
 
+    // Rmax = 6.90 m so 7.50 m is large enough
     ARayArray* array =
-        ARayShooter::RandomCone(lambda, 7.5 * m, dist, 100000, &rayrot, &raytr);
+        ARayShooter::RandomCone(lambda, 7.5 * m, dist, 1000000, &rayrot, &raytr);
 
     manager->TraceNonSequential(*array);
 
@@ -218,7 +229,9 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
     double meanx = htmp.GetMean();
     h2[i] = new TH2D(Form("h%d", i),
                      Form("#it{#theta} = %3.1f#circ;x (mm); y (mm)", angle),
-                     300, meanx / mm - 40, meanx / mm + 140, 300, -90, 90);
+                     300, meanx / mm - 50, meanx / mm + 150, 300, -100, 100);
+    h2[i]->GetXaxis()->SetNdivisions(110);
+    h2[i]->GetYaxis()->SetNdivisions(110);
 
     for (Int_t k = 0; k <= focused->GetLast(); k++) {
       ARay* ray = (ARay*)(*focused)[k];
@@ -236,8 +249,9 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
     }    // k
 
     delete array;
-    can->cd(i + 1);
+    can->cd(i + 1)->SetLogz();
     h2[i]->Draw("colz");
+    h2[i]->SetMaximum(h2[0]->GetEntries()/100.);
     can->Update();
 
     graphX->SetPoint(graphX->GetN(), angle, meanx / mm);
