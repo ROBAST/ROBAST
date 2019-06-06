@@ -1,3 +1,6 @@
+#ifndef ROBAST_INIT_H
+#define ROBAST_INIT_H
+
 #include "stdio.h"
 
 #ifndef SKIP_ROBAST_WELCOME
@@ -23,3 +26,5 @@ __attribute__((constructor)) static void PrintReference() {
   // clang-format on
 }
 #endif
+
+#endif // ROBAST_INIT_H

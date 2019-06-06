@@ -216,7 +216,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
 
     TObjArray* focused = array->GetFocused();
 
-    const double platescale = 28.65;  // (mm/deg)
+    const double platescale = 28.68;  // (mm/deg) 0.5 deg PSF gives 28.684 +/- 0.002
 
     TH1D htmp("", "", 1, -1e10, 1e10);
     for (Int_t k = 0; k <= focused->GetLast(); k++) {
@@ -267,24 +267,31 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
 
   TGraph* graphStdX = new TGraph;
   TGraph* graphStdY = new TGraph;
+  TGraph* graphD80 = new TGraph;
 
   for (int i = 0; i < kNangle; i++) {
     Double_t stdx = h2[i]->GetStdDev(1);
     Double_t stdy = h2[i]->GetStdDev(2);
+    Double_t r, x, y;
+    AGeoUtil::ContainmentRadius(h2[i], 0.80, r, x, y); // D80
     double angle = i * 0.5;
     graphStdX->SetPoint(i, angle, stdx * mm / pscale);
     graphStdY->SetPoint(i, angle, stdy * mm / pscale);
+    graphD80->SetPoint(i, angle, r * mm / pscale);
   }  // i
 
   TCanvas* can3 = new TCanvas("can3", "can3", 800, 600);
-  can3->DrawFrame(0, 0, 4, 0.11, ";Field Angle (deg);Std. Dev. (deg);");
+  can3->DrawFrame(0, 0, 4, 0.12, ";Field Angle (deg);Std. Dev. (deg);");
   graphStdX->Draw("p same");
   graphStdX->SetMarkerStyle(20);
   graphStdY->Draw("p same");
   graphStdY->SetMarkerStyle(21);
+  graphD80->Draw("p same");
+  graphD80->SetMarkerStyle(22);
 
   TLegend* leg = new TLegend(0.15, 0.6, 0.5, 0.85);
   leg->AddEntry(graphStdX, "Std. Dev. along X", "p");
   leg->AddEntry(graphStdY, "Std. Dev. along Y", "p");
+  leg->AddEntry(graphD80, "80% Containment Radius (D_{80})", "p");
   leg->Draw();
 }

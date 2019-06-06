@@ -10,6 +10,7 @@
 #include "TGeoBBox.h"
 #include "TGeoMatrix.h"
 #include "TGeoTube.h"
+#include "TH2.h"
 #include "TVector3.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -27,6 +28,8 @@ void MakePointToPointBBox(const char* name, const TVector3& v1,
 void MakePointToPointTube(const char* name, const TVector3& v1,
                           const TVector3& v2, Double_t radius, TGeoTube** tube,
                           TGeoCombiTrans** combi);
+void ContainmentRadius(TH2* h2, Double_t fraction, Double_t& r, Double_t& x,
+                       Double_t& y);
 
 }  // namespace AGeoUtil
 

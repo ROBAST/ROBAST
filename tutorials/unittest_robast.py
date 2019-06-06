@@ -423,6 +423,26 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
         self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
 
+    def testD80(self):
+        x0 = 1
+        y0 = -1
+        r0 = 2
+        h2 = ROOT.TH2D('', '', 1000, -3, 3, 1000, -3, 3)
+        N = 10000000
+        circ = ROOT.gRandom.Circle
+        uni = ROOT.gRandom.Uniform
+        x, y, r = ROOT.Double(), ROOT.Double(), ROOT.Double()
+
+        for i in range(N):
+            circ(x, y, r0)
+            scale = uni(0, 1)
+            h2.Fill(x*scale + x0, y*scale + y0)
+
+        ROOT.AGeoUtil.ContainmentRadius(h2, 0.8, r, x, y)
+        self.assertAlmostEqual(x/x0, 1, 2) # 1% difference is acceptale
+        self.assertAlmostEqual(y/y0, 1, 2)
+        self.assertAlmostEqual(r/r0, 0.8, 2)
+
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)
