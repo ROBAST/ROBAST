@@ -166,7 +166,7 @@ TColor* ARay::MakeColor() const {
   } else {
     R = 0.;
     G = 0.;
-    B = 0.0;
+    B = 0.;
   }
 
   Double_t sss = 0.;
@@ -175,14 +175,14 @@ TColor* ARay::MakeColor() const {
   } else if (380. <= wl && wl < 420.) {
     sss = 0.3 + 0.7 * (wl - 380.) / (420. - 380.);
   } else if (420. <= wl && wl < 700.) {
-    sss = 1.0;
+    sss = 1.;
   } else if (700. <= wl && wl < 781) {
     sss = 0.3 + 0.7 * (780. - wl) / (780. - 700.);
   } else if (781 <= wl && wl < 880.) {
     sss = 0.3;
   }
 
-  const Double_t gamma = 0.80;
+  const Double_t gamma = 0.8;
   R = R > 0. ? TMath::Power(R * sss, gamma) : 0.;
   G = G > 0. ? TMath::Power(G * sss, gamma) : 0.;
   B = B > 0. ? TMath::Power(B * sss, gamma) : 0.;
