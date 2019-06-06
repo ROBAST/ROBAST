@@ -12,6 +12,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "ARay.h"
+#include "AOpticsManager.h"
 #include "TMath.h"
 
 ClassImp(ARay);
@@ -121,6 +122,73 @@ Bool_t ARay::IsSuspended() const {
   }
 
   return kFALSE;
+}
+
+//_____________________________________________________________________________
+TColor* ARay::MakeColor() const {
+  // The origianl code in FORTRAN was written by Dan Bruton
+  // See http://www.physics.sfasu.edu/astro/color/spectra.html
+  Double_t wl = fLambda / AOpticsManager::nm();
+  Double_t R, G, B;
+
+  if (300. <= wl && wl < 380.) {
+    R = (wl - 300.) / (380. - 300.);
+    G = 0.;
+    B = (wl - 300.) / (380. - 300.);
+  } else if (380. <= wl && wl < 440.) {
+    R = -(wl - 440.) / (440. - 380.);
+    G = 0.;
+    B = 1.;
+  } else if (440. <= wl && wl < 490.) {
+    R = 0.;
+    G = (wl - 440.) / (490. - 440.);
+    B = 1.;
+  } else if (490. <= wl && wl < 510.) {
+    R = 0.;
+    G = 1.;
+    B = -(wl - 510.) / (510. - 490.);
+  } else if (510. <= wl && wl < 580.) {
+    R = (wl - 510.) / (580. - 510.);
+    G = 1.;
+    B = 0.;
+  } else if (580. <= wl && wl < 645) {
+    R = 1.;
+    G = -(wl - 645.) / (645. - 580.);
+    B = 0.;
+  } else if (645 <= wl && wl < 780.) {
+    R = 1.;
+    G = 0.;
+    B = 0.;
+  } else if (780. <= wl && wl < 880.) {
+    R = -(wl - 880.) / (880. - 781.);
+    G = 0.;
+    B = 0.;
+  } else {
+    R = 0.;
+    G = 0.;
+    B = 0.0;
+  }
+
+  Double_t sss = 0.;
+  if (300. <= wl && wl < 380.) {
+    sss = 0.3;
+  } else if (380. <= wl && wl < 420.) {
+    sss = 0.3 + 0.7 * (wl - 380.) / (420. - 380.);
+  } else if (420. <= wl && wl < 700.) {
+    sss = 1.0;
+  } else if (700. <= wl && wl < 781) {
+    sss = 0.3 + 0.7 * (780. - wl) / (780. - 700.);
+  } else if (781 <= wl && wl < 880.) {
+    sss = 0.3;
+  }
+
+  const Double_t gamma = 0.80;
+  R = R > 0. ? TMath::Power(R * sss, gamma) : 0.;
+  G = G > 0. ? TMath::Power(G * sss, gamma) : 0.;
+  B = B > 0. ? TMath::Power(B * sss, gamma) : 0.;
+
+  Int_t ci = TColor::GetFreeColorIndex();
+  return new TColor(ci, R, G, B);
 }
 
 //_____________________________________________________________________________

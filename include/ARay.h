@@ -7,6 +7,7 @@
 #ifndef A_RAY_H
 #define A_RAY_H
 
+#include "TColor.h"
 #include "TGeoNode.h"
 #include "TGeoTrack.h"
 #include "TPolyLine3D.h"
@@ -53,6 +54,7 @@ class ARay : public TGeoTrack {
   Bool_t IsRunning() const;
   Bool_t IsStopped() const;
   Bool_t IsSuspended() const;
+  TColor* MakeColor() const;
   TPolyLine3D* MakePolyLine3D() const;
   void SetDirection(Double_t dx, Double_t dy, Double_t dz);
   void SetDirection(Double_t* d);
