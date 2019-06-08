@@ -56,7 +56,7 @@ AGeoWinstonCone2D::~AGeoWinstonCone2D() {
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::CalcdRdZ(Double_t z) const throw(std::exception) {
+Double_t AGeoWinstonCone2D::CalcdRdZ(Double_t z) const noexcept(false) {
   if (TMath::Abs(z) > fDZ + 1e-10) {
     throw std::exception();
   }
@@ -79,7 +79,7 @@ Double_t AGeoWinstonCone2D::CalcdRdZ(Double_t z) const throw(std::exception) {
 }
 
 //_____________________________________________________________________________
-Double_t AGeoWinstonCone2D::CalcR(Double_t z) const throw(std::exception) {
+Double_t AGeoWinstonCone2D::CalcR(Double_t z) const noexcept(false) {
   if (TMath::Abs(z) > fDZ + 1e-10) {
     throw std::exception();
   }

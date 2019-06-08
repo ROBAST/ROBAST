@@ -54,10 +54,10 @@ class AGeoAsphericDisk : public TGeoBBox {
   virtual ~AGeoAsphericDisk();
 
   virtual Double_t Capacity() const;
-  virtual Double_t CalcdF1dr(Double_t r) const throw(std::exception);
-  virtual Double_t CalcdF2dr(Double_t r) const throw(std::exception);
-  virtual Double_t CalcF1(Double_t r) const throw(std::exception);
-  virtual Double_t CalcF2(Double_t r) const throw(std::exception);
+  virtual Double_t CalcdF1dr(Double_t r) const noexcept(false);
+  virtual Double_t CalcdF2dr(Double_t r) const noexcept(false);
+  virtual Double_t CalcF1(Double_t r) const noexcept(false);
+  virtual Double_t CalcF2(Double_t r) const noexcept(false);
   virtual void ComputeBBox();
   virtual void ComputeNormal(CONST53410 Double_t* point,
                              CONST53410 Double_t* dir, Double_t* norm);

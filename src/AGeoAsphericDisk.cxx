@@ -93,7 +93,7 @@ AGeoAsphericDisk::~AGeoAsphericDisk() {
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::CalcdF1dr(Double_t r) const throw(std::exception) {
+Double_t AGeoAsphericDisk::CalcdF1dr(Double_t r) const noexcept(false) {
   // Calculate dF1/dr
   Double_t p = r * r * fCurve1 * fCurve1 * fKappa1;
   if (1 - p <= 0) throw std::exception();
@@ -108,7 +108,7 @@ Double_t AGeoAsphericDisk::CalcdF1dr(Double_t r) const throw(std::exception) {
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::CalcdF2dr(Double_t r) const throw(std::exception) {
+Double_t AGeoAsphericDisk::CalcdF2dr(Double_t r) const noexcept(false) {
   // Calculate dF2/dr
   Double_t p = r * r * fCurve2 * fCurve2 * fKappa2;
   if (1 - p <= 0) throw std::exception();
@@ -123,7 +123,7 @@ Double_t AGeoAsphericDisk::CalcdF2dr(Double_t r) const throw(std::exception) {
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::CalcF1(Double_t r) const throw(std::exception) {
+Double_t AGeoAsphericDisk::CalcF1(Double_t r) const noexcept(false) {
   // Calculate z value of surface 1 at given r
   Double_t p = r * r * fCurve1 * fCurve1 * fKappa1;
   if (1 - p < 0) throw std::exception();
@@ -138,7 +138,7 @@ Double_t AGeoAsphericDisk::CalcF1(Double_t r) const throw(std::exception) {
 }
 
 //_____________________________________________________________________________
-Double_t AGeoAsphericDisk::CalcF2(Double_t r) const throw(std::exception) {
+Double_t AGeoAsphericDisk::CalcF2(Double_t r) const noexcept(false) {
   // Calculate z value of surface 1 at given r
   Double_t p = r * r * fCurve2 * fCurve2 * fKappa2;
   if (1 - p < 0) throw std::exception();

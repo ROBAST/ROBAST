@@ -38,8 +38,8 @@ class AGeoWinstonCone2D : public TGeoBBox {
   AGeoWinstonCone2D(const char* name, Double_t r1, Double_t r2, Double_t y);
   virtual ~AGeoWinstonCone2D();
 
-  virtual Double_t CalcR(Double_t z) const throw(std::exception);
-  virtual Double_t CalcdRdZ(Double_t z) const throw(std::exception);
+  virtual Double_t CalcR(Double_t z) const noexcept(false);
+  virtual Double_t CalcdRdZ(Double_t z) const noexcept(false);
   virtual Double_t Capacity() const;
   virtual void ComputeBBox();
   virtual void ComputeNormal(CONST53410 Double_t* point,
