@@ -125,6 +125,7 @@ Bool_t ARay::IsSuspended() const {
 }
 
 //_____________________________________________________________________________
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 7, 7)
 TColor* ARay::MakeColor() const {
   // The origianl code in FORTRAN was written by Dan Bruton
   // See http://www.physics.sfasu.edu/astro/color/spectra.html
@@ -190,6 +191,7 @@ TColor* ARay::MakeColor() const {
   Int_t ci = TColor::GetFreeColorIndex();
   return new TColor(ci, R, G, B);
 }
+#endif
 
 //_____________________________________________________________________________
 TPolyLine3D* ARay::MakePolyLine3D() const {
