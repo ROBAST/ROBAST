@@ -14,17 +14,17 @@
 #include <fstream>
 #include <iostream>
 
+#include "TSystem.h"
+
 #include "AOpticsManager.h"
 #include "ARefractiveIndexDotInfo.h"
 
 ClassImp(ARefractiveIndexDotInfo);
 
-ARefractiveIndexDotInfo::ARefractiveIndexDotInfo() : ARefractiveIndex() {}
-
-//_____________________________________________________________________________
-ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname) {
+ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
+  : ARefractiveIndex() {
   std::ifstream fin;
-  fin.open(fname);
+  fin.open(gSystem->ExpandPathName(fname));
 
   if (!fin.is_open()) {
     Error("ARefractiveIndexDotInfo", "Cannot open %s", fname);
@@ -34,8 +34,9 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname) {
   char buf[50];
   fin.getline(buf, 50);
 
-  bool CSV;   // comma separated values
-  bool CRLF;  // delimiter \r\n
+  bool CSV; // comma separated values
+  bool CRLF; // delimiter \r\n
+  char S = ','; // separator
   if (strcmp(buf, "wl,n\r") == 0) {
     CSV = true;
     CRLF = true;
@@ -44,43 +45,62 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname) {
     CRLF = false;  // \n
   } else if (strcmp(buf, "wl\tn\r") == 0) {
     CSV = false;  // TSV, tab separated values
+    S = '\t';
     CRLF = true;
   } else if (strcmp(buf, "wl\tn") == 0) {
     CSV = false;  // TSV, tab separated values
+    S = '\t';
     CRLF = false;
   } else {
     Error("ARefractiveIndexDotInfo", "Invalide data format");
     return;
   }
 
-  fGraph.Set(0);  // reset all the previous data
+  SafeDelete(fRefractiveIndex);
+  fRefractiveIndex = new TGraph;
 
   while (1) {
     double wl, n;
-    if (CSV) {
-      char* endptr;
-      fin.getline(buf, 50, ',');
-      wl = strtod(buf, &endptr);
-      if (*endptr != '\0') {  // cannot convert to double
-        break;
-      }
-      fin.getline(buf, 50, CRLF ? '\r' : '\n');
-      n = strtod(buf, &endptr);
-      if (*endptr != '\0') {  // cannot convert to double
-        break;
-      }
-    } else {
-      fin >> wl >> n;
-      if (!fin.good()) {
-        break;
-      }
+    char* endptr;
+    fin.getline(buf, 50, S);
+    wl = strtod(buf, &endptr);
+    if (*endptr != '\0') {  // cannot convert to double
+      break;
     }
-
-    fGraph.SetPoint(fGraph.GetN(), wl * AOpticsManager::um(), n);
+    fin.getline(buf, 50, CRLF ? '\r' : '\n');
+    n = strtod(buf, &endptr);
+    if (*endptr != '\0') {  // cannot convert to double
+      break;
+    }
+    
+    fRefractiveIndex->SetPoint(fRefractiveIndex->GetN(), wl * AOpticsManager::um(), n);
   }
-}
 
-//_____________________________________________________________________________
-Double_t ARefractiveIndexDotInfo::GetIndex(Double_t lambda) const {
-  return fGraph.Eval(lambda);
+  // Check if extinction coefficient data exists
+  fin.getline(buf, 50, CRLF ? '\r' : '\n');
+  // "wl," or "wl\t" should have been alread read in the previous while loop
+  if (strcmp(buf, "k") != 0) {
+    Error("ARefractiveIndexDotInfo", "Invalide data format");
+    return;
+  }
+
+  SafeDelete(fExtinctionCoefficient);
+  fExtinctionCoefficient = new TGraph;
+
+  while (1) {
+    double wl, k;
+    char* endptr;
+    fin.getline(buf, 50, S);
+    wl = strtod(buf, &endptr);
+    if (*endptr != '\0') {  // cannot convert to double
+      break;
+    }
+    fin.getline(buf, 50, CRLF ? '\r' : '\n');
+    k = strtod(buf, &endptr);
+    if (*endptr != '\0') {  // cannot convert to double
+      break;
+    }
+    
+    fExtinctionCoefficient->SetPoint(fExtinctionCoefficient->GetN(), wl * AOpticsManager::um(), k);
+  }
 }

@@ -11,11 +11,14 @@
 
 #pragma link C++ namespace AGeoUtil;
 
+#pragma link C++ class A2x2ComplexMatrix;
 #pragma link C++ class ABorderSurfaceCondition;
 #pragma link C++ class ACauchyFormula;
+#pragma link C++ class AConstantRefractiveIndex;
 #pragma link C++ class ACorsikaIACTEventHeader;
 #pragma link C++ class ACorsikaIACTFile;
 #pragma link C++ class ACorsikaIACTRunHeader;
+#pragma link C++ class AFilmetrixDotCom;
 #pragma link C++ class AFocalSurface;
 #pragma link C++ class AGeoAsphericDisk;
 #pragma link C++ class AGeoBezierPcon;
@@ -25,6 +28,7 @@
 #pragma link C++ class AGlassCatalog;
 #pragma link C++ class ALens;
 #pragma link C++ class AMirror;
+#pragma link C++ class AMultilayer;
 #pragma link C++ class AObscuration;
 #pragma link C++ class AOpticalComponent;
 #pragma link C++ class AOpticsManager;

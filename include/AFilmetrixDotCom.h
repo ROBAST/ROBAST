@@ -4,8 +4,8 @@
  * All rights reserved.                                                       *
  *****************************************************************************/
 
-#ifndef A_REFRACTIVE_INDEX_DOT_INFO_H
-#define A_REFRACTIVE_INDEX_DOT_INFO_H
+#ifndef A_FILMETRIX_DOT_COM_H
+#define A_FILMETRIX_DOT_COM_H
 
 #include "TGraph.h"
 
@@ -13,20 +13,21 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// ARefractiveIndexDotInfo
+// AFilmetrixDotCom
 //
-// Wrapper class to read text files retreived from https://reflactiveindex.info
+// Wrapper class to read text files retreived from
+// https://www.filmetrics.com/refractive-index-database/
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-class ARefractiveIndexDotInfo : public ARefractiveIndex {
+class AFilmetrixDotCom : public ARefractiveIndex {
  private:
 
  public:
-  virtual ~ARefractiveIndexDotInfo() {};
-  ARefractiveIndexDotInfo(const char* fname);
+  AFilmetrixDotCom(const char* fname);
+  virtual ~AFilmetrixDotCom() {};
 
-  ClassDef(ARefractiveIndexDotInfo, 1)
+  ClassDef(AFilmetrixDotCom, 1)
 };
 
-#endif  // A_REFRACTIVE_INDEX_DOT_INFO_H
+#endif  // A_FILMETRIX_DOT_COM_H

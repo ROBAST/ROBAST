@@ -7,7 +7,11 @@
 #ifndef A_REFRACTIVE_INDEX_H
 #define A_REFRACTIVE_INDEX_H
 
-#include "TObject.h"
+#include "TGraph.h"
+#include "TMath.h"
+
+#include <complex>
+#include <limits>
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -18,13 +22,34 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 class ARefractiveIndex : public TObject {
- private:
+ protected:
+  TGraph* fRefractiveIndex;
+  TGraph* fExtinctionCoefficient;
+
  public:
   ARefractiveIndex();
   virtual ~ARefractiveIndex();
 
   virtual Double_t GetAbbeNumber() const;
-  virtual Double_t GetIndex(Double_t lambda) const = 0;
+  virtual Double_t GetIndex(Double_t lambda) const {
+    return GetRefractiveIndex(lambda);
+  }
+  virtual Double_t GetRefractiveIndex(Double_t lambda) const {
+    return fRefractiveIndex ? fRefractiveIndex->Eval(lambda) : 1.;
+  }
+  virtual Double_t GetExtinctinoCoefficient(Double_t lambda) const {
+    return fExtinctionCoefficient ? fExtinctionCoefficient->Eval(lambda) : 0.;
+  }
+  virtual Double_t GetAbsorptionLength(Double_t lambda) const {
+    static const Double_t inf = std::numeric_limits<Double_t>::infinity();
+    Double_t k = GetExtinctinoCoefficient(lambda);
+    return k <= 0. ? inf : lambda / (4 * TMath::Pi() * k);
+  }
+  virtual std::complex<Double_t> GetComplexRefractiveIndex(Double_t lambda) const {
+    return std::complex<Double_t>(GetIndex(lambda), fExtinctionCoefficient ? fExtinctionCoefficient->Eval(lambda) : 0.);
+  }
+  virtual void SetExtinctionCoefficient(const TGraph& graph);
+  virtual void SetRefractiveIndex(const TGraph& graph);
 
   ClassDef(ARefractiveIndex, 1)
 };

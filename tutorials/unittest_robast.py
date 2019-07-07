@@ -443,6 +443,25 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(y/y0, 1, 2)
         self.assertAlmostEqual(r/r0, 0.8, 2)
 
+    def testTMM(self):
+        # Copied from tmm.tests.basic_test()
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med1(new AConstantRefractiveIndex(1.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med2(new AConstantRefractiveIndex(2., 4.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med3(new AConstantRefractiveIndex(3., .3));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med4(new AConstantRefractiveIndex(1., .1));')
+
+        multi = ROOT.AMultilayer(ROOT.med1, ROOT.med4)
+        multi.InsertLayer(ROOT.med2, 2)
+        multi.InsertLayer(ROOT.med3, 3)
+        th_0 = ROOT.std.complex(ROOT.double)(0.1)
+        lam_vac = 100 # Units are not important
+
+        reflectance = ROOT.double()
+        transmittance = ROOT.double()
+        multi.CoherentTMM(ROOT.AMultilayer.kS, th_0, lam_vac, reflectance, transmittance)
+        self.assertAlmostEqual(reflectance, 0.37273208839139516)
+        self.assertAlmostEqual(transmittance, 0.22604491247079261)
+
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)

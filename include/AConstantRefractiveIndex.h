@@ -4,29 +4,25 @@
  * All rights reserved.                                                       *
  *****************************************************************************/
 
-#ifndef A_REFRACTIVE_INDEX_DOT_INFO_H
-#define A_REFRACTIVE_INDEX_DOT_INFO_H
-
-#include "TGraph.h"
+#ifndef A_CONSTANT_REFRACTIVE_INDEX_H
+#define A_CONSTANT_REFRACTIVE_INDEX_H
 
 #include "ARefractiveIndex.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// ARefractiveIndexDotInfo
+// AConstantRefractiveIndex
 //
-// Wrapper class to read text files retreived from https://reflactiveindex.info
+// Abstract class for refractive index
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-class ARefractiveIndexDotInfo : public ARefractiveIndex {
- private:
-
+class AConstantRefractiveIndex : public ARefractiveIndex {
  public:
-  virtual ~ARefractiveIndexDotInfo() {};
-  ARefractiveIndexDotInfo(const char* fname);
+  AConstantRefractiveIndex(Double_t n, Double_t k = 0.);
+  virtual ~AConstantRefractiveIndex() {}
 
-  ClassDef(ARefractiveIndexDotInfo, 1)
+  ClassDef(AConstantRefractiveIndex, 1)
 };
 
-#endif  // A_REFRACTIVE_INDEX_DOT_INFO_H
+#endif  // A_CONSTANT_REFRACTIVE_INDEX_H

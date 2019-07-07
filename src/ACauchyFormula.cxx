@@ -18,7 +18,7 @@
 
 ClassImp(ACauchyFormula);
 
-ACauchyFormula::ACauchyFormula() {}
+ACauchyFormula::ACauchyFormula() : ARefractiveIndex() {}
 
 //_____________________________________________________________________________
 ACauchyFormula::ACauchyFormula(Double_t A, Double_t B, Double_t C) {
