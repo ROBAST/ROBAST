@@ -443,6 +443,21 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(y/y0, 1, 2)
         self.assertAlmostEqual(r/r0, 0.8, 2)
 
+    def testMixedRefractiveIndex(self):
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medA(new AConstantRefractiveIndex(1., 1.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medB(new AConstantRefractiveIndex(2., 2.));')
+        mixed = ROOT.AMixedRefractiveIndex(ROOT.medA, ROOT.medB, 3, 7)
+        nA = ROOT.medA.GetRefractiveIndex(100 * nm)
+        nB = ROOT.medB.GetRefractiveIndex(100 * nm)
+        kA = ROOT.medA.GetExtinctionCoefficient(100 * nm)
+        kB = ROOT.medB.GetExtinctionCoefficient(100 * nm)
+
+        n = mixed.GetRefractiveIndex(100 * nm)
+        k = mixed.GetExtinctionCoefficient(100 * nm)
+
+        self.assertAlmostEqual(n, nA * 0.3 + nB * 0.7)
+        self.assertAlmostEqual(k, kA * 0.3 + kB * 0.7)
+
     def testTMM(self):
         # Copied from tmm.tests.basic_test()
         ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med1(new AConstantRefractiveIndex(1.));')

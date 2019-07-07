@@ -37,16 +37,16 @@ class ARefractiveIndex : public TObject {
   virtual Double_t GetRefractiveIndex(Double_t lambda) const {
     return fRefractiveIndex ? fRefractiveIndex->Eval(lambda) : 1.;
   }
-  virtual Double_t GetExtinctinoCoefficient(Double_t lambda) const {
+  virtual Double_t GetExtinctionCoefficient(Double_t lambda) const {
     return fExtinctionCoefficient ? fExtinctionCoefficient->Eval(lambda) : 0.;
   }
   virtual Double_t GetAbsorptionLength(Double_t lambda) const {
     static const Double_t inf = std::numeric_limits<Double_t>::infinity();
-    Double_t k = GetExtinctinoCoefficient(lambda);
+    Double_t k = GetExtinctionCoefficient(lambda);
     return k <= 0. ? inf : lambda / (4 * TMath::Pi() * k);
   }
   virtual std::complex<Double_t> GetComplexRefractiveIndex(Double_t lambda) const {
-    return std::complex<Double_t>(GetIndex(lambda), fExtinctionCoefficient ? fExtinctionCoefficient->Eval(lambda) : 0.);
+    return std::complex<Double_t>(GetRefractiveIndex(lambda), GetExtinctionCoefficient(lambda));
   }
   virtual void SetExtinctionCoefficient(const TGraph& graph);
   virtual void SetRefractiveIndex(const TGraph& graph);

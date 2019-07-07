@@ -28,6 +28,7 @@
 #pragma link C++ class AGlassCatalog;
 #pragma link C++ class ALens;
 #pragma link C++ class AMirror;
+#pragma link C++ class AMixedRefractiveIndex;
 #pragma link C++ class AMultilayer;
 #pragma link C++ class AObscuration;
 #pragma link C++ class AOpticalComponent;
