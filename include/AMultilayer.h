@@ -45,6 +45,13 @@ private:
   virtual ~AMultilayer();
 
   void InsertLayer(std::shared_ptr<ARefractiveIndex> idx, Double_t thickness);
+  void ChangeThickness(std::size_t i, Double_t thickness) {
+    if (i < 1 || i > fThicknessList.size() - 2) {
+      Error("ChangeThickness", "Cannot change the thickness of the %luth layer", i);
+    } else {
+      fThicknessList[i] = thickness;
+    }
+  }
 
   void CoherentTMM(EPolarization polarization, std::complex<Double_t> th_0,
                    Double_t lam_vac, Double_t& reflectance,
