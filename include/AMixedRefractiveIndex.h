@@ -43,6 +43,10 @@ class AMixedRefractiveIndex : public ARefractiveIndex {
     Double_t kB = fMaterialB->GetExtinctionCoefficient(lambda);
     return  kA * fFractionA + kB * fFractionB;
   }
+  void SetFraction(Double_t fractionA, Double_t fractionB) {
+    fFractionA = fractionA / (fractionA + fractionB);
+    fFractionB = fractionB / (fractionA + fractionB);
+  }
 
   ClassDef(AMixedRefractiveIndex, 1)
 };
