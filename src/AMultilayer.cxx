@@ -130,12 +130,13 @@ std::complex<Double_t> AMultilayer::InterfaceR(EPolarization polarization,
   // th_i, th_f are (complex) propegation angle for incident and final
   // (in radians, where 0=normal). "th" stands for "theta".
 
+  auto cosi = std::cos(th_i);
+  auto cosf = std::cos(th_f);
+
   if (polarization == kS) {
-    return ((n_i * std::cos(th_i) - n_f * std::cos(th_f)) /
-            (n_i * std::cos(th_i) + n_f * std::cos(th_f)));
+    return (n_i * cosi - n_f * cosf) / (n_i * cosi + n_f * cosf);
   } else {
-    return ((n_f * std::cos(th_i) - n_i * std::cos(th_f)) /
-            (n_f * std::cos(th_i) + n_i * std::cos(th_f)));
+    return (n_f * cosi - n_i * cosf) / (n_f * cosi + n_i * cosf);
   }
 }
   
@@ -158,10 +159,13 @@ std::complex<Double_t> AMultilayer::InterfaceT(EPolarization polarization,
   // th_i, th_f are (complex) propegation angle for incident and final
   // (in radians, where 0=normal). "th" stands for "theta".
 
+  auto cosi = std::cos(th_i);
+  auto cosf = std::cos(th_f);
+
   if (polarization == kS) {
-    return 2. * n_i * std::cos(th_i) / (n_i * std::cos(th_i) + n_f * std::cos(th_f));
+    return 2. * n_i * cosi / (n_i * cosi + n_f * cosf);
   } else {
-    return 2. * n_i * std::cos(th_i) / (n_f * std::cos(th_i) + n_i * std::cos(th_f));
+    return 2. * n_i * cosi / (n_f * cosi + n_i * cosf);
   }
 }
 
@@ -266,6 +270,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
     t_list(num_layers, std::vector<std::complex<Double_t>>(num_layers));
   std::vector<std::vector<std::complex<Double_t>>>
     r_list(num_layers, std::vector<std::complex<Double_t>>(num_layers));
+
   for(std::size_t i = 0; i < num_layers - 1; ++i) {
     t_list[i][i + 1] = InterfaceT(polarization, n_list[i], n_list[i + 1],
                                   th_list[i], th_list[i + 1]);
