@@ -477,6 +477,10 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(reflectance, 0.37273208839139516)
         self.assertAlmostEqual(transmittance, 0.22604491247079261)
 
+        multi.CoherentTMM(ROOT.AMultilayer.kP, th_0, lam_vac, reflectance, transmittance)
+        self.assertAlmostEqual(reflectance, 0.37016110373044969)
+        self.assertAlmostEqual(transmittance, 0.22824374314132009)
+
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)
