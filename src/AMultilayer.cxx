@@ -113,63 +113,6 @@ void AMultilayer::ListSnell(std::complex<Double_t> th_0,
 }
 
 //______________________________________________________________________________
-std::complex<Double_t> AMultilayer::InterfaceR(EPolarization polarization,
-                                               std::complex<Double_t> n_i,
-                                               std::complex<Double_t> n_f,
-                                               std::complex<Double_t> th_i,
-                                               std::complex<Double_t> th_f) const
-{
-  // Copied from tmm.interface_r
-
-  // reflection amplitude (from Fresnel equations)
-  //
-  // polarization is either "s" or "p" for polarization
-  //
-  // n_i, n_f are (complex) refractive index for incident and final
-  //
-  // th_i, th_f are (complex) propegation angle for incident and final
-  // (in radians, where 0=normal). "th" stands for "theta".
-
-  auto cosi = std::cos(th_i);
-  auto cosf = std::cos(th_f);
-
-  if (polarization == kS) {
-    return (n_i * cosi - n_f * cosf) / (n_i * cosi + n_f * cosf);
-  } else {
-    return (n_f * cosi - n_i * cosf) / (n_f * cosi + n_i * cosf);
-  }
-}
-  
-
-//______________________________________________________________________________
-std::complex<Double_t> AMultilayer::InterfaceT(EPolarization polarization,
-                                               std::complex<Double_t> n_i,
-                                               std::complex<Double_t> n_f,
-                                               std::complex<Double_t> th_i,
-                                               std::complex<Double_t> th_f) const
-{
-  // Copied from tmm.interface_t
-
-  // transmission amplitude (frem Fresnel equations)
-  //
-  // polarization is either "s" or "p" for polarization
-  //
-  // n_i, n_f are (complex) refractive index for incident and final
-  //
-  // th_i, th_f are (complex) propegation angle for incident and final
-  // (in radians, where 0=normal). "th" stands for "theta".
-
-  auto cosi = std::cos(th_i);
-  auto cosf = std::cos(th_f);
-
-  if (polarization == kS) {
-    return 2. * n_i * cosi / (n_i * cosi + n_f * cosf);
-  } else {
-    return 2. * n_i * cosi / (n_f * cosi + n_i * cosf);
-  }
-}
-
-//______________________________________________________________________________
 void AMultilayer::InsertLayer(std::shared_ptr<ARefractiveIndex> idx, Double_t thickness)
 {
   // ----------------- Top layer
@@ -238,9 +181,9 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   }
 
   // delta is the total phase accrued by traveling through a given layer.
-  std::vector<std::complex<Double_t>> delta;
+  std::vector<std::complex<Double_t>> delta(num_layers);
   for(std::size_t i = 0; i < num_layers; ++i) {
-    delta.push_back(kz_list[i] * fThicknessList[i]);
+    delta[i] = kz_list[i] * fThicknessList[i];
   }
 
   // For a very opaque layer, reset delta to avoid divide-by-0 and similar
@@ -266,16 +209,23 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // t_list[i,j] and r_list[i,j] are transmission and reflection amplitudes,
   // respectively, coming from i, going to j. Only need to calculate this when
   // j=i+1. (2D array is overkill but helps avoid confusion.)
-  std::vector<std::vector<std::complex<Double_t>>>
-    t_list(num_layers, std::vector<std::complex<Double_t>>(num_layers));
-  std::vector<std::vector<std::complex<Double_t>>>
-    r_list(num_layers, std::vector<std::complex<Double_t>>(num_layers));
+  std::vector<std::complex<Double_t>> t_list(num_layers);
+  std::vector<std::complex<Double_t>> r_list(num_layers);
 
   for(std::size_t i = 0; i < num_layers - 1; ++i) {
-    t_list[i][i + 1] = InterfaceT(polarization, n_list[i], n_list[i + 1],
-                                  th_list[i], th_list[i + 1]);
-    r_list[i][i + 1] = InterfaceR(polarization, n_list[i], n_list[i + 1],
-                                  th_list[i], th_list[i + 1]);
+    auto cosi = std::cos(th_list[i]);
+    auto cosf = std::cos(th_list[i + 1]);
+    auto ii = n_list[i] * cosi;
+    if (polarization == kS) {
+      auto ff = n_list[i + 1] * cosf;
+      t_list[i] = 2. * ii / (ii + ff);
+      r_list[i] = (ii - ff) / (ii + ff);
+    } else {
+      auto fi = n_list[i + 1] * cosi;
+      auto if_ = n_list[i] * cosf;
+      t_list[i] = 2. * ii / (fi + if_);
+      r_list[i] = (fi - if_) / (fi + if_);
+    }
   }
 
   // At the interface between the (n-1)st and nth material, let v_n be the
@@ -289,10 +239,10 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   M_list.push_back(A2x2ComplexMatrix(0, 0, 0, 0));
   for (std::size_t i = 1; i < num_layers - 1; ++i) {
     static const std::complex<Double_t> j(0, 1);
-    M_list.push_back(1. / t_list[i][i + 1] *
+    M_list.push_back(1. / t_list[i] *
                      A2x2ComplexMatrix(std::exp(- j * delta[i]), 0,
                                        0, std::exp(j * delta[i])) *
-                     A2x2ComplexMatrix(1, r_list[i][i + 1], r_list[i][i + 1], 1));
+                     A2x2ComplexMatrix(1, r_list[i], r_list[i], 1));
     //std::cerr << i << "\t" << M_list[i].Get00() << "\t" << M_list[i].Get00() << std::endl;
     //std::cerr << "\t" << M_list[i].Get10() << "\t" << M_list[i].Get11() << std::endl;
   }
@@ -304,7 +254,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
     Mtilde = Mtilde * M_list[i];
   }
 
-  Mtilde = A2x2ComplexMatrix(1, r_list[0][1], r_list[0][1], 1) / t_list[0][1] * Mtilde;
+  Mtilde = A2x2ComplexMatrix(1, r_list[0], r_list[0], 1) / t_list[0] * Mtilde;
 
   // Net complex transmission and reflection amplitudes
   auto r = Mtilde.Get10() / Mtilde.Get00();
