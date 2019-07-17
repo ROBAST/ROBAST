@@ -26,6 +26,7 @@ class A2x2ComplexMatrix {
   // ( fC[2], fC[3] )
 
  public:
+  A2x2ComplexMatrix() : A2x2ComplexMatrix(0, 0, 0, 0) {};
   A2x2ComplexMatrix(std::complex<Double_t> c0, std::complex<Double_t> c1,
                     std::complex<Double_t> c2, std::complex<Double_t> c3);
   virtual ~A2x2ComplexMatrix() {}
