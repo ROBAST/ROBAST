@@ -278,18 +278,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // M_list[n]. M_0 and M_{num_layers-1} are not defined.
   // My M is a bit different than Sernelius's, but Mtilde is the same.
 
-  std::vector<A2x2ComplexMatrix> M_list;
-  M_list.push_back(A2x2ComplexMatrix(0, 0, 0, 0));
-  for (std::size_t i = 1; i < num_layers - 1; ++i) {
-    static const std::complex<Double_t> j(0, 1);
-    M_list.push_back(1. / t_list[i] *
-                     A2x2ComplexMatrix(std::exp(- j * delta[i]), 0,
-                                       0, std::exp(j * delta[i])) *
-                     A2x2ComplexMatrix(1, r_list[i], r_list[i], 1));
-  }
-
   // M_list[0] and M_list[-1] are filled with (0, 0, 0, 0) by default
-  /*
   std::vector<A2x2ComplexMatrix> M_list(num_layers);
   {
     auto M_i = M_list.begin(); ++M_i; // start i from 1
@@ -304,13 +293,13 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
         A2x2ComplexMatrix(1, *r_i, *r_i, 1);
       //std::cerr << i << "\t" << M_list[i].Get00() << "\t" << M_list[i].Get00() << std::endl;
       //std::cerr << "\t" << M_list[i].Get10() << "\t" << M_list[i].Get11() << std::endl;
+      ++M_i;
+      ++t_i;
+      ++r_i;
+      ++delta_i;
     }
-    ++M_i;
-    ++t_i;
-    ++r_i;
-    ++delta_i;
   }
-  */
+
   A2x2ComplexMatrix Mtilde(1, 0, 0, 1);
   {
     auto M_i = M_list.cbegin(); ++M_i; // start i from 1
