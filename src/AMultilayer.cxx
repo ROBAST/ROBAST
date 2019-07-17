@@ -105,7 +105,7 @@ void AMultilayer::ListSnell(std::complex<Double_t> th_0,
   // The first and last entry need to be the forward angle (the intermediate
   // layers don't matter, see https://arxiv.org/abs/1603.02720 Section 5)
   if (!IsForwardAngle(n_list[0], th_list[0])) {
-    th_list.front() = TMath::Pi() - th_list.front();
+    th_list[0] = TMath::Pi() - th_list[0];
   }
   if (!IsForwardAngle(n_list.back(), th_list.back())) {
     th_list.back() = TMath::Pi() - th_list.back();
@@ -281,18 +281,16 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // M_list[0] and M_list[-1] are filled with (0, 0, 0, 0) by default
   std::vector<A2x2ComplexMatrix> M_list(num_layers);
   {
+    const std::complex<Double_t> j(0, 1);
     auto M_i = M_list.begin(); ++M_i; // start i from 1
     auto t_i = t_list.cbegin(); ++t_i;
     auto r_i = r_list.cbegin(); ++r_i;
     auto delta_i = delta.cbegin(); ++delta_i;
     for (std::size_t i = 1; i < num_layers - 1; ++i) {
-      static const std::complex<Double_t> j(0, 1);
       auto j_delta_i = j * (*delta_i);
       *M_i = 1. / (*t_i) * A2x2ComplexMatrix(std::exp(- j_delta_i), 0, 0,
                                              std::exp(j_delta_i)) *
         A2x2ComplexMatrix(1, *r_i, *r_i, 1);
-      //std::cerr << i << "\t" << M_list[i].Get00() << "\t" << M_list[i].Get00() << std::endl;
-      //std::cerr << "\t" << M_list[i].Get10() << "\t" << M_list[i].Get11() << std::endl;
       ++M_i;
       ++t_i;
       ++r_i;
@@ -309,7 +307,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
     }
   }
 
-  Mtilde = A2x2ComplexMatrix(1, r_list.front(), r_list.front(), 1) / t_list.front() * Mtilde;
+  Mtilde = A2x2ComplexMatrix(1, r_list[0], r_list[0], 1) / t_list[0] * Mtilde;
 
   // Net complex transmission and reflection amplitudes
   auto r = Mtilde.Get10() / Mtilde.Get00();
@@ -337,7 +335,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // Net transmitted and reflected power, as a proportion of the incoming light
   // power.
   reflectance = std::abs(r) * std::abs(r);
-  auto n_i = n_list.front();
+  auto n_i = n_list[0];
   auto n_f = n_list.back();
   auto th_i = th_0;
   auto th_f = th_list.back();
