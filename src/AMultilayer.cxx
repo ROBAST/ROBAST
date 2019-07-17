@@ -156,11 +156,18 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // lam_vac is vacuum wavelength of the light.
 
   auto num_layers = fRefractiveIndexList.size();
-  std::vector<std::complex<Double_t>> n_list;
-  for (std::size_t i = 0; i < num_layers; ++i) {
-    n_list.push_back(fRefractiveIndexList[i]->GetComplexRefractiveIndex(lam_vac));
+  std::vector<std::complex<Double_t>> n_list(num_layers);
+
+  {
+    auto n_i = n_list.begin();
+    auto ref_i = fRefractiveIndexList.cbegin();
+    for (std::size_t i = 0; i < num_layers; ++i) {
+      *n_i = (*ref_i)->GetComplexRefractiveIndex(lam_vac);
+      ++n_i;
+      ++ref_i;
+    }
   }
-                      
+                 
   // Input tests
   if(std::abs((n_list[0] * std::sin(th_0)).imag()) >= 100 * EPSILON ||
      ! IsForwardAngle(n_list[0], th_0)) {
@@ -175,15 +182,35 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
 
   // kz is the z-component of (complex) angular wavevector for forward-moving
   // wave. Positive imaginary part means decaying.
-  std::vector<std::complex<Double_t>> kz_list;
-  for(std::size_t i = 0; i < num_layers; ++i) {
-    kz_list.push_back(TMath::TwoPi() * n_list[i] * std::cos(th_list[i]) / lam_vac);
+  std::vector<std::complex<Double_t>> kz_list(num_layers);
+  std::vector<std::complex<Double_t>> cos_th_list(num_layers);
+  {
+    auto kz_i = kz_list.begin();
+    auto n_i = n_list.cbegin();
+    auto th_i = th_list.cbegin();
+    auto cos_th_i = cos_th_list.begin();
+    for(std::size_t i = 0; i < num_layers; ++i) {
+      *cos_th_i = std::cos(*th_i);
+      *kz_i = TMath::TwoPi() * (*n_i) * (*cos_th_i) / lam_vac;
+      ++kz_i;
+      ++n_i;
+      ++th_i;
+      ++cos_th_i;
+    }
   }
 
   // delta is the total phase accrued by traveling through a given layer.
   std::vector<std::complex<Double_t>> delta(num_layers);
-  for(std::size_t i = 0; i < num_layers; ++i) {
-    delta[i] = kz_list[i] * fThicknessList[i];
+  {
+    auto delta_i = delta.begin();
+    auto kz_i = kz_list.cbegin();
+    auto thickness_i = fThicknessList.cbegin();
+    for(std::size_t i = 0; i < num_layers; ++i) {
+      *delta_i = (*kz_i) * (*thickness_i);
+      ++delta_i;
+      ++kz_i;
+      ++thickness_i;
+    }
   }
 
   // For a very opaque layer, reset delta to avoid divide-by-0 and similar
@@ -212,19 +239,35 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   std::vector<std::complex<Double_t>> t_list(num_layers);
   std::vector<std::complex<Double_t>> r_list(num_layers);
 
-  for(std::size_t i = 0; i < num_layers - 1; ++i) {
-    auto cosi = std::cos(th_list[i]);
-    auto cosf = std::cos(th_list[i + 1]);
-    auto ii = n_list[i] * cosi;
-    if (polarization == kS) {
-      auto ff = n_list[i + 1] * cosf;
-      t_list[i] = 2. * ii / (ii + ff);
-      r_list[i] = (ii - ff) / (ii + ff);
-    } else {
-      auto fi = n_list[i + 1] * cosi;
-      auto if_ = n_list[i] * cosf;
-      t_list[i] = 2. * ii / (fi + if_);
-      r_list[i] = (fi - if_) / (fi + if_);
+  {
+    auto t_i = t_list.begin();
+    auto r_i = r_list.begin();
+    auto th_i = th_list.cbegin();
+    auto th_f = th_list.cbegin(); ++th_f; // increment to access th_f (th[i + 1])
+    auto n_i = n_list.cbegin();
+    auto n_f = n_list.cbegin(); ++n_f; // increment to access n_f (n[i + 1])
+    auto cos_th_i = cos_th_list.cbegin(); // cos(th_i)
+    auto cos_th_f = cos_th_list.cbegin(); ++cos_th_f; // increment to access cos(th_f)
+    for(std::size_t i = 0; i < num_layers - 1; ++i) {
+      auto ii = *n_i * (*cos_th_i);
+      if (polarization == kS) {
+        auto ff = *n_f * (*cos_th_f);
+        *t_i = 2. * ii / (ii + ff);
+        *r_i = (ii - ff) / (ii + ff);
+      } else {
+        auto fi = *n_f * (*cos_th_i);
+        auto if_ = *n_i * (*cos_th_f);
+        *t_i = 2. * ii / (fi + if_);
+        *r_i = (fi - if_) / (fi + if_);
+      }
+      ++t_i;
+      ++r_i;
+      ++th_i;
+      ++th_f;
+      ++n_i;
+      ++n_f;
+      ++cos_th_i;
+      ++cos_th_f;
     }
   }
 
@@ -243,18 +286,41 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
                      A2x2ComplexMatrix(std::exp(- j * delta[i]), 0,
                                        0, std::exp(j * delta[i])) *
                      A2x2ComplexMatrix(1, r_list[i], r_list[i], 1));
-    //std::cerr << i << "\t" << M_list[i].Get00() << "\t" << M_list[i].Get00() << std::endl;
-    //std::cerr << "\t" << M_list[i].Get10() << "\t" << M_list[i].Get11() << std::endl;
   }
-  M_list.push_back(A2x2ComplexMatrix(0, 0, 0, 0));
-  
+
+  // M_list[0] and M_list[-1] are filled with (0, 0, 0, 0) by default
+  /*
+  std::vector<A2x2ComplexMatrix> M_list(num_layers);
+  {
+    auto M_i = M_list.begin(); ++M_i; // start i from 1
+    auto t_i = t_list.cbegin(); ++t_i;
+    auto r_i = r_list.cbegin(); ++r_i;
+    auto delta_i = delta.cbegin(); ++delta_i;
+    for (std::size_t i = 1; i < num_layers - 1; ++i) {
+      static const std::complex<Double_t> j(0, 1);
+      auto j_delta_i = j * (*delta_i);
+      *M_i = 1. / (*t_i) * A2x2ComplexMatrix(std::exp(- j_delta_i), 0, 0,
+                                             std::exp(j_delta_i)) *
+        A2x2ComplexMatrix(1, *r_i, *r_i, 1);
+      //std::cerr << i << "\t" << M_list[i].Get00() << "\t" << M_list[i].Get00() << std::endl;
+      //std::cerr << "\t" << M_list[i].Get10() << "\t" << M_list[i].Get11() << std::endl;
+    }
+    ++M_i;
+    ++t_i;
+    ++r_i;
+    ++delta_i;
+  }
+  */
   A2x2ComplexMatrix Mtilde(1, 0, 0, 1);
-
-  for (std::size_t i = 1; i < num_layers - 1; ++i) {
-    Mtilde = Mtilde * M_list[i];
+  {
+    auto M_i = M_list.cbegin(); ++M_i; // start i from 1
+    for (std::size_t i = 1; i < num_layers - 1; ++i) {
+      Mtilde = Mtilde * (*M_i);
+      ++M_i;
+    }
   }
 
-  Mtilde = A2x2ComplexMatrix(1, r_list[0], r_list[0], 1) / t_list[0] * Mtilde;
+  Mtilde = A2x2ComplexMatrix(1, r_list.front(), r_list.front(), 1) / t_list.front() * Mtilde;
 
   // Net complex transmission and reflection amplitudes
   auto r = Mtilde.Get10() / Mtilde.Get00();
@@ -282,7 +348,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // Net transmitted and reflected power, as a proportion of the incoming light
   // power.
   reflectance = std::abs(r) * std::abs(r);
-  auto n_i = n_list[0];
+  auto n_i = n_list.front();
   auto n_f = n_list.back();
   auto th_i = th_0;
   auto th_f = th_list.back();
