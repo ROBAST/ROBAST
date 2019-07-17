@@ -97,9 +97,16 @@ void AMultilayer::ListSnell(std::complex<Double_t> th_0,
   // "angles" may be complex!!
 
   auto num_layers = fRefractiveIndexList.size();
-  for(std::size_t i = 0; i < num_layers; ++i) {
-    auto angle_i = std::asin(n_list[0] * std::sin(th_0) / n_list[i]);
-    th_list.push_back(angle_i);
+  th_list.resize(num_layers);
+  {
+    auto n_i = n_list.cbegin();
+    auto th_i = th_list.begin();
+    auto n0_sinth0 = (*n_i) * std::sin(th_0);
+    for(std::size_t i = 0; i < num_layers; ++i) {
+      *th_i = std::asin(n0_sinth0  / *n_i);
+      ++n_i;
+      ++th_i;
+    }
   }
 
   // The first and last entry need to be the forward angle (the intermediate
@@ -218,18 +225,22 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // transmission < 1e-30 --- small enough that the exact value doesn't
   // matter.
   static Bool_t opacity_warning = kFALSE;
-  for (std::size_t i = 1; i < num_layers - 1; ++i) {
-    if (delta[i].imag() > 35) {
-      delta[i] = delta[i].real() + std::complex<Double_t>(0, 35);
-      if (opacity_warning == kFALSE) {
-        opacity_warning = kTRUE;
-        Error("CoherentTMM",
-              "Warning: Layers that are almost perfectly opaque "
-              "are modified to be slightly transmissive, "
-              "allowing 1 photon in 10^30 to pass through. It's "
-              "for numerical stability. This warning will not "
-              "be shown again.");
+  {
+    auto delta_i = delta.begin(); ++delta_i; // start from i = 1
+    for (std::size_t i = 1; i < num_layers - 1; ++i) {
+      if ((*delta_i).imag() > 35) {
+        *delta_i = (*delta_i).real() + std::complex<Double_t>(0, 35);
+        if (opacity_warning == kFALSE) {
+          opacity_warning = kTRUE;
+          Error("CoherentTMM",
+                "Warning: Layers that are almost perfectly opaque "
+                "are modified to be slightly transmissive, "
+                "allowing 1 photon in 10^30 to pass through. It's "
+                "for numerical stability. This warning will not "
+                "be shown again.");
+        }
       }
+      ++delta_i;
     }
   }
   
