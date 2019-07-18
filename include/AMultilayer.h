@@ -47,6 +47,31 @@ private:
   void CoherentTMM(EPolarization polarization, std::complex<Double_t> th_0,
                    Double_t lam_vac, Double_t& reflectance,
                    Double_t& transmittance) const;
+  void CoherentTMMMixed(std::complex<Double_t> th_0,
+                        Double_t lam_vac, Double_t& reflectance,
+                        Double_t& transmittance) const {
+    Double_t r = 0;
+    Double_t t = 0;
+    CoherentTMMP(th_0, lam_vac, reflectance, transmittance);
+    r += reflectance;
+    t += transmittance;
+    CoherentTMMS(th_0, lam_vac, reflectance, transmittance);
+    r += reflectance;
+    t += transmittance;
+
+    reflectance = r / 2.;
+    transmittance = t/ 2.;
+  }
+  void CoherentTMMP(std::complex<Double_t> th_0,
+                    Double_t lam_vac, Double_t& reflectance,
+                    Double_t& transmittance) const {
+    CoherentTMM(kP, th_0, lam_vac, reflectance, transmittance);
+  }
+  void CoherentTMMS(std::complex<Double_t> th_0,
+                    Double_t lam_vac, Double_t& reflectance,
+                    Double_t& transmittance) const {
+    CoherentTMM(kS, th_0, lam_vac, reflectance, transmittance);
+  }
   void PrintLayers(Double_t lambda) const;
 
   ClassDef(AMultilayer, 1)
