@@ -471,15 +471,52 @@ class TestROBAST(unittest.TestCase):
         th_0 = ROOT.std.complex(ROOT.double)(0.1)
         lam_vac = 100 # Units are not important
 
+        rs, rp = 0.37273208839139516, 0.37016110373044969
+        ts, tp = 0.22604491247079261, 0.22824374314132009
+
         reflectance = ROOT.double()
         transmittance = ROOT.double()
         multi.CoherentTMM(ROOT.AMultilayer.kS, th_0, lam_vac, reflectance, transmittance)
-        self.assertAlmostEqual(reflectance, 0.37273208839139516)
-        self.assertAlmostEqual(transmittance, 0.22604491247079261)
+        self.assertAlmostEqual(reflectance, rs)
+        self.assertAlmostEqual(transmittance, ts)
 
         multi.CoherentTMM(ROOT.AMultilayer.kP, th_0, lam_vac, reflectance, transmittance)
-        self.assertAlmostEqual(reflectance, 0.37016110373044969)
-        self.assertAlmostEqual(transmittance, 0.22824374314132009)
+        self.assertAlmostEqual(reflectance, rp)
+        self.assertAlmostEqual(transmittance, tp)
+
+        multi.CoherentTMMMixed(th_0, lam_vac, reflectance, transmittance)
+        self.assertAlmostEqual(reflectance, (rs + rp) / 2.)
+        self.assertAlmostEqual(transmittance, (ts + tp) / 2.)
+
+        wavelength_v = ROOT.vector('Double_t')()
+        answer = []
+
+        for i in range(300, 800):
+            wavelength_v.push_back(i)
+            multi.CoherentTMMMixed(th_0, wavelength_v.back(), reflectance, transmittance)
+            answer.append((float(reflectance), float(transmittance))) # need cast to copy the value
+
+        reflectance_v = ROOT.vector('Double_t')()
+        transmittance_v = ROOT.vector('Double_t')()
+        multi.CoherentTMMMixed(th_0, wavelength_v, reflectance_v, transmittance_v)
+
+        for i in range(wavelength_v.size()):
+            self.assertAlmostEqual(answer[i][0], reflectance_v[i])
+            self.assertAlmostEqual(answer[i][1], transmittance_v[i])
+
+        angle_v = ROOT.vector('std::complex<Double_t>')()
+        answer = []
+
+        for i in range(500):
+            angle_v.push_back(ROOT.std.complex(ROOT.double)(i * ROOT.TMath.Pi() / 2000.))
+            multi.CoherentTMMMixed(angle_v.back(), lam_vac, reflectance, transmittance)
+            answer.append((float(reflectance), float(transmittance)))
+            
+        multi.CoherentTMMMixed(angle_v, lam_vac, reflectance_v, transmittance_v)
+
+        for i in range(angle_v.size()):
+            self.assertAlmostEqual(answer[i][0], reflectance_v[i])
+            self.assertAlmostEqual(answer[i][1], transmittance_v[i])
 
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
