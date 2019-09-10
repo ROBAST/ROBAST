@@ -25,6 +25,7 @@ public:
 private:
   std::vector<std::shared_ptr<ARefractiveIndex>> fRefractiveIndexList;
   std::vector<Double_t> fThicknessList;
+  std::size_t fNthreads;
 
   Bool_t IsForwardAngle(std::complex<Double_t> n, std::complex<Double_t> theta) const;
   void ListSnell(std::complex<Double_t> th_0,
@@ -99,25 +100,24 @@ private:
     reflectance.resize(n);
     transmittance.resize(n);
 
-    const auto nthreads = std::thread::hardware_concurrency();
-    std::vector<std::thread> threads(nthreads);
+    std::vector<std::thread> threads(fNthreads);
 
     auto th_0_cbegin = th_0.cbegin();
     auto th_0_cend = th_0.end();
     auto reflectance_begin = reflectance.begin();
     auto transmittance_begin = transmittance.begin();
 
-    auto step = n/nthreads;
+    auto step = n / fNthreads;
 
-    for (std::size_t i = 0; i < nthreads; ++i) {     
-      if (i == nthreads - 1) {
+    for (std::size_t i = 0; i < fNthreads; ++i) {
+      if (i == fNthreads - 1) {
         threads[i] = std::thread(&AMultilayer::CoherentTMMMixedMultiAngle, *this, th_0_cbegin, th_0_cbegin + step, lam_vac, reflectance_begin, transmittance_begin);
         th_0_cbegin += step;
       } else {
         threads[i] = std::thread(&AMultilayer::CoherentTMMMixedMultiAngle, *this, th_0_cbegin, th_0_cend, lam_vac, reflectance_begin, transmittance_begin);
       }
     }
-    for (std::size_t i = 0; i < nthreads; ++i) {
+    for (std::size_t i = 0; i < fNthreads; ++i) {
       threads[i].join();
     }
   }
@@ -128,25 +128,24 @@ private:
     reflectance.resize(n);
     transmittance.resize(n);
 
-    const auto nthreads = std::thread::hardware_concurrency();
-    std::vector<std::thread> threads(nthreads);
+    std::vector<std::thread> threads(fNthreads);
 
     auto lam_vac_cbegin = lam_vac.cbegin();
     auto lam_vac_cend = lam_vac.end();
     auto reflectance_begin = reflectance.begin();
     auto transmittance_begin = transmittance.begin();
 
-    auto step = n/nthreads;
+    auto step = n / fNthreads;
 
-    for (std::size_t i = 0; i < nthreads; ++i) {     
-      if (i == nthreads - 1) {
+    for (std::size_t i = 0; i < fNthreads; ++i) {
+      if (i == fNthreads - 1) {
         threads[i] = std::thread(&AMultilayer::CoherentTMMMixedMultiWavelength, *this, th_0, lam_vac_cbegin, lam_vac_cbegin + step, reflectance_begin, transmittance_begin);
         lam_vac_cbegin += step;
       } else {
         threads[i] = std::thread(&AMultilayer::CoherentTMMMixedMultiWavelength, *this, th_0, lam_vac_cbegin, lam_vac_cend, reflectance_begin, transmittance_begin);
       }
     }
-    for (std::size_t i = 0; i < nthreads; ++i) {
+    for (std::size_t i = 0; i < fNthreads; ++i) {
       threads[i].join();
     }
   }
@@ -161,6 +160,7 @@ private:
     CoherentTMM(kS, th_0, lam_vac, reflectance, transmittance);
   }
   void PrintLayers(Double_t lambda) const;
+  void SetNthreads(std::size_t n);
 
   ClassDef(AMultilayer, 1)
 };

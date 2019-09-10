@@ -22,7 +22,7 @@ static const Double_t inf = std::numeric_limits<Double_t>::infinity();
 ClassImp(AMultilayer);
 
 AMultilayer::AMultilayer(std::shared_ptr<ARefractiveIndex> top,
-                         std::shared_ptr<ARefractiveIndex> bottom)
+                         std::shared_ptr<ARefractiveIndex> bottom) : fNthreads(1)
 {
   fRefractiveIndexList.push_back(bottom);
   fThicknessList.push_back(inf);
@@ -370,3 +370,15 @@ void AMultilayer::PrintLayers(Double_t lambda) const
   std::cout << "----------------------------------------" << std::endl;
 }
 
+//__________________________________________________________________________________
+void AMultilayer::SetNthreads(std::size_t n)
+{
+  // Note that having n larger than 1 frequently decreases the total performance.
+  // Use this method only when you feed a very long vector.
+  if (n == 0) {
+    fNthreads = std::thread::hardware_concurrency(); // can return 0 if n is unknown
+    if (fNthreads == 0) fNthreads = 1;
+  } else if (n > 0) {
+    fNthreads = n;
+  }
+}
