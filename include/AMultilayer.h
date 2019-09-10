@@ -30,6 +30,35 @@ private:
   void ListSnell(std::complex<Double_t> th_0,
                  const std::vector<std::complex<Double_t>>& n_list,
                  std::vector<std::complex<Double_t>>& th_list) const;
+  void CoherentTMMMixedMultiAngle(std::vector<std::complex<Double_t>>::const_iterator th_0_cbegin,
+                                  std::vector<std::complex<Double_t>>::const_iterator th_0_cend,
+                                  Double_t lam_vac, std::vector<Double_t>::iterator reflectance_it,
+                                  std::vector<Double_t>::iterator transmittance_it
+                                  ) {
+    for (auto cit = th_0_cbegin; cit != th_0_cend; ++cit) {
+      Double_t r, t;
+      CoherentTMMMixed(*cit, lam_vac, r, t);
+      *reflectance_it = r;
+      *transmittance_it = t;
+      ++reflectance_it;
+      ++transmittance_it;
+    }
+  }
+  void CoherentTMMMixedMultiWavelength(std::complex<Double_t> th_0,
+                                       std::vector<Double_t>::const_iterator lam_vac_cbegin,
+                                       std::vector<Double_t>::const_iterator lam_vac_cend,
+                                       std::vector<Double_t>::iterator reflectance_it,
+                                       std::vector<Double_t>::iterator transmittance_it
+                                       ) {
+    for (auto cit = lam_vac_cbegin; cit != lam_vac_cend; ++cit) {
+      Double_t r, t;
+      CoherentTMMMixed(th_0, *cit, r, t);
+      *reflectance_it = r;
+      *transmittance_it = t;
+      ++reflectance_it;
+      ++transmittance_it;
+    }
+  }
 
  public:
   AMultilayer(std::shared_ptr<ARefractiveIndex> top,
@@ -119,35 +148,6 @@ private:
     }
     for (std::size_t i = 0; i < nthreads; ++i) {
       threads[i].join();
-    }
-  }
-  void CoherentTMMMixedMultiAngle(std::vector<std::complex<Double_t>>::const_iterator th_0_cbegin,
-                                  std::vector<std::complex<Double_t>>::const_iterator th_0_cend,
-                                  Double_t lam_vac, std::vector<Double_t>::iterator reflectance_it,
-                                  std::vector<Double_t>::iterator transmittance_it
-                                  ) {
-    for (auto cit = th_0_cbegin; cit != th_0_cend; ++cit) {
-      Double_t r, t;
-      CoherentTMMMixed(*cit, lam_vac, r, t);
-      *reflectance_it = r;
-      *transmittance_it = t;
-      ++reflectance_it;
-      ++transmittance_it;
-    }
-  }
-  void CoherentTMMMixedMultiWavelength(std::complex<Double_t> th_0,
-                                       std::vector<Double_t>::const_iterator lam_vac_cbegin,
-                                       std::vector<Double_t>::const_iterator lam_vac_cend,
-                                       std::vector<Double_t>::iterator reflectance_it,
-                                       std::vector<Double_t>::iterator transmittance_it
-                                       ) {
-    for (auto cit = lam_vac_cbegin; cit != lam_vac_cend; ++cit) {
-      Double_t r, t;
-      CoherentTMMMixed(th_0, *cit, r, t);
-      *reflectance_it = r;
-      *transmittance_it = t;
-      ++reflectance_it;
-      ++transmittance_it;
     }
   }
   void CoherentTMMP(std::complex<Double_t> th_0,
