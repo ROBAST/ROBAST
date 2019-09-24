@@ -19,6 +19,7 @@
 #include "AOpticsManager.h"
 static const Double_t kEpsilon =
     1e-6;  // Fixed in TGeoNavigator.cxx (equiv to 1e-6 cm)
+static const Double_t kInf = std::numeric_limits<Double_t>::infinity();
 
 ClassImp(AOpticsManager);
 
@@ -305,7 +306,7 @@ void AOpticsManager::TraceNonSequential(TObjArray* array) {
       if (typeCurrent == kLens) {
         Double_t abs =
             ((ALens*)currentNode->GetVolume())->GetAbsorptionLength(lambda);
-        if (abs > 0) {
+        if (abs > 0 && abs != kInf) {
           Double_t abs_step = gRandom->Exp(abs);
           if (abs_step < step) {
             Double_t n1 =

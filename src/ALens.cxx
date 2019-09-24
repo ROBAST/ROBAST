@@ -16,11 +16,7 @@
 ClassImp(ALens);
 
 ALens::ALens()
-    : fAbsorptionLength(NULL),
-      fIndex(NULL),
-      fIndexGraph(NULL),
-      fConstantIndex(1),
-      fConstantAbsorptionLength(-1) {
+  : fIndex(NULL) {
   // Default constructor
   SetLineColor(7);
 }
@@ -28,11 +24,7 @@ ALens::ALens()
 //_____________________________________________________________________________
 ALens::ALens(const char* name, const TGeoShape* shape, const TGeoMedium* med)
     : AOpticalComponent(name, shape, med),
-      fAbsorptionLength(NULL),
-      fIndex(NULL),
-      fIndexGraph(NULL),
-      fConstantIndex(1),
-      fConstantAbsorptionLength(-1) {
+      fIndex(NULL) {
   SetLineColor(7);
 #if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
   if (GetMedium() == TGeoVolume::DummyMedium() ||
@@ -44,33 +36,21 @@ ALens::ALens(const char* name, const TGeoShape* shape, const TGeoMedium* med)
 
 //_____________________________________________________________________________
 ALens::~ALens() {
-  SafeDelete(fAbsorptionLength);
   SafeDelete(fIndex);
-  SafeDelete(fIndexGraph);
 }
 
 //_____________________________________________________________________________
 Double_t ALens::GetAbsorptionLength(Double_t lambda) const {
-  if (!fAbsorptionLength) {
-    return fConstantAbsorptionLength;
+  if (!fIndex) {
+    return std::numeric_limits<Double_t>::infinity();
   }
 
-  Double_t abs = fAbsorptionLength->Eval(lambda);
+  Double_t abs = fIndex->GetAbsorptionLength(lambda);
 
   return abs >= 0 ? abs : 0;
 }
 
 //_____________________________________________________________________________
 Double_t ALens::GetRefractiveIndex(Double_t lambda) const {
-  Double_t ret = fConstantIndex;
-
-  if (fIndex) {
-    ret = fIndex->GetIndex(lambda);
-  }
-
-  if (fIndexGraph) {
-    ret = fIndexGraph->Eval(lambda);
-  }
-
-  return ret;
+  return fIndex ? fIndex->GetIndex(lambda) : 1.;
 }

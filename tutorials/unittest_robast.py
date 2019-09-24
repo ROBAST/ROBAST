@@ -59,41 +59,39 @@ class TestROBAST(unittest.TestCase):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
-        for j in range(2):
-            if j == 0:
-                # test a constant absorption length
-                lens.SetConstantAbsorptionLength(1*mm)
-            else:
-                # test absorption length evaluated from a TGraph
-                graph = ROOT.TGraph()
-                graph.SetPoint(0, 300*nm, 0.5*mm) # 1 mm at 400 nm
-                graph.SetPoint(1, 500*nm, 1.5*mm)
-                lens.SetAbsorptionLength(graph)
+        # test absorption length evaluated from a TGraph
+        wl = 400 * nm
+        absl = 1 * mm
+        graph = ROOT.TGraph()
+        graph.SetPoint(0, wl, wl / (4 * ROOT.TMath.Pi() * absl))
+        ref = ROOT.ARefractiveIndex()
+        ref.SetExtinctionCoefficient(graph)
+        lens.SetRefractiveIndex(ref)
 
-            rays = ROOT.ARayShooter.RandomSphere(400*nm, 10000)
-            manager.TraceNonSequential(rays)
+        rays = ROOT.ARayShooter.RandomSphere(400*nm, 10000)
+        manager.TraceNonSequential(rays)
             
-            h = ROOT.TH1D("h", "h", 1000, 0, 10)
+        h = ROOT.TH1D("h", "h", 1000, 0, 10)
             
-            absorbed = rays.GetAbsorbed()
+        absorbed = rays.GetAbsorbed()
             
-            for i in range(absorbed.GetLast() + 1):
-                ray = absorbed.At(i)
-                p = array.array("d", [0, 0, 0, 0])
-                ray.GetLastPoint(p)
-                d = (p[0]*p[0] + p[1]*p[1] + p[2]*p[2])**0.5
-                h.Fill(d/mm)
+        for i in range(absorbed.GetLast() + 1):
+            ray = absorbed.At(i)
+            p = array.array("d", [0, 0, 0, 0])
+            ray.GetLastPoint(p)
+            d = (p[0]*p[0] + p[1]*p[1] + p[2]*p[2])**0.5
+            h.Fill(d/mm)
                 
-            h.Draw()
-            h.Fit("expo", "l")
-            ROOT.gPad.Update()
+        h.Draw()
+        h.Fit("expo", "l")
+        ROOT.gPad.Update()
 
-            expo = h.GetFunction("expo")
-            p = -expo.GetParameter(1)
-            e = expo.GetParError(1)
+        expo = h.GetFunction("expo")
+        p = -expo.GetParameter(1)
+        e = expo.GetParError(1)
 
-            self.assertGreater(1, p - 3*e)
-            self.assertLess(1, p + 3*e)
+        self.assertGreater(1, p - 3*e)
+        self.assertLess(1, p + 3*e)
 
     def testFresnelReflection(self):
         manager = makeTheWorld()
@@ -101,10 +99,19 @@ class TestROBAST(unittest.TestCase):
 
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 0.5*m)
         lens = ROOT.ALens("lens", lensbox)
-        lens.SetConstantAbsorptionLength(1*um)
+
+        wl = 400 * nm
+
+        absl = 1 * um
+        graph = ROOT.TGraph()
+        graph.SetPoint(0, wl, wl / (4 * ROOT.TMath.Pi() * absl))
+        ref = ROOT.ARefractiveIndex()
+        ref.SetExtinctionCoefficient(graph)
 
         idx = 3.
-        lens.SetConstantRefractiveIndex(idx)
+        graph.SetPoint(0, wl, idx)
+        ref.SetRefractiveIndex(graph)
+        lens.SetRefractiveIndex(ref)
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
@@ -117,7 +124,7 @@ class TestROBAST(unittest.TestCase):
 
         rays = ROOT.ARayArray()
         for i in range(N):
-            ray = ROOT.ARay(i, 400*nm, 0, 0, 0.8*m, 0, 0, 0, -1)
+            ray = ROOT.ARay(i, wl, 0, 0, 0.8*m, 0, 0, 0, -1)
             rays.Add(ray)
 
         manager.TraceNonSequential(rays)
@@ -269,7 +276,9 @@ class TestROBAST(unittest.TestCase):
         graph = ROOT.TGraph()
         graph.SetPoint(0, 400*nm, 1.6)
         graph.SetPoint(1, 500*nm, 1.5)
-        lens.SetRefractiveIndex(graph)
+        ref = ROOT.ARefractiveIndex()
+        ref.SetRefractiveIndex(graph)
+        lens.SetRefractiveIndex(ref)
         n = lens.GetRefractiveIndex(450*nm)
         self.assertEqual(n, 1.55)
 
@@ -280,8 +289,13 @@ class TestROBAST(unittest.TestCase):
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
         lens = ROOT.ALens("lens", lensbox)
 
+        graph = ROOT.TGraph()
         idx = 1.5
-        lens.SetConstantRefractiveIndex(idx)
+        graph.SetPoint(0, 100 * nm, idx)
+        graph.SetPoint(1, 1000 * nm, idx)
+        ref = ROOT.ARefractiveIndex()
+        ref.SetRefractiveIndex(graph)
+        lens.SetRefractiveIndex(ref)
 
         manager.GetTopVolume().AddNode(lens, 1)
 
