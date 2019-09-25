@@ -14,7 +14,6 @@
 #pragma link C++ class A2x2ComplexMatrix;
 #pragma link C++ class ABorderSurfaceCondition;
 #pragma link C++ class ACauchyFormula;
-#pragma link C++ class AConstantRefractiveIndex;
 #pragma link C++ class ACorsikaIACTEventHeader;
 #pragma link C++ class ACorsikaIACTFile;
 #pragma link C++ class ACorsikaIACTRunHeader;
