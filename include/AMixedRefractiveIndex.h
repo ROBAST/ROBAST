@@ -24,8 +24,8 @@ class AMixedRefractiveIndex : public ARefractiveIndex {
   Double_t fFractionA;
   Double_t fFractionB;
 
-  void SetExtinctionCoefficient(const TGraph&) {};
-  void SetRefractiveIndex(const TGraph&) {};
+  void SetExtinctionCoefficient(std::shared_ptr<TGraph>) {};
+  void SetRefractiveIndex(std::shared_ptr<TGraph>) {};
 
  public:
   AMixedRefractiveIndex(std::shared_ptr<ARefractiveIndex> materialA,

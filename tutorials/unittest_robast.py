@@ -28,6 +28,10 @@ m  = ROOT.AOpticsManager.m()
 r2d = ROOT.TMath.RadToDeg()
 d2r = ROOT.TMath.DegToRad()
 
+ROOT.gROOT.ProcessLine('std::shared_ptr<TGraph> graph;')
+ROOT.gROOT.ProcessLine('std::shared_ptr<TGraph2D> graph2d;')
+ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> refidx;')
+
 def makeTheWorld():
     manager = ROOT.AOpticsManager("manager", "manager")
     worldbox = ROOT.TGeoBBox("worldbox", 1*m, 1*m, 1*m)
@@ -62,11 +66,15 @@ class TestROBAST(unittest.TestCase):
         # test absorption length evaluated from a TGraph
         wl = 400 * nm
         absl = 1 * mm
-        graph = ROOT.TGraph()
-        graph.SetPoint(0, wl, wl / (4 * ROOT.TMath.Pi() * absl))
-        ref = ROOT.ARefractiveIndex()
-        ref.SetExtinctionCoefficient(graph)
-        lens.SetRefractiveIndex(ref)
+
+        ROOT.gROOT.ProcessLine('refidx = std::make_shared<ARefractiveIndex>();')
+        ROOT.gROOT.ProcessLine('graph = std::make_shared<TGraph>();')
+        ROOT.graph.SetPoint(0, wl, 1)
+        ROOT.refidx.SetRefractiveIndex(ROOT.graph)
+        ROOT.gROOT.ProcessLine('graph = std::make_shared<TGraph>();')
+        ROOT.graph.SetPoint(0, wl, wl / (4 * ROOT.TMath.Pi() * absl))
+        ROOT.refidx.SetExtinctionCoefficient(ROOT.graph)
+        lens.SetRefractiveIndex(ROOT.refidx)
 
         rays = ROOT.ARayShooter.RandomSphere(400*nm, 10000)
         manager.TraceNonSequential(rays)
@@ -101,17 +109,14 @@ class TestROBAST(unittest.TestCase):
         lens = ROOT.ALens("lens", lensbox)
 
         wl = 400 * nm
-
         absl = 1 * um
-        graph = ROOT.TGraph()
-        graph.SetPoint(0, wl, wl / (4 * ROOT.TMath.Pi() * absl))
-        ref = ROOT.ARefractiveIndex()
-        ref.SetExtinctionCoefficient(graph)
-
         idx = 3.
-        graph.SetPoint(0, wl, idx)
-        ref.SetRefractiveIndex(graph)
-        lens.SetRefractiveIndex(ref)
+
+        ROOT.gROOT.ProcessLine('double idx, k;')
+        ROOT.idx = idx
+        ROOT.k = wl / (4 * ROOT.TMath.Pi() * absl)
+        ROOT.gROOT.ProcessLine('refidx = std::make_shared<ARefractiveIndex>(idx, k);')
+        lens.SetRefractiveIndex(ROOT.refidx)
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
@@ -147,11 +152,11 @@ class TestROBAST(unittest.TestCase):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
         
-        graph = ROOT.TGraph()
-        graph.SetPoint(0, 300*nm, 0.)
-        graph.SetPoint(1, 500*nm, .5) # 0.25 at 400 nm
-        mirror.SetReflectivity(graph)
-        self.assertAlmostEqual(mirror.GetReflectivity(400*nm, 0), 0.25, 6)
+        ROOT.gROOT.ProcessLine('graph = std::make_shared<TGraph>();')
+        ROOT.graph.SetPoint(0, 300*nm, 0.)
+        ROOT.graph.SetPoint(1, 500*nm, .5) # 0.25 at 400 nm
+        mirror.SetReflectance(ROOT.graph)
+        self.assertAlmostEqual(mirror.GetReflectance(400*nm, 0), 0.25, 6)
 
         N = 10000
 
@@ -169,16 +174,16 @@ class TestROBAST(unittest.TestCase):
         self.assertLess(ref, (n + n**0.5*3)/N)
         
         # Test of a 2D reflectance graph
-        graph = ROOT.TGraph2D()
+        ROOT.gROOT.ProcessLine('graph2d = std::make_shared<TGraph2D>();')
         deg = ROOT.TMath.DegToRad()
 
         # This should be 0.5 at (400 nm, 45 deg)
-        graph.SetPoint(0, 300*nm,  0*deg, 0.0)
-        graph.SetPoint(1, 300*nm, 90*deg, 0.3)
-        graph.SetPoint(2, 500*nm,  0*deg, 0.7)
-        graph.SetPoint(3, 500*nm, 90*deg, 1.0)
-        mirror.SetReflectivity(graph)
-        self.assertAlmostEqual(mirror.GetReflectivity(400*nm, 45*deg), 0.5, 3)
+        ROOT.graph2d.SetPoint(0, 300*nm,  0*deg, 0.0)
+        ROOT.graph2d.SetPoint(1, 300*nm, 90*deg, 0.3)
+        ROOT.graph2d.SetPoint(2, 500*nm,  0*deg, 0.7)
+        ROOT.graph2d.SetPoint(3, 500*nm, 90*deg, 1.0)
+        mirror.SetReflectance(ROOT.graph2d)
+        self.assertAlmostEqual(mirror.GetReflectance(400*nm, 45*deg), 0.5, 3)
 
         rays = ROOT.ARayArray()
         for i in range(N):
@@ -273,12 +278,12 @@ class TestROBAST(unittest.TestCase):
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
         lens = ROOT.ALens("lens", lensbox)
 
-        graph = ROOT.TGraph()
-        graph.SetPoint(0, 400*nm, 1.6)
-        graph.SetPoint(1, 500*nm, 1.5)
-        ref = ROOT.ARefractiveIndex()
-        ref.SetRefractiveIndex(graph)
-        lens.SetRefractiveIndex(ref)
+        ROOT.gROOT.ProcessLine('graph = std::make_shared<TGraph>();')
+        ROOT.graph.SetPoint(0, 400*nm, 1.6)
+        ROOT.graph.SetPoint(1, 500*nm, 1.5)
+        ROOT.gROOT.ProcessLine('refidx = std::make_shared<ARefractiveIndex>();')
+        ROOT.refidx.SetRefractiveIndex(ROOT.graph)
+        lens.SetRefractiveIndex(ROOT.refidx)
         n = lens.GetRefractiveIndex(450*nm)
         self.assertEqual(n, 1.55)
 
@@ -289,13 +294,9 @@ class TestROBAST(unittest.TestCase):
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
         lens = ROOT.ALens("lens", lensbox)
 
-        graph = ROOT.TGraph()
         idx = 1.5
-        graph.SetPoint(0, 100 * nm, idx)
-        graph.SetPoint(1, 1000 * nm, idx)
-        ref = ROOT.ARefractiveIndex()
-        ref.SetRefractiveIndex(graph)
-        lens.SetRefractiveIndex(ref)
+        ROOT.gROOT.ProcessLine('refidx = std::make_shared<ARefractiveIndex>(%.1f);' % idx)
+        lens.SetRefractiveIndex(ROOT.refidx)
 
         manager.GetTopVolume().AddNode(lens, 1)
 
@@ -304,11 +305,6 @@ class TestROBAST(unittest.TestCase):
         lens.AddNode(focal, 1)
 
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
-            manager.SetMultiThread(True)
-        manager.SetMaxThreads(4)
-        manager.DisableFresnelReflection(True)
 
         theta = 30*d2r
         sint = ROOT.TMath.Sin(theta)
@@ -441,7 +437,7 @@ class TestROBAST(unittest.TestCase):
         x0 = 1
         y0 = -1
         r0 = 2
-        h2 = ROOT.TH2D('', '', 1000, -3, 3, 1000, -3, 3)
+        h2 = ROOT.TH2D('', '', 2000, -3, 3, 2000, -3, 3)
         N = 10000000
         circ = ROOT.gRandom.Circle
         uni = ROOT.gRandom.Uniform
@@ -458,8 +454,8 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(r/r0, 0.8, 2)
 
     def testMixedRefractiveIndex(self):
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medA(new AConstantRefractiveIndex(1., 1.));')
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medB(new AConstantRefractiveIndex(2., 2.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medA(new ARefractiveIndex(1., 1.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medB(new ARefractiveIndex(2., 2.));')
         mixed = ROOT.AMixedRefractiveIndex(ROOT.medA, ROOT.medB, 3, 7)
         nA = ROOT.medA.GetRefractiveIndex(100 * nm)
         nB = ROOT.medB.GetRefractiveIndex(100 * nm)
@@ -474,10 +470,10 @@ class TestROBAST(unittest.TestCase):
 
     def testTMM(self):
         # Copied from tmm.tests.basic_test()
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med1(new AConstantRefractiveIndex(1.));')
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med2(new AConstantRefractiveIndex(2., 4.));')
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med3(new AConstantRefractiveIndex(3., .3));')
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med4(new AConstantRefractiveIndex(1., .1));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med1(new ARefractiveIndex(1.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med2(new ARefractiveIndex(2., 4.));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med3(new ARefractiveIndex(3., .3));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> med4(new ARefractiveIndex(1., .1));')
 
         multi = ROOT.AMultilayer(ROOT.med1, ROOT.med4)
         multi.InsertLayer(ROOT.med2, 2)

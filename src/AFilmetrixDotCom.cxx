@@ -44,10 +44,8 @@ AFilmetrixDotCom::AFilmetrixDotCom(const char* fname) : ARefractiveIndex() {
     return;
   }
 
-  SafeDelete(fRefractiveIndex);
-  SafeDelete(fExtinctionCoefficient);
-  fRefractiveIndex = new TGraph;
-  fExtinctionCoefficient = new TGraph;
+  fRefractiveIndex = std::make_shared<TGraph>();
+  fExtinctionCoefficient = std::make_shared<TGraph>();
 
   while (1) {
     double wl, n, k;

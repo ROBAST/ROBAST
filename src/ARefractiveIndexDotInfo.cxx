@@ -56,8 +56,7 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
     return;
   }
 
-  SafeDelete(fRefractiveIndex);
-  fRefractiveIndex = new TGraph;
+  fRefractiveIndex = std::make_shared<TGraph>();
 
   while (1) {
     double wl, n;
@@ -84,8 +83,7 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
     return;
   }
 
-  SafeDelete(fExtinctionCoefficient);
-  fExtinctionCoefficient = new TGraph;
+  fExtinctionCoefficient = std::make_shared<TGraph>();
 
   while (1) {
     double wl, k;

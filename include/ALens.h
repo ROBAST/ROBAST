@@ -22,16 +22,16 @@
 
 class ALens : public AOpticalComponent {
  private:
-  ARefractiveIndex* fIndex;            // Refractive index
+  std::shared_ptr<ARefractiveIndex> fIndex;            // Refractive index
 
  public:
   ALens();
   ALens(const char* name, const TGeoShape* shape, const TGeoMedium* med = 0);
-  virtual ~ALens();
+  virtual ~ALens() {};
 
   virtual Double_t GetAbsorptionLength(Double_t lambda) const;
   virtual Double_t GetRefractiveIndex(Double_t lambda) const;
-  virtual void SetRefractiveIndex(ARefractiveIndex* index) { fIndex = index; }
+  virtual void SetRefractiveIndex(std::shared_ptr<ARefractiveIndex> index) { fIndex = index; }
 
   ClassDef(ALens, 1)
 };

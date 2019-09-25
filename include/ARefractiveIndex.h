@@ -12,6 +12,7 @@
 
 #include <complex>
 #include <limits>
+#include <memory>
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -23,12 +24,13 @@
 
 class ARefractiveIndex : public TObject {
  protected:
-  TGraph* fRefractiveIndex;
-  TGraph* fExtinctionCoefficient;
+  std::shared_ptr<TGraph> fRefractiveIndex;
+  std::shared_ptr<TGraph> fExtinctionCoefficient;
 
  public:
-  ARefractiveIndex();
-  virtual ~ARefractiveIndex();
+  ARefractiveIndex() {};
+  ARefractiveIndex(Double_t n, Double_t k = 0.);
+  virtual ~ARefractiveIndex() {};
 
   virtual Double_t GetAbbeNumber() const;
   virtual Double_t GetIndex(Double_t lambda) const {
@@ -48,8 +50,12 @@ class ARefractiveIndex : public TObject {
   virtual std::complex<Double_t> GetComplexRefractiveIndex(Double_t lambda) const {
     return std::complex<Double_t>(GetRefractiveIndex(lambda), GetExtinctionCoefficient(lambda));
   }
-  virtual void SetExtinctionCoefficient(const TGraph& graph);
-  virtual void SetRefractiveIndex(const TGraph& graph);
+  virtual void SetExtinctionCoefficient(std::shared_ptr<TGraph> graph) {
+    fExtinctionCoefficient = graph;
+  }
+  virtual void SetRefractiveIndex(std::shared_ptr<TGraph> graph) {
+    fRefractiveIndex = graph;
+  }
 
   ClassDef(ARefractiveIndex, 1)
 };

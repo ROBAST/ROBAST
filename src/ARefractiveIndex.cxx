@@ -16,13 +16,14 @@
 
 ClassImp(ARefractiveIndex);
 
-ARefractiveIndex::ARefractiveIndex() : fRefractiveIndex(0),
-                                       fExtinctionCoefficient(0) {}
+ARefractiveIndex::ARefractiveIndex(Double_t n, Double_t k) {
+  fRefractiveIndex = std::make_shared<TGraph>();
+  fRefractiveIndex->SetPoint(0, 0, n);
 
-//______________________________________________________________________________
-ARefractiveIndex::~ARefractiveIndex() {
-  SafeDelete(fRefractiveIndex);
-  SafeDelete(fExtinctionCoefficient);
+  if (k > 0) {
+    fExtinctionCoefficient = std::make_shared<TGraph>();
+    fExtinctionCoefficient->SetPoint(0, 0, k);
+  }
 }
 
 //______________________________________________________________________________
@@ -34,26 +35,4 @@ Double_t ARefractiveIndex::GetAbbeNumber() const {
   Double_t nF = GetIndex(486.1327 * nm);
 
   return (nD - 1.) / (nF - nC);
-}
-
-//______________________________________________________________________________
-void ARefractiveIndex::SetRefractiveIndex(const TGraph& graph) {
-  SafeDelete(fRefractiveIndex);
-  fRefractiveIndex = new TGraph;
-  for(int i = 0; i < graph.GetN(); ++i){
-    double x = graph.GetX()[i];
-    double y = graph.GetY()[i];
-    fRefractiveIndex->SetPoint(i, x, y);
-  }
-}
-
-//______________________________________________________________________________
-void ARefractiveIndex::SetExtinctionCoefficient(const TGraph& graph) {
-  SafeDelete(fExtinctionCoefficient);
-  fExtinctionCoefficient = new TGraph;
-  for(int i = 0; i < graph.GetN(); ++i){
-    double x = graph.GetX()[i];
-    double y = graph.GetY()[i];
-    fExtinctionCoefficient->SetPoint(i, x, y);
-  }
 }

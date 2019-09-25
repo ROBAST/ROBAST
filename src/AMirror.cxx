@@ -21,9 +21,6 @@ ClassImp(AMirror);
 AMirror::AMirror() {
   // Default constructor
   fReflectance = 1.0;
-  fReflectance1D = 0;
-  fReflectance2D = 0;
-  fReflectanceTH2 = 0;
   SetLineColor(16);
 }
 
@@ -32,17 +29,11 @@ AMirror::AMirror(const char* name, const TGeoShape* shape,
                  const TGeoMedium* med)
     : AOpticalComponent(name, shape, med) {
   fReflectance = 1.0;
-  fReflectance1D = 0;
-  fReflectance2D = 0;
-  fReflectanceTH2 = 0;
   SetLineColor(16);
 }
 
 //_____________________________________________________________________________
 AMirror::~AMirror() {
-  SafeDelete(fReflectance1D);
-  SafeDelete(fReflectance2D);
-  SafeDelete(fReflectanceTH2);
 }
 
 //_____________________________________________________________________________

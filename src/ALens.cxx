@@ -35,11 +35,6 @@ ALens::ALens(const char* name, const TGeoShape* shape, const TGeoMedium* med)
 }
 
 //_____________________________________________________________________________
-ALens::~ALens() {
-  SafeDelete(fIndex);
-}
-
-//_____________________________________________________________________________
 Double_t ALens::GetAbsorptionLength(Double_t lambda) const {
   if (!fIndex) {
     return std::numeric_limits<Double_t>::infinity();
