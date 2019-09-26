@@ -10,7 +10,7 @@ ROOT.gSystem.Load("libROBAST")
 # See https://groups.cern.ch/group/roottalk/Lists/Archive/Flat.aspx?RootFolder=%2Fgroup%2Froottalk%2FLists%2FArchive%2FPyROOT%20Seg%20fault%20with%20a%20custom%20class%20%28only%20in%20ROOT6%29&FolderCTID=0x01200200A201AF59FD011C4E9284C43BF0CDA2A4
 ROOT.ARefractiveIndex
 
-for i in xrange(ROOT.gClassTable.Classes()):
+for i in range(ROOT.gClassTable.Classes()):
     cname = ROOT.gClassTable.At(i)
     if cname[:4] == 'TGeo' or (cname[:4] == 'AGeo' and cname != 'AGeoUtil') or \
        cname in ('AOpticsManager', 'ALens', 'AMirror', 'AFocalSurface', 'AObscuration'):

@@ -35,7 +35,7 @@ class AGlassCatalog : public TObject {
   AGlassCatalog();
   virtual ~AGlassCatalog();
 
-  static ARefractiveIndex* GetRefractiveIndex(const char* name);
+  static std::shared_ptr<ARefractiveIndex> GetRefractiveIndex(const char* name);
 
   ClassDef(AGlassCatalog, 0)
 };

@@ -204,26 +204,26 @@ void AshraOptics() {
     hist[i][1]->Draw("col");
   }  // i
 
-  TGraph* rms[3];
+  TGraph* stddev[3];
   for (Int_t i = 0; i < 3; i++) {
-    rms[i] = new TGraph;
-    rms[i]->SetLineColor(i + 1);
+    stddev[i] = new TGraph;
+    stddev[i]->SetLineColor(i + 1);
     for (Int_t j = 0; j < kN; j++) {
       Double_t val = TMath::Sqrt(
-          TMath::Power(hist[j][i]->GetRMS(1), 2) +
+          TMath::Power(hist[j][i]->GetStdDev(1), 2) +
           TMath::Power(
-              hist[j][i]->GetRMS(2) / TMath::Cos(TMath::Pi() * j / 180), 2));
-      rms[i]->SetPoint(j, j, val * mm / kInputR[0] / TMath::Pi() * 180 * 60);
+              hist[j][i]->GetStdDev(2) / TMath::Cos(TMath::Pi() * j / 180), 2));
+      stddev[i]->SetPoint(j, j, val * mm / kInputR[0] / TMath::Pi() * 180 * 60);
     }  // j
   }    // i
 
   TCanvas* can3 = new TCanvas("can3", "", 640 + 4, 480 + 4);
-  TH2D* frameRMS = new TH2D("frameRMS", ";Incident Angle [deg];RMS [arcmin];",
+  TH2D* frameStdDev = new TH2D("frameStdDev", ";Angle of Incidence (deg);Std. Dev. (arcmin);",
                             1, 0, 21, 1, 0, 2);
-  frameRMS->Draw();
+  frameStdDev->Draw();
 
   for (Int_t i = 0; i < 3; i++) {
-    rms[i]->Draw("l same");
+    stddev[i]->Draw("l same");
   }  // i
 }
 
@@ -332,9 +332,9 @@ void AddLens(AOpticalComponent* opt) {
        -1.99402e-22 * TMath::Power(mm, -7)}};
 
   // Acrylite data measured with V-Block method
-  ASchottFormula* acrylite =
-      new ASchottFormula(+2.192728e-0, -5.320698e-3, +7.215869e-3, +1.657987e-3,
-                         -2.122694e-4, +1.173515e-5);
+  auto acrylite = std::make_shared<ASchottFormula>
+    (+2.192728e-0, -5.320698e-3, +7.215869e-3, +1.657987e-3,
+     -2.122694e-4, +1.173515e-5);
 
   AGeoAsphericDisk* a[3];
   ALens* lens[3];
@@ -480,9 +480,9 @@ void AddPipeline(AOpticalComponent* opt) {
 //_____________________________________________________________________________
 void AddInputWindow(AOpticalComponent* opt) {
   // Kovar glass
-  ASchottFormula* kovar =
-      new ASchottFormula(+2.176400e-0, -5.051050e-3, +1.379077e-2, -9.428276e-4,
-                         +1.304423e-4, -5.956672e-6);
+  auto kovar = std::make_shared<ASchottFormula>
+    (+2.176400e-0, -5.051050e-3, +1.379077e-2, -9.428276e-4,
+     +1.304423e-4, -5.956672e-6);
 
   // Input window of 20" II
   TGeoSphere* sphere1 =

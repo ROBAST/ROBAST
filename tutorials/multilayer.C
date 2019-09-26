@@ -1,6 +1,5 @@
 #include "AOpticsManager.h"
 #include "AMultilayer.h"
-#include "AConstantRefractiveIndex.h"
 #include "ARefractiveIndex.h"
 #include "AFilmetrixDotCom.h"
 
@@ -9,12 +8,10 @@
 static const Double_t nm = AOpticsManager::nm();
 
 void multilayer() {
-  std::shared_ptr<ARefractiveIndex> air(new AConstantRefractiveIndex(1.));
-  std::shared_ptr<ARefractiveIndex> glass(new AConstantRefractiveIndex(1.52));
-  std::shared_ptr<ARefractiveIndex> SiO2(new AFilmetrixDotCom("SiO2.txt"));
-  std::shared_ptr<ARefractiveIndex> TiO2(new AFilmetrixDotCom("TiO2.txt"));
-  //std::shared_ptr<ARefractiveIndex> SiO2(new AConstantRefractiveIndex(1.46));
-  //std::shared_ptr<ARefractiveIndex> TiO2(new AConstantRefractiveIndex(2.40));
+  auto air = std::make_shared<ARefractiveIndex>(1., 0.);
+  auto glass = std::make_shared<ARefractiveIndex>(1.52, 0.);
+  auto SiO2 = std::make_shared<AFilmetrixDotCom>("SiO2.txt");
+  auto TiO2 = std::make_shared<AFilmetrixDotCom>("TiO2.txt");
 
   AMultilayer uv_cut(air, glass);
 

@@ -49,7 +49,7 @@ void SchmidtCassegrain() {
                        3.20036892E-14 / TMath::Power(inch, 7)};
   disk->SetPolynomials(0, 0, 4, coeff);
 
-  ARefractiveIndex* bk7 = AGlassCatalog::GetRefractiveIndex("N-BK7");
+  auto bk7 = AGlassCatalog::GetRefractiveIndex("N-BK7");
   ALens* lens = new ALens("lens", disk);
   lens->SetRefractiveIndex(bk7);
   top->AddNode(lens, 1);

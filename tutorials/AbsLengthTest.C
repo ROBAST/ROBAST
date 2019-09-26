@@ -26,7 +26,11 @@ void AbsLengthTest() {
   // Top volume
   TGeoBBox* topbox = new TGeoBBox("topbox", 30 * m, 30 * m, 30 * m);
   ALens* top = new ALens("top", topbox);
-  top->SetConstantAbsorptionLength(10 * cm);
+  auto lambda = 400 * nm;
+  auto absl = 10 * cm;
+  auto k = ARefractiveIndex::AbsorptionLengthToExtinctionCoefficient(absl, lambda);
+  auto refidx = std::make_shared<ARefractiveIndex>(1, k);
+  top->SetRefractiveIndex(refidx);
   world->AddNode(top, 1);
 
   manager->CloseGeometry();
@@ -34,7 +38,7 @@ void AbsLengthTest() {
   TCanvas* canGeometry = new TCanvas("canGeometry", "canGeometry", 800, 800);
   top->Draw();
 
-  ARayArray* array = ARayShooter::RandomSphere(400 * nm, 10000);
+  ARayArray* array = ARayShooter::RandomSphere(lambda, 10000);
   manager->TraceNonSequential(*array);
   TObjArray* absorbed = array->GetAbsorbed();
 

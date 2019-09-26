@@ -39,24 +39,24 @@ AGlassCatalog::AGlassCatalog() {}
 AGlassCatalog::~AGlassCatalog() {}
 
 //_____________________________________________________________________________
-ARefractiveIndex* AGlassCatalog::GetRefractiveIndex(const char* name) {
+std::shared_ptr<ARefractiveIndex> AGlassCatalog::GetRefractiveIndex(const char* name) {
   for (Int_t i = 0; i < kNCauchy; i++) {
     if (strcmp(name, kNameCauchy[i]) == 0) {
-      return new ACauchyFormula(&kParCauchy[i][0]);
+      return std::make_shared<ACauchyFormula>(&kParCauchy[i][0]);
       break;
     }
   }
 
   for (Int_t i = 0; i < kNSchott; i++) {
     if (strcmp(name, kNameSchott[i]) == 0) {
-      return new ASchottFormula(&kParSchott[i][0]);
+      return std::make_shared<ASchottFormula>(&kParSchott[i][0]);
       break;
     }
   }
 
   for (Int_t i = 0; i < kNSellmeier; i++) {
     if (strcmp(name, kNameSellmeier[i]) == 0) {
-      return new ASellmeierFormula(&kParSellmeier[i][0]);
+      return std::make_shared<ASellmeierFormula>(&kParSellmeier[i][0]);
       break;
     }
   }
