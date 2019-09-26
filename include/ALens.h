@@ -30,6 +30,7 @@ class ALens : public AOpticalComponent {
   virtual ~ALens() {};
 
   virtual Double_t GetAbsorptionLength(Double_t lambda) const;
+  virtual Double_t GetExtinctionCoefficient(Double_t lambda) const;
   virtual Double_t GetRefractiveIndex(Double_t lambda) const;
   virtual void SetRefractiveIndex(std::shared_ptr<ARefractiveIndex> index) { fIndex = index; }
 

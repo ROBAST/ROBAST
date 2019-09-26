@@ -42,7 +42,18 @@ Double_t ALens::GetAbsorptionLength(Double_t lambda) const {
 
   Double_t abs = fIndex->GetAbsorptionLength(lambda);
 
-  return abs >= 0 ? abs : 0;
+  return abs;
+}
+
+//_____________________________________________________________________________
+Double_t ALens::GetExtinctionCoefficient(Double_t lambda) const {
+  if (!fIndex) {
+    return 0;
+  }
+
+  Double_t ex = fIndex->GetExtinctionCoefficient(lambda);
+
+  return ex;
 }
 
 //_____________________________________________________________________________
