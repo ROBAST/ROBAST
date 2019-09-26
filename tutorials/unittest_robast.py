@@ -25,8 +25,8 @@ mm = ROOT.AOpticsManager.mm()
 um = ROOT.AOpticsManager.um()
 nm = ROOT.AOpticsManager.nm()
 m  = ROOT.AOpticsManager.m()
-r2d = ROOT.TMath.RadToDeg()
-d2r = ROOT.TMath.DegToRad()
+rad = ROOT.AOpticsManager.rad()
+deg = ROOT.AOpticsManager.deg()
 
 ROOT.gROOT.ProcessLine('std::shared_ptr<TGraph> graph;')
 ROOT.gROOT.ProcessLine('std::shared_ptr<TGraph2D> graph2d;')
@@ -126,7 +126,7 @@ class TestROBAST(unittest.TestCase):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
-        N = 10000
+        N = 100000
 
         rays = ROOT.ARayArray()
         for i in range(N):
@@ -140,6 +140,31 @@ class TestROBAST(unittest.TestCase):
 
         self.assertGreater(ref, (n - n**0.5*3)/N)
         self.assertLess(ref, (n + n**0.5*3)/N)
+
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> TiO2 = std::make_shared<AFilmetrixDotCom>("TiO2.txt")');
+        ROOT.gROOT.ProcessLine('auto air = std::make_shared<ARefractiveIndex>(1., 0.)');
+        layer = ROOT.AMultilayer(ROOT.air, ROOT.TiO2)
+
+        angle = ROOT.std.complex(ROOT.double)(45 * deg)
+        for wl in (200 * nm, 800 * nm):
+            ref, trans = ROOT.double(), ROOT.double()
+            layer.CoherentTMMMixed(angle, wl, ref, trans)
+
+            lens.SetRefractiveIndex(ROOT.TiO2)
+
+            rays = ROOT.ARayArray()
+            z, dy, dz = 0.51 * m, 1/2**0.5, -1/2**0.5
+            for i in range(N):
+                ray = ROOT.ARay(i, wl, 0, 0, z, 0, 0, dy, dz)
+                rays.Add(ray)
+
+            manager.SetLimit(3) # stop tracking of photons that entered the lens
+            manager.TraceNonSequential(rays)
+
+            n = rays.GetExited().GetLast() + 1
+            print(ref, n, N)
+            self.assertGreater(ref, (n - n**0.5*3)/N)
+            self.assertLess(ref, (n + n**0.5*3)/N)
 
     def testMirrorReflection(self):
         manager = makeTheWorld()
@@ -176,7 +201,6 @@ class TestROBAST(unittest.TestCase):
         
         # Test of a 2D reflectance graph
         ROOT.gROOT.ProcessLine('graph2d = std::make_shared<TGraph2D>();')
-        deg = ROOT.TMath.DegToRad()
 
         # This should be 0.5 at (400 nm, 45 deg)
         ROOT.graph2d.SetPoint(0, 300*nm,  0*deg, 0.0)
@@ -209,7 +233,7 @@ class TestROBAST(unittest.TestCase):
 
         condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror )
         sigma = 1
-        condition.SetGaussianRoughness(sigma*d2r)
+        condition.SetGaussianRoughness(sigma * deg)
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
@@ -238,7 +262,7 @@ class TestROBAST(unittest.TestCase):
             px = p[0]
             py = p[1]
             pz = p[2]
-            h2.Fill(px*r2d, py*r2d)
+            h2.Fill(px * rad / deg, py * rad / deg)
 
         f2 = ROOT.TF2("f2", "[0]*exp(-(x*x + y*y)/(2*[1]*[1]))", -10*sigma, 10*sigma, -10*sigma, 10*sigma)
         f2.SetParameter(0, 1000)
@@ -307,7 +331,7 @@ class TestROBAST(unittest.TestCase):
 
         manager.CloseGeometry()
 
-        theta = 30*d2r
+        theta = 30 * deg
         sint = ROOT.TMath.Sin(theta)
         cost = ROOT.TMath.Cos(theta)
         ray = ROOT.ARay(0, 400*nm, 0*m, 0*m, 2*mm, 0, sint, 0, -cost)
@@ -337,8 +361,8 @@ class TestROBAST(unittest.TestCase):
         qe_lambda.SetPoint(1, 500*nm, 1.0)
 
         qe_angle = ROOT.TGraph()
-        qe_angle.SetPoint(0,  0*d2r, 1.) # QE = 100% for on-axis photons
-        qe_angle.SetPoint(1, 90*d2r, 0.)
+        qe_angle.SetPoint(0,  0 * deg, 1.) # QE = 100% for on-axis photons
+        qe_angle.SetPoint(1, 90 * deg, 0.)
 
         manager.GetTopVolume().AddNode(focal, 1)
         manager.CloseGeometry()
@@ -357,7 +381,7 @@ class TestROBAST(unittest.TestCase):
 
             N = 1000**2
             raytr = ROOT.TGeoTranslation("raytr", 0, 0, 2*mm)
-            direction = ROOT.TVector3(ROOT.TMath.Cos(45*d2r), 0, -ROOT.TMath.Sin(45*d2r))
+            direction = ROOT.TVector3(ROOT.TMath.Cos(45 * deg), 0, -ROOT.TMath.Sin(45 * deg))
             array = ROOT.ARayShooter.Square(400*nm, 1*mm, 1000, 0, raytr, direction)
             manager.TraceNonSequential(array)
         
