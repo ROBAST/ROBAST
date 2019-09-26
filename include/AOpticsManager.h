@@ -33,8 +33,8 @@ class AOpticsManager : public TGeoManager {
 
   static void* Thread(void* args);
 
-  void DoFresnel(Double_t n1, Double_t n2, ARay& ray, TGeoNavigator* nav,
-                 TGeoNode* currentNode, TGeoNode* nextNode);
+  void DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
+                 TGeoNavigator* nav, TGeoNode* currentNode, TGeoNode* nextNode);
   void DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav,
                     TGeoNode* currentNode, TGeoNode* nextNode);
   TVector3 GetFacetNormal(TGeoNavigator* nav, TGeoNode* currentNode,
