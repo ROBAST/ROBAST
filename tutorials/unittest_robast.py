@@ -72,7 +72,8 @@ class TestROBAST(unittest.TestCase):
         ROOT.graph.SetPoint(0, wl, 1)
         ROOT.refidx.SetRefractiveIndex(ROOT.graph)
         ROOT.gROOT.ProcessLine('graph = std::make_shared<TGraph>();')
-        ROOT.graph.SetPoint(0, wl, wl / (4 * ROOT.TMath.Pi() * absl))
+        k = ROOT.ARefractiveIndex.AbsorptionLengthToExtinctionCoefficient(absl, wl)
+        ROOT.graph.SetPoint(0, wl, k)
         ROOT.refidx.SetExtinctionCoefficient(ROOT.graph)
         lens.SetRefractiveIndex(ROOT.refidx)
 
@@ -114,7 +115,7 @@ class TestROBAST(unittest.TestCase):
 
         ROOT.gROOT.ProcessLine('double idx, k;')
         ROOT.idx = idx
-        ROOT.k = wl / (4 * ROOT.TMath.Pi() * absl)
+        ROOT.k = ROOT.ARefractiveIndex.AbsorptionLengthToExtinctionCoefficient(absl, wl)
         ROOT.gROOT.ProcessLine('refidx = std::make_shared<ARefractiveIndex>(idx, k);')
         lens.SetRefractiveIndex(ROOT.refidx)
 
@@ -437,7 +438,7 @@ class TestROBAST(unittest.TestCase):
         x0 = 1
         y0 = -1
         r0 = 2
-        h2 = ROOT.TH2D('', '', 2000, -3, 3, 2000, -3, 3)
+        h2 = ROOT.TH2D('', '', 1000, -3, 3, 1000, -3, 3)
         N = 10000000
         circ = ROOT.gRandom.Circle
         uni = ROOT.gRandom.Uniform
