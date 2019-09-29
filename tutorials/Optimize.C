@@ -92,7 +92,12 @@ double Func(const double* par) {
 
   ALens* lens = new ALens("lens", disk);
   AGlassCatalog schott("../misc/schottzemax-20180601.agf");
-  lens->SetRefractiveIndex(schott.GetRefractiveIndex("N-BK7"));
+  auto bk7 = schott.GetRefractiveIndex("N-BK7");
+  // Temporarily remove the coefficients because the optimization does not
+  // converge well when they are non-zero, resulting in random internal
+  // absorption in the lens. A better workaround is needed.
+  bk7->SetExtinctionCoefficient(0);
+  lens->SetRefractiveIndex(bk7);
   gOpticsManager->GetTopVolume()->AddNode(lens, 1);
 
   double origin[3] = {0, 0, 50 * mm + 1 * um};
