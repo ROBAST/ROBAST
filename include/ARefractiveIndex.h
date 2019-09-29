@@ -33,9 +33,6 @@ class ARefractiveIndex : public TObject {
   virtual ~ARefractiveIndex() {};
 
   virtual Double_t GetAbbeNumber() const;
-  virtual Double_t GetIndex(Double_t lambda) const {
-    return GetRefractiveIndex(lambda);
-  }
   virtual Double_t GetRefractiveIndex(Double_t lambda) const {
     return fRefractiveIndex ? fRefractiveIndex->Eval(lambda) : 1.;
   }

@@ -59,7 +59,7 @@ void EdmundOptics() {
                             8.41855181e-3, -5.81790767e-2, 1.29599726e2);
 
   // should be 1.48749
-  std::cout << FSL5->GetIndex(0.58756 * um) << std::endl;
+  std::cout << FSL5->GetRefractiveIndex(0.58756 * um) << std::endl;
 
   // S-TIH13
   // http://www.ohara-inc.co.jp/jp/product/optical/dl/data/jstih13.pdf
@@ -68,7 +68,7 @@ void EdmundOptics() {
                             1.18368386e-2, 5.90208025e-2, 1.71959976e2);
 
   // should be 1.74077
-  std::cout << TIH13->GetIndex(0.58756 * um) << std::endl;
+  std::cout << TIH13->GetRefractiveIndex(0.58756 * um) << std::endl;
 
   ALens* lens1 = new ALens("lens1", disk1);
   lens1->SetRefractiveIndex(FSL5);

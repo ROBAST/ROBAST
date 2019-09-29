@@ -58,5 +58,5 @@ Double_t ALens::GetExtinctionCoefficient(Double_t lambda) const {
 
 //_____________________________________________________________________________
 Double_t ALens::GetRefractiveIndex(Double_t lambda) const {
-  return fIndex ? fIndex->GetIndex(lambda) : 1.;
+  return fIndex ? fIndex->GetRefractiveIndex(lambda) : 1.;
 }

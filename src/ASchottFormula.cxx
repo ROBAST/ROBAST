@@ -40,7 +40,7 @@ ASchottFormula::ASchottFormula(const Double_t* p) {
 }
 
 //_____________________________________________________________________________
-Double_t ASchottFormula::GetIndex(Double_t lambda) const {
+Double_t ASchottFormula::GetRefractiveIndex(Double_t lambda) const {
   // Calculate the refractive index at wavelength = lambda (m)
   // Use AOpticsManager::m() to get the unit length in (m)
   //
