@@ -7,6 +7,9 @@
 #ifndef A_GLASS_CALTALOG_H
 #define A_GLASS_CALTALOG_H
 
+#include <map>
+#include <memory>
+
 #include "ACauchyFormula.h"
 #include "ASchottFormula.h"
 #include "ASellmeierFormula.h"
@@ -22,20 +25,14 @@
 
 class AGlassCatalog : public TObject {
  private:
-  enum { kNSellmeier = 2, kNSchott = 0, kNCauchy = 0 };
-  static const Char_t kNameCauchy[kNCauchy][10];  // Cauchy name
-  static const Char_t kNameSchott[kNSchott][10];  // SCHOTT name (e.g. BK7)
-  static const Char_t kNameSellmeier[kNSellmeier]
-                                    [10];         // Sellmeier name (e.g. BK7)
-  static const Double_t kParCauchy[kNCauchy][3];  // Cauchy formula parameters
-  static const Double_t kParSchott[kNSchott][6];  // SCHOTT formula parameters
-  static const Double_t kParSellmeier[kNSellmeier]
-                                     [6];  // Sellmeier formula parameters
+  std::map<std::string, std::shared_ptr<ARefractiveIndex>> fIndexMap;
+
  public:
   AGlassCatalog();
+  AGlassCatalog(const std::string& catalog_file);
   virtual ~AGlassCatalog();
 
-  static std::shared_ptr<ARefractiveIndex> GetRefractiveIndex(const char* name);
+  std::shared_ptr<ARefractiveIndex> GetRefractiveIndex(const std::string& name);
 
   ClassDef(AGlassCatalog, 0)
 };

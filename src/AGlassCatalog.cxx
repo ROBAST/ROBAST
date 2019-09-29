@@ -11,55 +11,107 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <fstream>
+
+#include "TSystem.h"
+
 #include "AGlassCatalog.h"
+#include "AOpticsManager.h"
 
 ClassImp(AGlassCatalog);
-
-const Char_t AGlassCatalog::kNameCauchy[kNCauchy][10] = {};
-const Char_t AGlassCatalog::kNameSchott[kNSchott][10] = {};
-const Char_t AGlassCatalog::kNameSellmeier[kNSellmeier][10] = {"N-BK7", "SF6"};
-
-const Double_t AGlassCatalog::kParCauchy[kNCauchy][3] = {};
-const Double_t AGlassCatalog::kParSchott[kNSchott][6] = {};
-const Double_t AGlassCatalog::kParSellmeier[kNSellmeier][6] =
-    // B1 B2 B3 C1 C2 C3
-    // data from "Optical Glass Data Sheets" by SCHOTT
-    // http://www.us.schott.com/advanced_optics/english/download/schott_optical_glass_collection_datasheets_dec_2011_us.pdf
-    {
-        {1.03961212e0, 2.31792344e-1, 1.01046945e0, 6.00069867e-3,
-         2.00179144e-2, 1.03560653e2},  // N-BK7
-        {1.72448482e0, 3.90104889e-1, 1.04572858e0, 1.34871947e-2,
-         5.69318095e-2, 1.18557185e2}  // SF6
-};
 
 //_____________________________________________________________________________
 AGlassCatalog::AGlassCatalog() {}
 
 //_____________________________________________________________________________
+AGlassCatalog::AGlassCatalog(const std::string& catalog_file) {
+  std::ifstream fin;
+  fin.open(gSystem->ExpandPathName(catalog_file.c_str()));
+
+  if (!fin.is_open()) {
+    Error("AGlassCatalog", "Cannot open %s", catalog_file.c_str());
+    return;
+  }
+
+  // ASCII glass format catalog file (AGF)
+  if (catalog_file.size() - catalog_file.find(".agf") != 4 &&
+      catalog_file.size() - catalog_file.find(".AGF") != 4 ) {
+    Error("AGlassCatalog", "Cannot read a non-ZEMAX file");
+    return;
+  }
+
+  const std::size_t bufsize = 200;
+  char buf[bufsize], glass_name[bufsize];
+  std::string glass_name_s;
+  Double_t nd;
+  Int_t formula;
+  std::shared_ptr<TGraph> graph;
+  const std::size_t ncd = 8;
+  Double_t cd[ncd];
+
+  while (fin.good()) {
+    fin.getline(buf, bufsize);
+    if (strncmp(buf, "NM ", 3) == 0) {
+      // found a glass name
+      // e.g., "NM N-BK7 2 517642.251 1.5168 64.17 0 1"
+      // where
+      // glass name : N-BK7
+      // dispersion formula : 2 (2 = Sellmeier)
+      // product number? : 517642.251
+      // Nd : 1.5168
+      // Vd : 64.17
+      // ignore thremal expantion: 0
+      // exclude substitution: 1
+      // meta material? : ?
+      char product_number[bufsize];
+      Double_t vd;
+      if (sscanf(buf, "NM %s %d %s %lf %lf", glass_name, &formula, product_number,
+                 &nd, &vd) != 5) {
+        Warning("AGlassCatalog", "Bad format line found: %s", buf);
+      }
+
+      glass_name_s = std::string(glass_name);
+      graph = std::make_shared<TGraph>();
+
+      fIndexMap.insert(std::make_pair(glass_name_s, std::shared_ptr<ARefractiveIndex>(0)));
+    } else if(strncmp(buf, "CD ", 3) == 0) {
+      int ret = sscanf(buf, "CD %lf %lf %lf %lf %lf %lf %lf %lf", &cd[0], &cd[1],
+                       &cd[2], &cd[3], &cd[4], &cd[5], &cd[6], &cd[7]);
+      if (formula == 2 && ret >= 6) {
+        auto it = fIndexMap.find(glass_name_s);
+        if (it != fIndexMap.end()) {
+          it->second = std::make_shared<ASellmeierFormula>(cd[0], cd[2], cd[4], cd[1], cd[3], cd[5]);
+          it->second->SetExtinctionCoefficient(graph);
+        }
+      }
+    } else if(strncmp(buf, "IT ", 3) == 0) {
+      Double_t wl, T, d; // lambda (um), transmittance, thickness (mm)
+      int ret = sscanf(buf, "IT %lf %lf %lf", &wl, &T, &d);
+      if (ret == 3) {
+        wl *= AOpticsManager::um();
+        d *= AOpticsManager::mm();
+        Double_t absl = - d / TMath::Log(T);
+        Double_t k = ARefractiveIndex::AbsorptionLengthToExtinctionCoefficient(absl, wl);
+        graph->SetPoint(graph->GetN(), wl, k);
+      } else if (ret == 2) {
+        // Some glass materials such as N-LASF9 has incomplete lines
+        // Just ignore
+      } else {
+        Warning("AGlassCatalog", "Bad format line found: %s", buf);
+      }
+    }
+  }
+}
+
+//_____________________________________________________________________________
 AGlassCatalog::~AGlassCatalog() {}
 
 //_____________________________________________________________________________
-std::shared_ptr<ARefractiveIndex> AGlassCatalog::GetRefractiveIndex(const char* name) {
-  for (Int_t i = 0; i < kNCauchy; i++) {
-    if (strcmp(name, kNameCauchy[i]) == 0) {
-      return std::make_shared<ACauchyFormula>(&kParCauchy[i][0]);
-      break;
-    }
+std::shared_ptr<ARefractiveIndex> AGlassCatalog::GetRefractiveIndex(const std::string& name) {
+  auto it = fIndexMap.find(name);
+  if (it == fIndexMap.end()) {
+    return 0;
+  } else {
+    return it->second;
   }
-
-  for (Int_t i = 0; i < kNSchott; i++) {
-    if (strcmp(name, kNameSchott[i]) == 0) {
-      return std::make_shared<ASchottFormula>(&kParSchott[i][0]);
-      break;
-    }
-  }
-
-  for (Int_t i = 0; i < kNSellmeier; i++) {
-    if (strcmp(name, kNameSellmeier[i]) == 0) {
-      return std::make_shared<ASellmeierFormula>(&kParSellmeier[i][0]);
-      break;
-    }
-  }
-
-  return 0;
 }

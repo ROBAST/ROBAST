@@ -91,7 +91,8 @@ double Func(const double* par) {
   }  // if
 
   ALens* lens = new ALens("lens", disk);
-  lens->SetRefractiveIndex(AGlassCatalog::GetRefractiveIndex("N-BK7"));
+  AGlassCatalog schott("../misc/schottzemax-20180601.agf");
+  lens->SetRefractiveIndex(schott.GetRefractiveIndex("N-BK7"));
   gOpticsManager->GetTopVolume()->AddNode(lens, 1);
 
   double origin[3] = {0, 0, 50 * mm + 1 * um};

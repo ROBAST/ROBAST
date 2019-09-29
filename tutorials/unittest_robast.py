@@ -58,8 +58,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
@@ -121,8 +121,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
@@ -173,8 +173,8 @@ class TestROBAST(unittest.TestCase):
         mirror = ROOT.AMirror("mirror", mirrorbox)
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
         
@@ -237,8 +237,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
@@ -286,8 +286,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
@@ -366,8 +366,8 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(focal, 1)
         manager.CloseGeometry()
-        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE') < \
-           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0)'):
+        if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
+           ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
 
@@ -398,15 +398,21 @@ class TestROBAST(unittest.TestCase):
                 sigma = (N*(1 - 0.25)*0.25)**0.5
                 self.assertLess(abs(nfocused - N/4.), 3*sigma)
 
+    def testGlassCatalog(self):
+        schott = ROOT.AGlassCatalog('../misc/schottzemax-20180601.agf')
+        r = schott.GetRefractiveIndex('N-BK7')
+        self.assertAlmostEqual(r.GetRefractiveIndex(589.3 * nm) / 1.51680, 1., 4) # nD
+        self.assertAlmostEqual(r.GetExtinctionCoefficient(2325 * nm), 4.2911e-6, 9)
+
     def testSellmeierFormula(self):
         # N-BK7 from a SCHOTT catalog
         nbk7 = ROOT.ASellmeierFormula(1.03961212, 0.231792344, 1.01046945,
                                       0.00600069867, 0.0200179144, 103.560653)
        
-        self.assertAlmostEqual(nbk7.GetIndex( 312.6*nm), 1.548620, 4) # n312.6
-        self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), 1.516730, 4) # nD
-        self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 4) # nt
-        self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 4) # n2325.4
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex( 312.6*nm), 1.548620, 4) # n312.6
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex( 589.3*nm), 1.516730, 4) # nD
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), 1.507310, 4) # nt
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), 1.489210, 4) # n2325.4
 
         self.assertAlmostEqual(nbk7.GetAbbeNumber(), 64.17, 1) # vD, vd = 64.17
 
@@ -439,24 +445,24 @@ class TestROBAST(unittest.TestCase):
                                       0.00600069867*0.95, 0.0200179144*0.95, 103.560653*0.95)
 
         # These comparisons should fail because B1 to C3 are scaled by 0.95
-        self.assertNotAlmostEqual(nbk7.GetIndex( 312.6*nm), 1.548620, 3) # n312.6
-        self.assertNotAlmostEqual(nbk7.GetIndex( 589.3*nm), 1.516730, 3) # nD
-        self.assertNotAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 3) # nt
-        self.assertNotAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 3) # n2325.4
+        self.assertNotAlmostEqual(nbk7.GetRefractiveIndex( 312.6*nm), 1.548620, 3) # n312.6
+        self.assertNotAlmostEqual(nbk7.GetRefractiveIndex( 589.3*nm), 1.516730, 3) # nD
+        self.assertNotAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), 1.507310, 3) # nt
+        self.assertNotAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), 1.489210, 3) # n2325.4
 
         f = nbk7.FitData(graph, "N-BK7", "")
         graph.Draw("a*")
 
         # Will get an almost correct answers. "3" is due to an inperfect fitting result.
-        self.assertAlmostEqual(nbk7.GetIndex( 312.6*nm), 1.548620, 3) # n312.6
-        self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), 1.516730, 3) # nD
-        self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), 1.507310, 3) # nt
-        self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), 1.489210, 3) # n2325.4
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex( 312.6*nm), 1.548620, 3) # n312.6
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex( 589.3*nm), 1.516730, 3) # nD
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), 1.507310, 3) # nt
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), 1.489210, 3) # n2325.4
 
-        self.assertAlmostEqual(nbk7.GetIndex( 312.6*nm), f.Eval( 312.6*nm), 6) # n312.6
-        self.assertAlmostEqual(nbk7.GetIndex( 589.3*nm), f.Eval( 589.3*nm), 6) # nD
-        self.assertAlmostEqual(nbk7.GetIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
-        self.assertAlmostEqual(nbk7.GetIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex( 312.6*nm), f.Eval( 312.6*nm), 6) # n312.6
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex( 589.3*nm), f.Eval( 589.3*nm), 6) # nD
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
+        self.assertAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
 
     def testD80(self):
         x0 = 1
