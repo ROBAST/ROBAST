@@ -78,6 +78,14 @@ TF1* ASellmeierFormula::FitData(TGraph* graph, const char* tf1name,
   f->SetParLimits(4, 0, 1e-1);
   f->SetParLimits(5, 0, 1e3);
 
+  // Initialize with typical values
+  f->SetParameter(0, 1.);
+  f->SetParameter(1, .2);
+  f->SetParameter(2, 1.);
+  f->SetParameter(3, 5e-3);
+  f->SetParameter(4, 2e-2);
+  f->SetParameter(5, 1e2);
+
   graph->Fit(f, option);
   for (Int_t i = 0; i < (Int_t)(sizeof(fPar) / sizeof(Double_t)); i++) {
     fPar[i] = f->GetParameter(i);
