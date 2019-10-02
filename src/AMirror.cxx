@@ -33,8 +33,7 @@ AMirror::AMirror(const char* name, const TGeoShape* shape,
 }
 
 //_____________________________________________________________________________
-AMirror::~AMirror() {
-}
+AMirror::~AMirror() {}
 
 //_____________________________________________________________________________
 Double_t AMirror::GetReflectance(Double_t lambda, Double_t angle) {

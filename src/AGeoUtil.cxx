@@ -14,7 +14,7 @@
 NamespaceImp(AGeoUtil)
 #endif
 
-static Double_t SumInRadius(TH2* h2, double x, double y, double r) {
+    static Double_t SumInRadius(TH2* h2, double x, double y, double r) {
   Double_t r2 = r * r;
   TAxis* xax = h2->GetXaxis();
   TAxis* yax = h2->GetYaxis();
@@ -115,7 +115,8 @@ void ContainmentRadius(TH2* h2, Double_t fraction, Double_t& r, Double_t& x,
   x = h2->GetMean(1);  // Initial x
   y = h2->GetMean(2);  // Initial y
   r = TMath::Sqrt(h2->GetStdDev(1) * h2->GetStdDev(1) +
-                  h2->GetStdDev(2) * h2->GetStdDev(2)) * 1.5;
+                  h2->GetStdDev(2) * h2->GetStdDev(2)) *
+      1.5;
   Double_t dr = 0.1 * r;
   Double_t sum_goal = h2->Integral() * fraction;
 

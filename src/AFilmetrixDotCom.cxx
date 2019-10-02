@@ -16,8 +16,8 @@
 
 #include "TSystem.h"
 
-#include "AOpticsManager.h"
 #include "AFilmetrixDotCom.h"
+#include "AOpticsManager.h"
 
 ClassImp(AFilmetrixDotCom);
 
@@ -39,7 +39,7 @@ AFilmetrixDotCom::AFilmetrixDotCom(const char* fname) : ARefractiveIndex() {
       strcmp(buf, "\xef\xbb\xbfWavelength(nm)\tn\tk"  ) != 0 &&
       strcmp(buf,             "Wavelength(nm)\tn\tk\r") != 0 &&
       strcmp(buf,             "Wavelength(nm)\tn\tk")   != 0 ) {
-  // clang-format on
+    // clang-format on
     Error("AFilmetrixDotCom", "Invalide data format");
     return;
   }
@@ -50,7 +50,7 @@ AFilmetrixDotCom::AFilmetrixDotCom(const char* fname) : ARefractiveIndex() {
   while (1) {
     double wl, n, k;
     fin >> wl >> n >> k;
-    if(fin.good()) {
+    if (fin.good()) {
       wl *= AOpticsManager::nm();
       fRefractiveIndex->SetPoint(fRefractiveIndex->GetN(), wl, n);
       fExtinctionCoefficient->SetPoint(fExtinctionCoefficient->GetN(), wl, k);

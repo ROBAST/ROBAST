@@ -216,7 +216,8 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
 
     TObjArray* focused = array->GetFocused();
 
-    const double platescale = 28.68;  // (mm/deg) 0.5 deg PSF gives 28.684 +/- 0.002
+    const double platescale =
+        28.68;  // (mm/deg) 0.5 deg PSF gives 28.684 +/- 0.002
 
     TH1D htmp("", "", 1, -1e10, 1e10);
     for (Int_t k = 0; k <= focused->GetLast(); k++) {
@@ -273,7 +274,7 @@ void RayTrace(AOpticsManager* manager, TCanvas* can3D) {
     Double_t stdx = h2[i]->GetStdDev(1);
     Double_t stdy = h2[i]->GetStdDev(2);
     Double_t r, x, y;
-    AGeoUtil::ContainmentRadius(h2[i], 0.80, r, x, y); // D80
+    AGeoUtil::ContainmentRadius(h2[i], 0.80, r, x, y);  // D80
     double angle = i * 0.5;
     graphStdX->SetPoint(i, angle, stdx * mm / pscale);
     graphStdY->SetPoint(i, angle, stdy * mm / pscale);

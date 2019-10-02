@@ -22,7 +22,7 @@
 ClassImp(ARefractiveIndexDotInfo);
 
 ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
-  : ARefractiveIndex() {
+    : ARefractiveIndex() {
   std::ifstream fin;
   fin.open(gSystem->ExpandPathName(fname));
 
@@ -34,9 +34,9 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
   char buf[50];
   fin.getline(buf, 50);
 
-  bool CSV; // comma separated values
-  bool CRLF; // delimiter \r\n
-  char S = ','; // separator
+  bool CSV;      // comma separated values
+  bool CRLF;     // delimiter \r\n
+  char S = ',';  // separator
   if (strcmp(buf, "wl,n\r") == 0) {
     CSV = true;
     CRLF = true;
@@ -71,8 +71,9 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
     if (*endptr != '\0') {  // cannot convert to double
       break;
     }
-    
-    fRefractiveIndex->SetPoint(fRefractiveIndex->GetN(), wl * AOpticsManager::um(), n);
+
+    fRefractiveIndex->SetPoint(fRefractiveIndex->GetN(),
+                               wl * AOpticsManager::um(), n);
   }
 
   // Check if extinction coefficient data exists
@@ -98,7 +99,8 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
     if (*endptr != '\0') {  // cannot convert to double
       break;
     }
-    
-    fExtinctionCoefficient->SetPoint(fExtinctionCoefficient->GetN(), wl * AOpticsManager::um(), k);
+
+    fExtinctionCoefficient->SetPoint(fExtinctionCoefficient->GetN(),
+                                     wl * AOpticsManager::um(), k);
   }
 }

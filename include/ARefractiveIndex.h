@@ -28,9 +28,9 @@ class ARefractiveIndex : public TObject {
   std::shared_ptr<TGraph> fExtinctionCoefficient;
 
  public:
-  ARefractiveIndex() {};
+  ARefractiveIndex(){};
   ARefractiveIndex(Double_t n, Double_t k = 0.);
-  virtual ~ARefractiveIndex() {};
+  virtual ~ARefractiveIndex(){};
 
   virtual Double_t GetAbbeNumber() const;
   virtual Double_t GetRefractiveIndex(Double_t lambda) const {
@@ -44,8 +44,10 @@ class ARefractiveIndex : public TObject {
     Double_t k = GetExtinctionCoefficient(lambda);
     return k <= 0. ? inf : ExtinctionCoefficientToAbsorptionLength(k, lambda);
   }
-  virtual std::complex<Double_t> GetComplexRefractiveIndex(Double_t lambda) const {
-    return std::complex<Double_t>(GetRefractiveIndex(lambda), GetExtinctionCoefficient(lambda));
+  virtual std::complex<Double_t> GetComplexRefractiveIndex(
+      Double_t lambda) const {
+    return std::complex<Double_t>(GetRefractiveIndex(lambda),
+                                  GetExtinctionCoefficient(lambda));
   }
   virtual void SetExtinctionCoefficient(std::shared_ptr<TGraph> graph) {
     fExtinctionCoefficient = graph;
@@ -53,10 +55,12 @@ class ARefractiveIndex : public TObject {
   virtual void SetRefractiveIndex(std::shared_ptr<TGraph> graph) {
     fRefractiveIndex = graph;
   }
-  static Double_t AbsorptionLengthToExtinctionCoefficient(Double_t a, Double_t lambda) {
+  static Double_t AbsorptionLengthToExtinctionCoefficient(Double_t a,
+                                                          Double_t lambda) {
     return lambda / (4 * TMath::Pi() * a);
   }
-  static Double_t ExtinctionCoefficientToAbsorptionLength(Double_t k, Double_t lambda) {
+  static Double_t ExtinctionCoefficientToAbsorptionLength(Double_t k,
+                                                          Double_t lambda) {
     return lambda / (4 * TMath::Pi() * k);
   }
 

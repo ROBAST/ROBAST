@@ -76,7 +76,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
 
   if (fDisableFresnelReflection == kFALSE) {
     Double_t Rs, Rp;  // reflectivity for s- and p-polarized photon
-    auto _2 = [] (Double_t v) {return v*v;};
+    auto _2 = [](Double_t v) { return v * v; };
     if (k2 <= 0.) {
       Double_t eta1S = n1 * cos1;
       Double_t eta2S = n2 * cos2;
@@ -84,7 +84,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
       // As long as navigation is OK, theta1 should not be 90 deg
       Double_t eta1P = n1 / cos1;
       Double_t eta2P = n2 / cos2;
-            
+
       Rs = _2((eta1S - eta2S) / (eta1S + eta2S));
       Rp = _2((eta1P - eta2P) / (eta1P + eta2P));
     } else {
@@ -96,8 +96,8 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
       Double_t v = 2 * n2 * k2;
       Double_t tmp = TMath::Sqrt(_2(u) + _2(v));
       // cos(\xi/2), sin(\xi/2)
-      Double_t cosxi2 = TMath::Sqrt(1 + u / tmp)/TMath::Sqrt2();
-      Double_t sinxi2 = TMath::Sqrt(1 - u / tmp)/TMath::Sqrt2();
+      Double_t cosxi2 = TMath::Sqrt(1 + u / tmp) / TMath::Sqrt2();
+      Double_t sinxi2 = TMath::Sqrt(1 - u / tmp) / TMath::Sqrt2();
       // Double_t xi = TMath::ATan(v / u); // unused
       Double_t x2S = TMath::Sqrt(tmp) * cosxi2;
       Double_t y2S = TMath::Sqrt(tmp) * sinxi2;
@@ -108,7 +108,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
       Rp = (_2(x1P - x2P) + _2(y2P)) / (_2(x1P + x2P) + _2(y2P));
     }
     Double_t R = (Rs + Rp) / 2.;  // We assume that polarization is random
-    
+
     if (gRandom->Uniform(1) < R) {  // reflection at the boundary
       DoReflection(n1, ray, nav, currentNode, nextNode);
       return;

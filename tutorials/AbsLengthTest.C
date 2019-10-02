@@ -28,7 +28,8 @@ void AbsLengthTest() {
   ALens* top = new ALens("top", topbox);
   auto lambda = 400 * nm;
   auto absl = 10 * cm;
-  auto k = ARefractiveIndex::AbsorptionLengthToExtinctionCoefficient(absl, lambda);
+  auto k =
+      ARefractiveIndex::AbsorptionLengthToExtinctionCoefficient(absl, lambda);
   auto refidx = std::make_shared<ARefractiveIndex>(1, k);
   top->SetRefractiveIndex(refidx);
   world->AddNode(top, 1);

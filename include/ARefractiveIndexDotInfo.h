@@ -21,9 +21,8 @@
 
 class ARefractiveIndexDotInfo : public ARefractiveIndex {
  private:
-
  public:
-  virtual ~ARefractiveIndexDotInfo() {};
+  virtual ~ARefractiveIndexDotInfo(){};
   ARefractiveIndexDotInfo(const char* fname);
 
   ClassDef(ARefractiveIndexDotInfo, 1)

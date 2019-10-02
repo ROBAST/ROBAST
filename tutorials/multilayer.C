@@ -1,7 +1,7 @@
-#include "AOpticsManager.h"
-#include "AMultilayer.h"
-#include "ARefractiveIndex.h"
 #include "AFilmetrixDotCom.h"
+#include "AMultilayer.h"
+#include "AOpticsManager.h"
+#include "ARefractiveIndex.h"
 
 #include "TCanvas.h"
 
@@ -21,14 +21,14 @@ void multilayer() {
   Double_t d_low = lambda / n_low / 4.;
   Double_t d_high = lambda / n_high / 4.;
 
-  for(Int_t i = 0; i < 17; ++i) {
+  for (Int_t i = 0; i < 17; ++i) {
     if (i == 0 || i == 16) {
       uv_cut.InsertLayer(TiO2, d_high / 2.);
     } else {
-      if (i%2 == 0) {
-	uv_cut.InsertLayer(TiO2, d_high);
+      if (i % 2 == 0) {
+        uv_cut.InsertLayer(TiO2, d_high);
       } else {
-	uv_cut.InsertLayer(SiO2, d_low);
+        uv_cut.InsertLayer(SiO2, d_low);
       }
     }
   }
@@ -41,14 +41,14 @@ void multilayer() {
   d_low = lambda / n_low / 4.;
   d_high = lambda / n_high / 4.;
 
-  for(Int_t i = 0; i < 17; ++i) {
+  for (Int_t i = 0; i < 17; ++i) {
     if (i == 0 || i == 16) {
       ir_cut.InsertLayer(SiO2, d_low / 2.);
     } else {
-      if (i%2 == 0) {
-	ir_cut.InsertLayer(SiO2, d_low);
+      if (i % 2 == 0) {
+        ir_cut.InsertLayer(SiO2, d_low);
       } else {
-	ir_cut.InsertLayer(TiO2, d_high);
+        ir_cut.InsertLayer(TiO2, d_high);
       }
     }
   }
@@ -56,18 +56,21 @@ void multilayer() {
   TGraph* graIR = new TGraph;
   TGraph* graUV = new TGraph;
 
-  for(Int_t i = 300; i <= 800; ++i){
+  for (Int_t i = 300; i <= 800; ++i) {
     Double_t lambda = i * nm;
     Double_t angle = 0. * TMath::DegToRad();
     Double_t reflectance, transmittance;
-    uv_cut.CoherentTMM(AMultilayer::kS, angle, lambda, reflectance, transmittance);
+    uv_cut.CoherentTMM(AMultilayer::kS, angle, lambda, reflectance,
+                       transmittance);
     graUV->SetPoint(graUV->GetN(), i, transmittance * 100);
 
-    ir_cut.CoherentTMM(AMultilayer::kS, angle, lambda, reflectance, transmittance);
+    ir_cut.CoherentTMM(AMultilayer::kS, angle, lambda, reflectance,
+                       transmittance);
     graIR->SetPoint(graIR->GetN(), i, transmittance * 100);
   }
   TCanvas* can = new TCanvas("can", "can", 800, 600);
-  can->DrawFrame(350, 0, 800, 100)->SetTitle(";Wavelength (nm);Transmittance (%)");
+  can->DrawFrame(350, 0, 800, 100)
+      ->SetTitle(";Wavelength (nm);Transmittance (%)");
   graUV->Draw("l");
   graUV->SetLineColor(2);
   graIR->Draw("l");

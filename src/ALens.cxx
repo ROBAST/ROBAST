@@ -15,16 +15,14 @@
 
 ClassImp(ALens);
 
-ALens::ALens()
-  : fIndex(NULL) {
+ALens::ALens() : fIndex(NULL) {
   // Default constructor
   SetLineColor(7);
 }
 
 //_____________________________________________________________________________
 ALens::ALens(const char* name, const TGeoShape* shape, const TGeoMedium* med)
-    : AOpticalComponent(name, shape, med),
-      fIndex(NULL) {
+    : AOpticalComponent(name, shape, med), fIndex(NULL) {
   SetLineColor(7);
 #if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
   if (GetMedium() == TGeoVolume::DummyMedium() ||

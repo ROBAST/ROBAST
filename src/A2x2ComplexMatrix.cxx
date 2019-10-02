@@ -18,8 +18,7 @@
 A2x2ComplexMatrix::A2x2ComplexMatrix(std::complex<Double_t> c0,
                                      std::complex<Double_t> c1,
                                      std::complex<Double_t> c2,
-                                     std::complex<Double_t> c3)
-{
+                                     std::complex<Double_t> c3) {
   fC[0] = c0;
   fC[1] = c1;
   fC[2] = c2;
@@ -27,8 +26,7 @@ A2x2ComplexMatrix::A2x2ComplexMatrix(std::complex<Double_t> c0,
 }
 
 //______________________________________________________________________________
-void A2x2ComplexMatrix::Print() const
-{
+void A2x2ComplexMatrix::Print() const {
   std::cout << fC[0] << ", " << fC[1] << std::endl;
   std::cout << fC[2] << ", " << fC[3] << std::endl;
 }

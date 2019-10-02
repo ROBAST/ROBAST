@@ -9,8 +9,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "A2x2ComplexMatrix.h"
 #include "AMultilayer.h"
+#include "A2x2ComplexMatrix.h"
 #include "AOpticsManager.h"
 
 #include <complex>
@@ -22,20 +22,19 @@ static const Double_t inf = std::numeric_limits<Double_t>::infinity();
 ClassImp(AMultilayer);
 
 AMultilayer::AMultilayer(std::shared_ptr<ARefractiveIndex> top,
-                         std::shared_ptr<ARefractiveIndex> bottom) : fNthreads(1)
-{
+                         std::shared_ptr<ARefractiveIndex> bottom)
+    : fNthreads(1) {
   fRefractiveIndexList.push_back(bottom);
   fThicknessList.push_back(inf);
   InsertLayer(top, inf);
 }
 
 //______________________________________________________________________________
-AMultilayer::~AMultilayer() {
-}
+AMultilayer::~AMultilayer() {}
 
 //______________________________________________________________________________
-Bool_t AMultilayer::IsForwardAngle(std::complex<Double_t> n, std::complex<Double_t> theta) const
-{
+Bool_t AMultilayer::IsForwardAngle(std::complex<Double_t> n,
+                                   std::complex<Double_t> theta) const {
   // Copied from tmm.is_forward_angle
 
   // if a wave is traveling at angle theta from normal in a medium with index n,
@@ -46,19 +45,19 @@ Bool_t AMultilayer::IsForwardAngle(std::complex<Double_t> n, std::complex<Double
   // See https://arxiv.org/abs/1603.02720 appendix D. If theta is the forward
   // angle, then (pi-theta) is the backward angle and vice-versa.
 
-  if(n.real() * n.imag() < 0){
+  if (n.real() * n.imag() < 0) {
     Error("IsForwardAngle",
           "For materials with gain, it's ambiguous which "
           "beam is incoming vs outgoing. See "
           "https://arxiv.org/abs/1603.02720 Appendix C.\n"
-          "n: %.3e + %.3ei   angle: %.3e + %.3ei", n.real(), n.imag(),
-          theta.real(), theta.imag());
+          "n: %.3e + %.3ei   angle: %.3e + %.3ei",
+          n.real(), n.imag(), theta.real(), theta.imag());
   }
   auto ncostheta = n * std::cos(theta);
   Bool_t answer;
   if (std::abs(ncostheta.imag()) > 100 * EPSILON) {
     // Either evanescent decay or lossy medium. Either way, the one that
-    // decays is the forward-moving wave      
+    // decays is the forward-moving wave
     answer = ncostheta.imag() > 0;
   } else {
     // Forward is the one with positive Poynting vector
@@ -68,30 +67,36 @@ Bool_t AMultilayer::IsForwardAngle(std::complex<Double_t> n, std::complex<Double
     answer = ncostheta.real() > 0;
   }
   // double-check the answer ... can't be too careful!
-  std::string
-    error_string(Form("It's not clear which beam is incoming vs outgoing. Weird"
-                      " index maybe?\n"
-                      "n: %.3e + %.3ei   angle: %.3e + %.3ei",
-                      n.real(), n.imag(), theta.real(), theta.imag()));
+  std::string error_string(
+      Form("It's not clear which beam is incoming vs outgoing. Weird"
+           " index maybe?\n"
+           "n: %.3e + %.3ei   angle: %.3e + %.3ei",
+           n.real(), n.imag(), theta.real(), theta.imag()));
   if (answer == true) {
-    if (ncostheta.imag() <= -100 * EPSILON) Error("IsForwardAngle", "%s", error_string.c_str());
-    if (ncostheta.real() <= -100 * EPSILON) Error("IsForwardAngle", "%s", error_string.c_str());
-    if ((n * std::cos(std::conj(theta))).real() <= -100 * EPSILON) Error("IsForwardAngle", "%s", error_string.c_str());
+    if (ncostheta.imag() <= -100 * EPSILON)
+      Error("IsForwardAngle", "%s", error_string.c_str());
+    if (ncostheta.real() <= -100 * EPSILON)
+      Error("IsForwardAngle", "%s", error_string.c_str());
+    if ((n * std::cos(std::conj(theta))).real() <= -100 * EPSILON)
+      Error("IsForwardAngle", "%s", error_string.c_str());
   } else {
-    if(ncostheta.imag() >= 100 * EPSILON) Error("IsForwardAngle", "%s", error_string.c_str());
-    if(ncostheta.real() >= 100 * EPSILON) Error("IsForwardAngle", "%s", error_string.c_str());
-    if ((n * std::cos(std::conj(theta))).real() < 100 * EPSILON) Error("IsForwardAngle", "%s", error_string.c_str());
+    if (ncostheta.imag() >= 100 * EPSILON)
+      Error("IsForwardAngle", "%s", error_string.c_str());
+    if (ncostheta.real() >= 100 * EPSILON)
+      Error("IsForwardAngle", "%s", error_string.c_str());
+    if ((n * std::cos(std::conj(theta))).real() < 100 * EPSILON)
+      Error("IsForwardAngle", "%s", error_string.c_str());
   }
   return answer;
 }
 
 //______________________________________________________________________________
-void AMultilayer::ListSnell(std::complex<Double_t> th_0,
-                            const std::vector<std::complex<Double_t>>& n_list,
-                            std::vector<std::complex<Double_t>>& th_list) const
-{
+void AMultilayer::ListSnell(
+    std::complex<Double_t> th_0,
+    const std::vector<std::complex<Double_t>>& n_list,
+    std::vector<std::complex<Double_t>>& th_list) const {
   // Copied from tmm.list_snell
-  
+
   // return list of angle theta in each layer based on angle th_0 in layer 0,
   // using Snell's law. n_list is index of refraction of each layer. Note that
   // "angles" may be complex!!
@@ -102,8 +107,8 @@ void AMultilayer::ListSnell(std::complex<Double_t> th_0,
     auto n_i = n_list.cbegin();
     auto th_i = th_list.begin();
     auto n0_sinth0 = (*n_i) * std::sin(th_0);
-    for(std::size_t i = 0; i < num_layers; ++i) {
-      *th_i = std::asin(n0_sinth0  / *n_i);
+    for (std::size_t i = 0; i < num_layers; ++i) {
+      *th_i = std::asin(n0_sinth0 / *n_i);
       ++n_i;
       ++th_i;
     }
@@ -120,26 +125,25 @@ void AMultilayer::ListSnell(std::complex<Double_t> th_0,
 }
 
 //______________________________________________________________________________
-void AMultilayer::InsertLayer(std::shared_ptr<ARefractiveIndex> idx, Double_t thickness)
-{
+void AMultilayer::InsertLayer(std::shared_ptr<ARefractiveIndex> idx,
+                              Double_t thickness) {
   // ----------------- Top layer
   // ----------------- 1st layer
   // ----------------- 2nd layer
   // ...
   // ----------------- <------------- Insert a new layer here
-  // ----------------- Bottom layer 
+  // ----------------- Bottom layer
   fRefractiveIndexList.insert(fRefractiveIndexList.end() - 1, idx);
   fThicknessList.insert(fThicknessList.end() - 1, thickness);
 }
 
 //______________________________________________________________________________
-void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t> th_0,
-                              Double_t lam_vac,
+void AMultilayer::CoherentTMM(EPolarization polarization,
+                              std::complex<Double_t> th_0, Double_t lam_vac,
                               Double_t& reflectance,
-                              Double_t& transmittance) const
-{
+                              Double_t& transmittance) const {
   // Copied from tmm.ch_tmm
-  
+
   // Main "coherent transfer matrix method" calc. Given parameters of a stack,
   // calculates everything you could ever want to know about how light
   // propagates in it. (If performance is an issue, you can delete some of the
@@ -158,7 +162,8 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // a function of lateral position).
   //
   // d_list is the list of layer thicknesses (front to back). Should correspond
-  // one-to-one with elements of n_list. First and last elements should be "inf".
+  // one-to-one with elements of n_list. First and last elements should be
+  // "inf".
   //
   // lam_vac is vacuum wavelength of the light.
 
@@ -174,10 +179,10 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
       ++ref_i;
     }
   }
-                 
+
   // Input tests
-  if(std::abs((n_list[0] * std::sin(th_0)).imag()) >= 100 * EPSILON ||
-     ! IsForwardAngle(n_list[0], th_0)) {
+  if (std::abs((n_list[0] * std::sin(th_0)).imag()) >= 100 * EPSILON ||
+      !IsForwardAngle(n_list[0], th_0)) {
     Error("CoherentTMM", "Error in n0 or th0!");
   }
 
@@ -196,7 +201,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
     auto n_i = n_list.cbegin();
     auto th_i = th_list.cbegin();
     auto cos_th_i = cos_th_list.begin();
-    for(std::size_t i = 0; i < num_layers; ++i) {
+    for (std::size_t i = 0; i < num_layers; ++i) {
       *cos_th_i = std::cos(*th_i);
       *kz_i = TMath::TwoPi() * (*n_i) * (*cos_th_i) / lam_vac;
       ++kz_i;
@@ -212,7 +217,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
     auto delta_i = delta.begin();
     auto kz_i = kz_list.cbegin();
     auto thickness_i = fThicknessList.cbegin();
-    for(std::size_t i = 0; i < num_layers; ++i) {
+    for (std::size_t i = 0; i < num_layers; ++i) {
       *delta_i = (*kz_i) * (*thickness_i);
       ++delta_i;
       ++kz_i;
@@ -226,7 +231,8 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // matter.
   static Bool_t opacity_warning = kFALSE;
   {
-    auto delta_i = delta.begin(); ++delta_i; // start from i = 1
+    auto delta_i = delta.begin();
+    ++delta_i;  // start from i = 1
     for (std::size_t i = 1; i < num_layers - 1; ++i) {
       if ((*delta_i).imag() > 35) {
         *delta_i = (*delta_i).real() + std::complex<Double_t>(0, 35);
@@ -243,7 +249,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
       ++delta_i;
     }
   }
-  
+
   // t_list[i,j] and r_list[i,j] are transmission and reflection amplitudes,
   // respectively, coming from i, going to j. Only need to calculate this when
   // j=i+1. (2D array is overkill but helps avoid confusion.)
@@ -254,12 +260,15 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
     auto t_i = t_list.begin();
     auto r_i = r_list.begin();
     auto th_i = th_list.cbegin();
-    auto th_f = th_list.cbegin(); ++th_f; // increment to access th_f (th[i + 1])
+    auto th_f = th_list.cbegin();
+    ++th_f;  // increment to access th_f (th[i + 1])
     auto n_i = n_list.cbegin();
-    auto n_f = n_list.cbegin(); ++n_f; // increment to access n_f (n[i + 1])
-    auto cos_th_i = cos_th_list.cbegin(); // cos(th_i)
-    auto cos_th_f = cos_th_list.cbegin(); ++cos_th_f; // increment to access cos(th_f)
-    for(std::size_t i = 0; i < num_layers - 1; ++i) {
+    auto n_f = n_list.cbegin();
+    ++n_f;                                 // increment to access n_f (n[i + 1])
+    auto cos_th_i = cos_th_list.cbegin();  // cos(th_i)
+    auto cos_th_f = cos_th_list.cbegin();
+    ++cos_th_f;  // increment to access cos(th_f)
+    for (std::size_t i = 0; i < num_layers - 1; ++i) {
       auto ii = *n_i * (*cos_th_i);
       if (polarization == kS) {
         auto ff = *n_f * (*cos_th_f);
@@ -293,15 +302,20 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   std::vector<A2x2ComplexMatrix> M_list(num_layers);
   {
     const std::complex<Double_t> j(0, 1);
-    auto M_i = M_list.begin(); ++M_i; // start i from 1
-    auto t_i = t_list.cbegin(); ++t_i;
-    auto r_i = r_list.cbegin(); ++r_i;
-    auto delta_i = delta.cbegin(); ++delta_i;
+    auto M_i = M_list.begin();
+    ++M_i;  // start i from 1
+    auto t_i = t_list.cbegin();
+    ++t_i;
+    auto r_i = r_list.cbegin();
+    ++r_i;
+    auto delta_i = delta.cbegin();
+    ++delta_i;
     for (std::size_t i = 1; i < num_layers - 1; ++i) {
       auto j_delta_i = j * (*delta_i);
-      *M_i = 1. / (*t_i) * A2x2ComplexMatrix(std::exp(- j_delta_i), 0, 0,
-                                             std::exp(j_delta_i)) *
-        A2x2ComplexMatrix(1, *r_i, *r_i, 1);
+      *M_i =
+          1. / (*t_i) *
+          A2x2ComplexMatrix(std::exp(-j_delta_i), 0, 0, std::exp(j_delta_i)) *
+          A2x2ComplexMatrix(1, *r_i, *r_i, 1);
       ++M_i;
       ++t_i;
       ++r_i;
@@ -311,7 +325,8 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
 
   A2x2ComplexMatrix Mtilde(1, 0, 0, 1);
   {
-    auto M_i = M_list.cbegin(); ++M_i; // start i from 1
+    auto M_i = M_list.cbegin();
+    ++M_i;  // start i from 1
     for (std::size_t i = 1; i < num_layers - 1; ++i) {
       Mtilde = Mtilde * (*M_i);
       ++M_i;
@@ -328,7 +343,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   // has no left interface.
   /* Will not be used at the moment (A.O.)
   std::vector<std::array<std::complex<Double_t>, 2>> vw_list(num_layers);
-  
+
   std::complex<Double_t> vw[2] = {t, 0.};
   vw_list.back()[0] = vw[0];
   vw_list.back()[1] = vw[1];
@@ -351,32 +366,35 @@ void AMultilayer::CoherentTMM(EPolarization polarization, std::complex<Double_t>
   auto th_i = th_0;
   auto th_f = th_list.back();
   if (polarization == kS) {
-    transmittance = std::abs(t * t) * (((n_f * std::cos(th_f)).real())
-                                       / (n_i * std::cos(th_i)).real());
+    transmittance = std::abs(t * t) * (((n_f * std::cos(th_f)).real()) /
+                                       (n_i * std::cos(th_i)).real());
   } else {
-    transmittance = std::abs(t * t) * (((n_f * std::conj(std::cos(th_f))).real())
-                                       / (n_i * std::conj(std::cos(th_i))).real());
+    transmittance =
+        std::abs(t * t) * (((n_f * std::conj(std::cos(th_f))).real()) /
+                           (n_i * std::conj(std::cos(th_i))).real());
   }
 }
 
 //__________________________________________________________________________________
-void AMultilayer::PrintLayers(Double_t lambda) const
-{
+void AMultilayer::PrintLayers(Double_t lambda) const {
   auto n = fRefractiveIndexList.size();
-  for(std::size_t i = 0; i < n; ++i){
+  for (std::size_t i = 0; i < n; ++i) {
     std::cout << "----------------------------------------\n";
-    std::cout << i << "\tn_i = " << fRefractiveIndexList[i]->GetComplexRefractiveIndex(lambda) << "\td_i = " << fThicknessList[i] / AOpticsManager::nm() << " (nm)\n";
+    std::cout << i << "\tn_i = "
+              << fRefractiveIndexList[i]->GetComplexRefractiveIndex(lambda)
+              << "\td_i = " << fThicknessList[i] / AOpticsManager::nm()
+              << " (nm)\n";
   }
   std::cout << "----------------------------------------" << std::endl;
 }
 
 //__________________________________________________________________________________
-void AMultilayer::SetNthreads(std::size_t n)
-{
-  // Note that having n larger than 1 frequently decreases the total performance.
-  // Use this method only when you feed a very long vector.
+void AMultilayer::SetNthreads(std::size_t n) {
+  // Note that having n larger than 1 frequently decreases the total
+  // performance. Use this method only when you feed a very long vector.
   if (n == 0) {
-    fNthreads = std::thread::hardware_concurrency(); // can return 0 if n is unknown
+    fNthreads =
+        std::thread::hardware_concurrency();  // can return 0 if n is unknown
     if (fNthreads == 0) fNthreads = 1;
   } else if (n > 0) {
     fNthreads = n;

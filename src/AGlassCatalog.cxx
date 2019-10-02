@@ -35,7 +35,7 @@ AGlassCatalog::AGlassCatalog(const std::string& catalog_file) {
 
   // ASCII glass format catalog file (AGF)
   if (catalog_file.size() - catalog_file.find(".agf") != 4 &&
-      catalog_file.size() - catalog_file.find(".AGF") != 4 ) {
+      catalog_file.size() - catalog_file.find(".AGF") != 4) {
     Error("AGlassCatalog", "Cannot read a non-ZEMAX file");
     return;
   }
@@ -65,33 +65,36 @@ AGlassCatalog::AGlassCatalog(const std::string& catalog_file) {
       // meta material? : ?
       char product_number[bufsize];
       Double_t vd;
-      if (sscanf(buf, "NM %s %d %s %lf %lf", glass_name, &formula, product_number,
-                 &nd, &vd) != 5) {
+      if (sscanf(buf, "NM %s %d %s %lf %lf", glass_name, &formula,
+                 product_number, &nd, &vd) != 5) {
         Warning("AGlassCatalog", "Bad format line found: %s", buf);
       }
 
       glass_name_s = std::string(glass_name);
       graph = std::make_shared<TGraph>();
 
-      fIndexMap.insert(std::make_pair(glass_name_s, std::shared_ptr<ARefractiveIndex>(0)));
-    } else if(strncmp(buf, "CD ", 3) == 0) {
-      int ret = sscanf(buf, "CD %lf %lf %lf %lf %lf %lf %lf %lf", &cd[0], &cd[1],
-                       &cd[2], &cd[3], &cd[4], &cd[5], &cd[6], &cd[7]);
+      fIndexMap.insert(
+          std::make_pair(glass_name_s, std::shared_ptr<ARefractiveIndex>(0)));
+    } else if (strncmp(buf, "CD ", 3) == 0) {
+      int ret = sscanf(buf, "CD %lf %lf %lf %lf %lf %lf %lf %lf", &cd[0],
+                       &cd[1], &cd[2], &cd[3], &cd[4], &cd[5], &cd[6], &cd[7]);
       if (formula == 2 && ret >= 6) {
         auto it = fIndexMap.find(glass_name_s);
         if (it != fIndexMap.end()) {
-          it->second = std::make_shared<ASellmeierFormula>(cd[0], cd[2], cd[4], cd[1], cd[3], cd[5]);
+          it->second = std::make_shared<ASellmeierFormula>(cd[0], cd[2], cd[4],
+                                                           cd[1], cd[3], cd[5]);
           it->second->SetExtinctionCoefficient(graph);
         }
       }
-    } else if(strncmp(buf, "IT ", 3) == 0) {
-      Double_t wl, T, d; // lambda (um), transmittance, thickness (mm)
+    } else if (strncmp(buf, "IT ", 3) == 0) {
+      Double_t wl, T, d;  // lambda (um), transmittance, thickness (mm)
       int ret = sscanf(buf, "IT %lf %lf %lf", &wl, &T, &d);
       if (ret == 3) {
         wl *= AOpticsManager::um();
         d *= AOpticsManager::mm();
-        Double_t absl = - d / TMath::Log(T);
-        Double_t k = ARefractiveIndex::AbsorptionLengthToExtinctionCoefficient(absl, wl);
+        Double_t absl = -d / TMath::Log(T);
+        Double_t k =
+            ARefractiveIndex::AbsorptionLengthToExtinctionCoefficient(absl, wl);
         graph->SetPoint(graph->GetN(), wl, k);
       } else if (ret == 2) {
         // Some glass materials such as N-LASF9 has incomplete lines
@@ -107,7 +110,8 @@ AGlassCatalog::AGlassCatalog(const std::string& catalog_file) {
 AGlassCatalog::~AGlassCatalog() {}
 
 //_____________________________________________________________________________
-std::shared_ptr<ARefractiveIndex> AGlassCatalog::GetRefractiveIndex(const std::string& name) {
+std::shared_ptr<ARefractiveIndex> AGlassCatalog::GetRefractiveIndex(
+    const std::string& name) {
   auto it = fIndexMap.find(name);
   if (it == fIndexMap.end()) {
     return 0;

@@ -24,8 +24,8 @@ class AMixedRefractiveIndex : public ARefractiveIndex {
   Double_t fFractionA;
   Double_t fFractionB;
 
-  void SetExtinctionCoefficient(std::shared_ptr<TGraph>) {};
-  void SetRefractiveIndex(std::shared_ptr<TGraph>) {};
+  void SetExtinctionCoefficient(std::shared_ptr<TGraph>){};
+  void SetRefractiveIndex(std::shared_ptr<TGraph>){};
 
  public:
   AMixedRefractiveIndex(std::shared_ptr<ARefractiveIndex> materialA,
@@ -36,12 +36,12 @@ class AMixedRefractiveIndex : public ARefractiveIndex {
   virtual Double_t GetRefractiveIndex(Double_t lambda) const {
     Double_t nA = fMaterialA->GetRefractiveIndex(lambda);
     Double_t nB = fMaterialB->GetRefractiveIndex(lambda);
-    return  nA * fFractionA + nB * fFractionB;
+    return nA * fFractionA + nB * fFractionB;
   }
   virtual Double_t GetExtinctionCoefficient(Double_t lambda) const {
     Double_t kA = fMaterialA->GetExtinctionCoefficient(lambda);
     Double_t kB = fMaterialB->GetExtinctionCoefficient(lambda);
-    return  kA * fFractionA + kB * fFractionB;
+    return kA * fFractionA + kB * fFractionB;
   }
   void SetFraction(Double_t fractionA, Double_t fractionB) {
     fFractionA = fractionA / (fractionA + fractionB);

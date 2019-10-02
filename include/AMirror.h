@@ -24,10 +24,12 @@
 class AMirror : public AOpticalComponent {
  private:
   Double_t fReflectance;
-  std::shared_ptr<TGraph> fReflectance1D;  // Reflectance data (ref v.s. wavelength)
+  std::shared_ptr<TGraph>
+      fReflectance1D;  // Reflectance data (ref v.s. wavelength)
   std::shared_ptr<TGraph2D>
-      fReflectance2D;    // Reflectance data (ref v.s. angle v.s. wavelength)
-  std::shared_ptr<TH2> fReflectanceTH2;  // Reflectance data (ref v.s. angle v.s. wavelength)
+      fReflectance2D;  // Reflectance data (ref v.s. angle v.s. wavelength)
+  std::shared_ptr<TH2>
+      fReflectanceTH2;  // Reflectance data (ref v.s. angle v.s. wavelength)
 
  public:
   AMirror();

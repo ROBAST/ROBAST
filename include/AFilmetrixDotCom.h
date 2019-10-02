@@ -22,10 +22,9 @@
 
 class AFilmetrixDotCom : public ARefractiveIndex {
  private:
-
  public:
   AFilmetrixDotCom(const char* fname);
-  virtual ~AFilmetrixDotCom() {};
+  virtual ~AFilmetrixDotCom(){};
 
   ClassDef(AFilmetrixDotCom, 1)
 };

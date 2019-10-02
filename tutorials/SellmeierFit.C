@@ -35,6 +35,6 @@ void SellmeierFit() {
   sellmaier->FitData(graph, "uvc200b");
 
   // You can get a refractive index at any wavelength you like
-  std::cout << "Refractive Index at 400 nm: " << sellmaier->GetRefractiveIndex(400 * nm)
-            << std::endl;
+  std::cout << "Refractive Index at 400 nm: "
+            << sellmaier->GetRefractiveIndex(400 * nm) << std::endl;
 }

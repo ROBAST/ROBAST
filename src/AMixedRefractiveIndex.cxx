@@ -15,12 +15,11 @@
 
 ClassImp(AMixedRefractiveIndex);
 
-AMixedRefractiveIndex::AMixedRefractiveIndex(std::shared_ptr<ARefractiveIndex> materialA,
-                                             std::shared_ptr<ARefractiveIndex> materialB,
-                                             Double_t fractionA,
-                                             Double_t fractionB)
-  : ARefractiveIndex(), fMaterialA(materialA), fMaterialB(materialB)
-{
+AMixedRefractiveIndex::AMixedRefractiveIndex(
+    std::shared_ptr<ARefractiveIndex> materialA,
+    std::shared_ptr<ARefractiveIndex> materialB, Double_t fractionA,
+    Double_t fractionB)
+    : ARefractiveIndex(), fMaterialA(materialA), fMaterialB(materialB) {
   fFractionA = fractionA / (fractionA + fractionB);
   fFractionB = fractionB / (fractionA + fractionB);
 }

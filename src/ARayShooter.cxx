@@ -40,7 +40,8 @@ Begin_Macro(source)
 
   rays = ARayShooter::Rectangle(400*nm, 100*m, 80*m, 20, 10, 0, 0);
   TGraph* rectangle = new TGraph;
-  rectangle->SetTitle("Rectangle(400*nm, 100*m, 80*m, 20, 10, 0, 0);X (m);Y(m)"); running = rays->GetRunning();
+  rectangle->SetTitle("Rectangle(400*nm, 100*m, 80*m, 20, 10, 0, 0);X
+(m);Y(m)"); running = rays->GetRunning();
 
   for(Int_t i = 0; i <= running->GetLast(); i++){
     ARay* ray = (ARay*)(*running)[i];
