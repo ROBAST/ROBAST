@@ -54,18 +54,20 @@ void EdmundOptics() {
 
   // Ohara S-FSL5
   // http://www.ohara-inc.co.jp/jp/product/optical/dl/data/jsfsl05.pdf
-  ASellmeierFormula* FSL5 =
-      new ASellmeierFormula(1.17447043e0, 1.40056154e-2, 1.19272435e0,
-                            8.41855181e-3, -5.81790767e-2, 1.29599726e2);
+  auto FSL5 =
+    std::make_shared<ASellmeierFormula>(1.17447043e0, 1.40056154e-2,
+					1.19272435e0, 8.41855181e-3,
+					-5.81790767e-2, 1.29599726e2);
 
   // should be 1.48749
   std::cout << FSL5->GetRefractiveIndex(0.58756 * um) << std::endl;
 
   // S-TIH13
   // http://www.ohara-inc.co.jp/jp/product/optical/dl/data/jstih13.pdf
-  ASellmeierFormula* TIH13 =
-      new ASellmeierFormula(1.62224674e0, 2.93844589e-1, 1.99225164e0,
-                            1.18368386e-2, 5.90208025e-2, 1.71959976e2);
+  auto TIH13
+    = std::make_shared<ASellmeierFormula>(1.62224674e0, 2.93844589e-1,
+					  1.99225164e0, 1.18368386e-2,
+					  5.90208025e-2, 1.71959976e2);
 
   // should be 1.74077
   std::cout << TIH13->GetRefractiveIndex(0.58756 * um) << std::endl;
@@ -75,7 +77,7 @@ void EdmundOptics() {
   ALens* lens2 = new ALens("lens2", disk2);
   lens2->SetRefractiveIndex(TIH13);
   ALens* lens3 = new ALens("lens3", disk3);
-  lens3->SetConstantRefractiveIndex(1.517);
+  lens3->SetRefractiveIndex(std::make_shared<ARefractiveIndex>(1.517));
 
   top->AddNode(lens1, 1);
   top->AddNode(lens2, 1);
