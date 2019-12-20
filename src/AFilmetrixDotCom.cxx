@@ -40,7 +40,7 @@ AFilmetrixDotCom::AFilmetrixDotCom(const char* fname) : ARefractiveIndex() {
       strcmp(buf,             "Wavelength(nm)\tn\tk\r") != 0 &&
       strcmp(buf,             "Wavelength(nm)\tn\tk")   != 0 ) {
     // clang-format on
-    Error("AFilmetrixDotCom", "Invalide data format");
+    Error("AFilmetrixDotCom", "Invalid data format");
     return;
   }
 
