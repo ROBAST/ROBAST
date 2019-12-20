@@ -80,7 +80,6 @@ ARefractiveIndexDotInfo::ARefractiveIndexDotInfo(const char* fname)
   fin.getline(buf, 50, CRLF ? '\r' : '\n');
   // "wl," or "wl\t" should have been alread read in the previous while loop
   if (strcmp(buf, "k") != 0) {
-    Error("ARefractiveIndexDotInfo", "Invalid data format");
     return;
   }
 
