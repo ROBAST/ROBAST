@@ -7,8 +7,8 @@
 #ifndef A_BORDER_SURFACE_CONDITION_H
 #define A_BORDER_SURFACE_CONDITION_H
 
-#include "TObject.h"
 #include "AMultilayer.h"
+#include "TObject.h"
 
 class AOpticalComponent;
 
@@ -39,7 +39,7 @@ class ABorderSurfaceCondition : public TObject {
   void SetMultilayer(std::shared_ptr<AMultilayer> layer) {
     fMultilayer = layer;
   }
-  std::shared_ptr<AMultilayer> GetMultilayer() const {return fMultilayer;}
+  std::shared_ptr<AMultilayer> GetMultilayer() const { return fMultilayer; }
 
   ClassDef(ABorderSurfaceCondition, 1)
 };

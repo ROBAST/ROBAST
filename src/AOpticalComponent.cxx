@@ -17,12 +17,13 @@
 
 ClassImp(AOpticalComponent);
 
-AOpticalComponent::AOpticalComponent() : TGeoVolume(), fBorderSurfaceConditionArray(0) {}
+AOpticalComponent::AOpticalComponent()
+    : TGeoVolume(), fBorderSurfaceConditionArray(0) {}
 
 //_____________________________________________________________________________
 AOpticalComponent::AOpticalComponent(const char* name, const TGeoShape* shape,
                                      const TGeoMedium* med)
-  : TGeoVolume(name, shape, med), fBorderSurfaceConditionArray(0) {
+    : TGeoVolume(name, shape, med), fBorderSurfaceConditionArray(0) {
 #if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
   if (GetMedium() == TGeoVolume::DummyMedium()) {
     SetMedium(GetOpaqueVacuumMedium());
@@ -54,7 +55,8 @@ ABorderSurfaceCondition* AOpticalComponent::FindBorderSurfaceCondition(
   }
 
   for (Int_t i = 0; i < fBorderSurfaceConditionArray->GetEntries(); i++) {
-    if (((ABorderSurfaceCondition*)(*fBorderSurfaceConditionArray)[i])->GetComponent2() == component2) {
+    if (((ABorderSurfaceCondition*)(*fBorderSurfaceConditionArray)[i])
+            ->GetComponent2() == component2) {
       return (ABorderSurfaceCondition*)(*fBorderSurfaceConditionArray)[i];
     }
   }

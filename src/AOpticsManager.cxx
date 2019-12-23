@@ -70,25 +70,26 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
 
   AOpticalComponent* component1 = (AOpticalComponent*)currentNode->GetVolume();
   AOpticalComponent* component2 =
-    nextNode ? (AOpticalComponent*)nextNode->GetVolume() : 0;
+      nextNode ? (AOpticalComponent*)nextNode->GetVolume() : 0;
   ABorderSurfaceCondition* condition =
-    component1 ? component1->FindBorderSurfaceCondition(component2) : 0;
+      component1 ? component1->FindBorderSurfaceCondition(component2) : 0;
 
   Bool_t absorbed = kFALSE;
 
-  if(condition and condition->GetMultilayer()){
+  if (condition and condition->GetMultilayer()) {
     Double_t reflectance, transmittance;
     Double_t angle = TMath::ACos(cos1);
     Double_t lambda = ray.GetLambda();
     // polarization is ignored in this version
-    condition->GetMultilayer()->CoherentTMMMixed(angle, lambda, reflectance, transmittance);
+    condition->GetMultilayer()->CoherentTMMMixed(angle, lambda, reflectance,
+                                                 transmittance);
     auto rnd = gRandom->Uniform(1);
     if (rnd < reflectance) {  // reflection at the boundary
       DoReflection(n1, ray, nav, currentNode, nextNode, &n);
       return;
-    } else if(rnd < reflectance + transmittance) {
+    } else if (rnd < reflectance + transmittance) {
       goto transmission_process;
-    } else { // absorption
+    } else {  // absorption
       absorbed = kTRUE;
       goto transmission_process;
     }
@@ -140,7 +141,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
     }
   }
 
- transmission_process:
+transmission_process:
 
   Double_t x1[4], d2[3];
   ray.GetLastPoint(x1);
@@ -157,7 +158,7 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
   Double_t t = x1[3] + step / speed;
   ray.AddPoint(x2[0], x2[1], x2[2], t);
   ray.AddNode(nextNode);
-  if(absorbed){
+  if (absorbed) {
     ray.Absorb();
   } else {
     ray.SetDirection(d2);
@@ -193,7 +194,8 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav,
     if (condition and condition->GetMultilayer()) {
       Double_t transmittance;
       // ignore polarization in the current version
-      condition->GetMultilayer()->CoherentTMMMixed(angle, lambda, ref, transmittance);
+      condition->GetMultilayer()->CoherentTMMMixed(angle, lambda, ref,
+                                                   transmittance);
     } else {
       ref = ((AMirror*)nextNode->GetVolume())->GetReflectance(lambda, angle);
     }

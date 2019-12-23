@@ -36,7 +36,8 @@ class AOpticsManager : public TGeoManager {
   void DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
                  TGeoNavigator* nav, TGeoNode* currentNode, TGeoNode* nextNode);
   void DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav,
-                    TGeoNode* currentNode, TGeoNode* nextNode, TVector3* normal = 0);
+                    TGeoNode* currentNode, TGeoNode* nextNode,
+                    TVector3* normal = 0);
   TVector3 GetFacetNormal(TGeoNavigator* nav, TGeoNode* currentNode,
                           TGeoNode* nextNode);
 
