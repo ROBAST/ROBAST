@@ -21,7 +21,7 @@
 
 class AOpticalComponent : public TGeoVolume {
  private:
-  TObjArray* fSurfaceArray;
+  TObjArray* fBorderSurfaceConditionArray;
 
  public:
   AOpticalComponent();
@@ -29,8 +29,8 @@ class AOpticalComponent : public TGeoVolume {
                     const TGeoMedium* med = 0);
   virtual ~AOpticalComponent();
 
-  void AddSurfaceCondition(ABorderSurfaceCondition* condition);
-  ABorderSurfaceCondition* FindSurfaceCondition(AOpticalComponent* component2);
+  void AddBorderSurfaceCondition(ABorderSurfaceCondition* condition);
+  ABorderSurfaceCondition* FindBorderSurfaceCondition(AOpticalComponent* component2);
   TGeoMaterial* GetOpaqueVacuumMaterial() const;
   TGeoMaterial* GetTransparentVacuumMaterial() const;
   TGeoMedium* GetOpaqueVacuumMedium() const;

@@ -32,6 +32,13 @@ ROOT.gROOT.ProcessLine('std::shared_ptr<TGraph> graph;')
 ROOT.gROOT.ProcessLine('std::shared_ptr<TGraph2D> graph2d;')
 ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> refidx;')
 
+ROOT.gROOT.ProcessLine('auto air = std::make_shared<ARefractiveIndex>(1., 0.)');
+ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> Si = std::make_shared<AFilmetrixDotCom>("Si.txt");');
+ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> Si3N4 = std::make_shared<AFilmetrixDotCom>("Si3N4.txt");');
+ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> SiO2 = std::make_shared<AFilmetrixDotCom>("SiO2.txt");');
+ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> Al = std::make_shared<AFilmetrixDotCom>("Al.txt");');
+ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> TiO2 = std::make_shared<AFilmetrixDotCom>("TiO2.txt");');
+
 def makeTheWorld():
     manager = ROOT.AOpticsManager("manager", "manager")
     worldbox = ROOT.TGeoBBox("worldbox", 1*m, 1*m, 1*m)
@@ -141,8 +148,6 @@ class TestROBAST(unittest.TestCase):
         self.assertGreater(ref, (n - n**0.5*3)/N)
         self.assertLess(ref, (n + n**0.5*3)/N)
 
-        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> TiO2 = std::make_shared<AFilmetrixDotCom>("TiO2.txt")');
-        ROOT.gROOT.ProcessLine('auto air = std::make_shared<ARefractiveIndex>(1., 0.)');
         layer = ROOT.AMultilayer(ROOT.air, ROOT.TiO2)
 
         angle = ROOT.std.complex(ROOT.double)(45 * deg)
@@ -225,13 +230,90 @@ class TestROBAST(unittest.TestCase):
         self.assertGreater(ref, (n - n**0.5*3)/N)
         self.assertLess(ref, (n + n**0.5*3)/N)
 
+    def testMirrorBoundaryMultilayer(self):
+        manager = makeTheWorld()
+
+        mirrorbox = ROOT.TGeoBBox("mirrorbox", 0.5*m, 0.5*m, 0.5*m)
+        mirror = ROOT.AMirror("mirror", mirrorbox)
+
+        condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror)
+        ROOT.gROOT.ProcessLine('auto mirror_layer = std::make_shared<AMultilayer>(air, Al)');
+        ROOT.mirror_layer.InsertLayer(ROOT.SiO2, 25.4 * nm)
+
+        condition.SetMultilayer(ROOT.mirror_layer)
+
+        manager.GetTopVolume().AddNode(mirror, 1)
+        manager.CloseGeometry()
+
+        N = 100000
+
+        for wl in range(300, 1100, 100):
+            rays = ROOT.ARayArray()
+            for i in range(N):
+                ray = ROOT.ARay(i, wl * nm, 0, 0, 0.51*m, 0, 1, 0, -1)
+                rays.Add(ray)
+                manager.TraceNonSequential(rays)
+
+            n_exited = rays.GetExited().GetEntries()
+            n_absorbed = rays.GetAbsorbed().GetEntries()
+            self.assertEqual(n_exited + n_absorbed, N)
+
+            reflectance = ROOT.double()
+            transmittance = ROOT.double()
+            ROOT.mirror_layer.CoherentTMMMixed(ROOT.std.complex(ROOT.double)(45 * deg), wl * nm, reflectance, transmittance)
+
+            expected = N * reflectance
+            e = expected**0.5
+            self.assertGreater(n_exited,  expected - 3*e)
+            self.assertLess(n_exited, expected + 3*e)
+            print(wl, n_exited, n_absorbed)
+
+    def testLensBoundaryMultilayer(self):
+        manager = makeTheWorld()
+
+        lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 0.5*m)
+        lens = ROOT.AMirror("lens", lensbox)
+
+        condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), lens)
+        ROOT.gROOT.ProcessLine('auto lens_layer = std::make_shared<AMultilayer>(air, Si)');
+        ROOT.lens_layer.InsertLayer(ROOT.SiO2, 2000 * nm)
+        ROOT.lens_layer.InsertLayer(ROOT.Si3N4, 33 * nm)
+
+        condition.SetMultilayer(ROOT.lens_layer)
+
+        manager.GetTopVolume().AddNode(lens, 1)
+        manager.CloseGeometry()
+
+        N = 100000
+
+        for wl in range(300, 600, 50):
+            rays = ROOT.ARayArray()
+            for i in range(N):
+                ray = ROOT.ARay(i, wl * nm, 0, 0, 0.51*m, 0, 1, 0, -1)
+                rays.Add(ray)
+                manager.TraceNonSequential(rays)
+
+            n_exited = rays.GetExited().GetEntries()
+            n_absorbed = rays.GetAbsorbed().GetEntries()
+            self.assertEqual(n_exited + n_absorbed, N)
+
+            reflectance = ROOT.double()
+            transmittance = ROOT.double()
+            ROOT.lens_layer.CoherentTMMMixed(ROOT.std.complex(ROOT.double)(45 * deg), wl * nm, reflectance, transmittance)
+
+            expected = N * reflectance
+            e = expected**0.5
+            self.assertGreater(n_exited,  expected - 3*e)
+            self.assertLess(n_exited, expected + 3*e)
+            print(wl, n_exited, n_absorbed)
+
     def testMirrorScattaring(self):
         manager = makeTheWorld()
 
         mirrorbox = ROOT.TGeoBBox("mirrorbox", 0.5*m, 0.5*m, 0.5*m)
         mirror = ROOT.AMirror("mirror", mirrorbox)
 
-        condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror )
+        condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror)
         sigma = 1
         condition.SetGaussianRoughness(sigma * deg)
 

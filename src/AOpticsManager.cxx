@@ -66,13 +66,38 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
   Double_t cos1 = d1[0] * n[0] + d1[1] * n[1] + d1[2] * n[2];  // cos(theta1)
   Double_t sin1 = TMath::Sqrt(1 - cos1 * cos1);
   Double_t sin2 = n1 * sin1 / n2;  // Snell's law
+  Double_t cos2 = TMath::Sqrt(1 - sin2 * sin2);
 
-  if (sin2 > 1.) {  // total internal reflection
-    DoReflection(n1, ray, nav, currentNode, nextNode);
-    return;
+  AOpticalComponent* component1 = (AOpticalComponent*)currentNode->GetVolume();
+  AOpticalComponent* component2 =
+    nextNode ? (AOpticalComponent*)nextNode->GetVolume() : 0;
+  ABorderSurfaceCondition* condition =
+    component1 ? component1->FindBorderSurfaceCondition(component2) : 0;
+
+  Bool_t absorbed = kFALSE;
+
+  if(condition and condition->GetMultilayer()){
+    Double_t reflectance, transmittance;
+    Double_t angle = TMath::ACos(cos1);
+    Double_t lambda = ray.GetLambda();
+    // polarization is ignored in this version
+    condition->GetMultilayer()->CoherentTMMMixed(angle, lambda, reflectance, transmittance);
+    auto rnd = gRandom->Uniform(1);
+    if (rnd < reflectance) {  // reflection at the boundary
+      DoReflection(n1, ray, nav, currentNode, nextNode, &n);
+      return;
+    } else if(rnd < reflectance + transmittance) {
+      goto transmission_process;
+    } else { // absorption
+      absorbed = kTRUE;
+      goto transmission_process;
+    }
   }
 
-  Double_t cos2 = TMath::Sqrt(1 - sin2 * sin2);
+  if (sin2 > 1.) {  // total internal reflection
+    DoReflection(n1, ray, nav, currentNode, nextNode, &n);
+    return;
+  }
 
   if (fDisableFresnelReflection == kFALSE) {
     Double_t Rs, Rp;  // reflectivity for s- and p-polarized photon
@@ -110,10 +135,12 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
     Double_t R = (Rs + Rp) / 2.;  // We assume that polarization is random
 
     if (gRandom->Uniform(1) < R) {  // reflection at the boundary
-      DoReflection(n1, ray, nav, currentNode, nextNode);
+      DoReflection(n1, ray, nav, currentNode, nextNode, &n);
       return;
     }
   }
+
+ transmission_process:
 
   Double_t x1[4], d2[3];
   ray.GetLastPoint(x1);
@@ -125,33 +152,51 @@ void AOpticsManager::DoFresnel(Double_t n1, Double_t n2, Double_t k2, ARay& ray,
       d2[i] = d1[i];
     }
   }
-  ray.SetDirection(d2);
-  nav->SetCurrentDirection(d2);
   // step (m), c (m/s)
   Double_t speed = TMath::C() * m() / n1;
   Double_t t = x1[3] + step / speed;
   ray.AddPoint(x2[0], x2[1], x2[2], t);
   ray.AddNode(nextNode);
+  if(absorbed){
+    ray.Absorb();
+  } else {
+    ray.SetDirection(d2);
+    nav->SetCurrentDirection(d2);
+  }
 }
 
 //_____________________________________________________________________________
 void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav,
-                                  TGeoNode* currentNode, TGeoNode* nextNode) {
+                                  TGeoNode* currentNode, TGeoNode* nextNode,
+                                  TVector3* normal) {
   Double_t step = nav->GetStep();
 
-  TVector3 n = GetFacetNormal(
-      nav, currentNode, nextNode);  // normal vect perpendicular to the surface
+  // normal vect perpendicular to the surface
+  // if it is not calculated yet, call GetFacetNormal
+  TVector3 n = normal ? *normal : GetFacetNormal(nav, currentNode, nextNode);
   Double_t d1[3];
   ray.GetDirection(d1);
   Double_t cos1 = d1[0] * n[0] + d1[1] * n[1] + d1[2] * n[2];
+
+  AOpticalComponent* component1 = (AOpticalComponent*)currentNode->GetVolume();
+  AOpticalComponent* component2 =
+      nextNode ? (AOpticalComponent*)nextNode->GetVolume() : 0;
+  ABorderSurfaceCondition* condition =
+      component1 ? component1->FindBorderSurfaceCondition(component2) : 0;
 
   Bool_t absorbed = kFALSE;
 
   if (IsMirror(nextNode)) {
     Double_t angle = TMath::ACos(cos1);
     Double_t lambda = ray.GetLambda();
-    Double_t ref =
-        ((AMirror*)nextNode->GetVolume())->GetReflectance(lambda, angle);
+    Double_t ref;
+    if (condition and condition->GetMultilayer()) {
+      Double_t transmittance;
+      // ignore polarization in the current version
+      condition->GetMultilayer()->CoherentTMMMixed(angle, lambda, ref, transmittance);
+    } else {
+      ref = ((AMirror*)nextNode->GetVolume())->GetReflectance(lambda, angle);
+    }
     if (ref < gRandom->Uniform(1)) {
       absorbed = kTRUE;
       ray.Absorb();
@@ -191,7 +236,7 @@ TVector3 AOpticsManager::GetFacetNormal(TGeoNavigator* nav,
   TVector3 momentum(nav->GetCurrentDirection());
 
   ABorderSurfaceCondition* condition =
-      component1 ? component1->FindSurfaceCondition(component2) : 0;
+      component1 ? component1->FindBorderSurfaceCondition(component2) : 0;
 
   if (condition and condition->GetGaussianRoughness() != 0) {
     // The following method is based on G4OpBoundaryProcess::GetFacetNormal in

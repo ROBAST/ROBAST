@@ -17,13 +17,12 @@
 
 ClassImp(AOpticalComponent);
 
-AOpticalComponent::AOpticalComponent() : TGeoVolume() { fSurfaceArray = 0; }
+AOpticalComponent::AOpticalComponent() : TGeoVolume(), fBorderSurfaceConditionArray(0) {}
 
 //_____________________________________________________________________________
 AOpticalComponent::AOpticalComponent(const char* name, const TGeoShape* shape,
                                      const TGeoMedium* med)
-    : TGeoVolume(name, shape, med) {
-  fSurfaceArray = 0;
+  : TGeoVolume(name, shape, med), fBorderSurfaceConditionArray(0) {
 #if ROOT_VERSION(5, 34, 16) <= ROOT_VERSION_CODE
   if (GetMedium() == TGeoVolume::DummyMedium()) {
     SetMedium(GetOpaqueVacuumMedium());
@@ -32,30 +31,31 @@ AOpticalComponent::AOpticalComponent(const char* name, const TGeoShape* shape,
 }
 
 //_____________________________________________________________________________
-AOpticalComponent::~AOpticalComponent() { SafeDelete(fSurfaceArray); }
-
-//______________________________________________________________________________
-void AOpticalComponent::AddSurfaceCondition(
-    ABorderSurfaceCondition* condition) {
-  if (!fSurfaceArray) {
-    fSurfaceArray = new TObjArray;
-    fSurfaceArray->SetOwner(kTRUE);
-  }
-
-  fSurfaceArray->Add(condition);
+AOpticalComponent::~AOpticalComponent() {
+  SafeDelete(fBorderSurfaceConditionArray);
 }
 
 //______________________________________________________________________________
-ABorderSurfaceCondition* AOpticalComponent::FindSurfaceCondition(
+void AOpticalComponent::AddBorderSurfaceCondition(
+    ABorderSurfaceCondition* condition) {
+  if (!fBorderSurfaceConditionArray) {
+    fBorderSurfaceConditionArray = new TObjArray;
+    fBorderSurfaceConditionArray->SetOwner(kTRUE);
+  }
+
+  fBorderSurfaceConditionArray->Add(condition);
+}
+
+//______________________________________________________________________________
+ABorderSurfaceCondition* AOpticalComponent::FindBorderSurfaceCondition(
     AOpticalComponent* component2) {
-  if (!fSurfaceArray) {
+  if (!fBorderSurfaceConditionArray) {
     return 0;
   }
 
-  for (Int_t i = 0; i < fSurfaceArray->GetEntries(); i++) {
-    if (((ABorderSurfaceCondition*)(*fSurfaceArray)[i])->GetComponent2() ==
-        component2) {
-      return (ABorderSurfaceCondition*)(*fSurfaceArray)[i];
+  for (Int_t i = 0; i < fBorderSurfaceConditionArray->GetEntries(); i++) {
+    if (((ABorderSurfaceCondition*)(*fBorderSurfaceConditionArray)[i])->GetComponent2() == component2) {
+      return (ABorderSurfaceCondition*)(*fBorderSurfaceConditionArray)[i];
     }
   }
 
