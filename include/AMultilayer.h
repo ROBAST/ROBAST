@@ -10,6 +10,8 @@
 #include <memory>
 #include <thread>
 
+#include <TH2.h>
+
 #include "ARefractiveIndex.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,6 +28,8 @@ class AMultilayer : public TObject {
   std::vector<std::shared_ptr<ARefractiveIndex>> fRefractiveIndexList;
   std::vector<Double_t> fThicknessList;
   std::size_t fNthreads;
+  std::shared_ptr<TH2D> fPreCalculatedReflectanceMixed;
+  std::shared_ptr<TH2D> fPreCalculatedTransmittanceMixed;
 
   Bool_t IsForwardAngle(std::complex<Double_t> n,
                         std::complex<Double_t> theta) const;
@@ -82,6 +86,11 @@ class AMultilayer : public TObject {
                    Double_t& transmittance) const;
   void CoherentTMMMixed(std::complex<Double_t> th_0, Double_t lam_vac,
                         Double_t& reflectance, Double_t& transmittance) const {
+    if(fPreCalculatedReflectanceMixed and fPreCalculatedTransmittanceMixed) {
+      reflectance = fPreCalculatedReflectanceMixed->Interpolate(lam_vac, th_0.real());
+      transmittance = fPreCalculatedTransmittanceMixed->Interpolate(lam_vac, th_0.real());
+      return;
+    }
     Double_t r = 0;
     Double_t t = 0;
     CoherentTMMP(th_0, lam_vac, reflectance, transmittance);
@@ -100,6 +109,14 @@ class AMultilayer : public TObject {
     auto n = th_0.size();
     reflectance.resize(n);
     transmittance.resize(n);
+    if(fPreCalculatedReflectanceMixed and fPreCalculatedTransmittanceMixed) {
+      for(std::size_t i = 0; i < n; ++i){
+        auto th = th_0[i].real();
+        reflectance[i] =  fPreCalculatedReflectanceMixed->Interpolate(lam_vac, th);
+        transmittance[i] = fPreCalculatedTransmittanceMixed->Interpolate(lam_vac, th);
+      }
+      return;
+    }
 
     std::vector<std::thread> threads(fNthreads);
 
@@ -168,6 +185,27 @@ class AMultilayer : public TObject {
   void CoherentTMMS(std::complex<Double_t> th_0, Double_t lam_vac,
                     Double_t& reflectance, Double_t& transmittance) const {
     CoherentTMM(kS, th_0, lam_vac, reflectance, transmittance);
+  }
+  void PreCalculateTMM(Int_t lam_nbins, Double_t lam_min, Double_t lam_max,
+                            Int_t th_nbins, Double_t th_min, Double_t th_max) {
+    fPreCalculatedReflectanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
+    fPreCalculatedTransmittanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
+    for (Int_t j = 1; j <= th_nbins; ++j) {
+      Double_t th = fPreCalculatedReflectanceMixed->GetYaxis()->GetBinCenter(j);
+      for (Int_t i = 1; i <= lam_nbins; ++i) {
+        Double_t lam = fPreCalculatedReflectanceMixed->GetXaxis()->GetBinCenter(i);
+        Double_t reflectance, transmittance;
+        CoherentTMMMixed(th, lam, reflectance, transmittance);
+        fPreCalculatedReflectanceMixed->SetBinContent(i, j, reflectance);
+        fPreCalculatedTransmittanceMixed->SetBinContent(i, j, transmittance);
+      }
+    }
+  }
+  const std::shared_ptr<const TH2D> GetPrecalculatedReflectanceMixed() const {
+    return fPreCalculatedReflectanceMixed;
+  }
+  const std::shared_ptr<const TH2D> GetPrecalculatedTransmittanceMixed() const {
+    return fPreCalculatedTransmittanceMixed;
   }
   void PrintLayers(Double_t lambda) const;
   void SetNthreads(std::size_t n);
