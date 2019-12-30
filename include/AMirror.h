@@ -24,7 +24,7 @@
 class AMirror : public AOpticalComponent {
  private:
   Double_t fReflectance;
-  std::shared_ptr<TGraph>
+  std::shared_ptr<const TGraph>
       fReflectance1D;  // Reflectance data (ref v.s. wavelength)
   std::shared_ptr<TGraph2D>
       fReflectance2D;  // Reflectance data (ref v.s. angle v.s. wavelength)
@@ -37,16 +37,10 @@ class AMirror : public AOpticalComponent {
   virtual ~AMirror();
 
   Double_t GetReflectance(Double_t lambda, Double_t angle /* (rad) */);
-  Double_t GetReflectivity(Double_t lambda, Double_t angle /* (rad) */) {
-    return GetReflectance(lambda, angle);
-  }
   void SetReflectance(Double_t ref) { fReflectance = ref; }
-  void SetReflectance(std::shared_ptr<TGraph> ref) { fReflectance1D = ref; }
-  void SetReflectivity(std::shared_ptr<TGraph> ref) { SetReflectance(ref); }
-  void SetReflectance(std::shared_ptr<TGraph2D> ref) { fReflectance2D = ref; }
-  void SetReflectivity(std::shared_ptr<TGraph2D> ref) { SetReflectance(ref); }
+  void SetReflectance(std::shared_ptr<const TGraph> ref) { fReflectance1D = ref; }
   void SetReflectance(std::shared_ptr<TH2> ref) { fReflectanceTH2 = ref; }
-  void SetReflectivity(std::shared_ptr<TH2> ref) { SetReflectance(ref); }
+  void SetReflectance(std::shared_ptr<TGraph2D> ref) { fReflectance2D = ref; }
 
   ClassDef(AMirror, 1)
 };

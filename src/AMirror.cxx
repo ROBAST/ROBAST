@@ -37,16 +37,18 @@ AMirror::~AMirror() {}
 
 //_____________________________________________________________________________
 Double_t AMirror::GetReflectance(Double_t lambda, Double_t angle) {
-  // Return mirror reflectivity for a photon whose wavelength is lambda, and
+  // Return mirror reflectance for a photon whose wavelength is lambda, and
   // whose incident angle is "angle" (rad)
+  // This method should be const but TGraph2D::Interpolate and TH2::Interpolate
+  // are non-const methods.
   Double_t ret;
 
   if (fReflectance2D) {
-    ret = fReflectance2D->Interpolate(lambda, angle);
+    ret = fReflectance2D->Interpolate(lambda, angle); // non-const as of 6.18
   } else if (fReflectanceTH2) {
-    ret = fReflectanceTH2->Interpolate(lambda, angle);
+    ret = fReflectanceTH2->Interpolate(lambda, angle); // const since ROOT 6.19
   } else if (fReflectance1D) {
-    ret = fReflectance1D->Eval(lambda);
+    ret = fReflectance1D->Eval(lambda); // const
   } else {
     ret = fReflectance;
   }
