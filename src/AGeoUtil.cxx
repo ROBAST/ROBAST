@@ -5,6 +5,7 @@
 // Utility functions to build complex geometries easily                       //
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include "TGeoTube.h"
 #include "TMath.h"
 
@@ -43,6 +44,87 @@ NamespaceImp(AGeoUtil)
 namespace AGeoUtil {
 
 //______________________________________________________________________________
+void MakeArb8FromPoints(const char* name, const TVector3& v1,
+                        const TVector3& v2, const TVector3& v3,
+                        const TVector3& v4, const TVector3& v5,
+                        TGeoArb8** arb8, TGeoCombiTrans** combi) {
+  // Create an Arb8 object from 5 different points. v1-v4 are for the top
+  // surface and they must be clock-wise when seen from the top. v5 for the
+  // bottom and v6-8 will be automatically calculated. It is assumed that
+  // v1-v4 and v5-v8 are paralell and that they have the same coordinates when
+  // seen from the top. Very small coordinates residual due to computation or
+  // the input CAD file is ignored.
+
+  TVector3 normal = v1 - v5;
+  Double_t dZ = normal.Mag() / 2.;
+  Double_t theta = normal.Theta();
+  Double_t phi = normal.Phi();
+
+  TVector3 v[4] = {TVector3(0, 0, 0), v2 - v1, v3 - v1, v4 - v1};
+  Double_t vertices[16];
+
+  for(Int_t i = 1; i <= 3; ++i) {
+    v[i].RotateZ(-phi - TMath::Pi() / 2.); // in radian
+    v[i].RotateX(-theta); // in radian
+    vertices[2 * i    ] = v[i].X();
+    vertices[2 * i + 1] = v[i].Y();
+    vertices[2 * i + 8] = v[i].X();
+    vertices[2 * i + 9] = v[i].Y();
+  }
+
+  *arb8 = new TGeoArb8(name, dZ, vertices);
+  TGeoTranslation tr(v5.X() + normal.X() / 2., v5.Y() + normal.Y() / 2.,
+                     v5.Z() + normal.Z() / 2.);
+  TGeoRotation rot = TGeoRotation("", 0, 0, phi * TMath::RadToDeg() + 90)
+    * TGeoRotation("", 0, theta * TMath::RadToDeg(), 0); // deg
+  *combi = new TGeoCombiTrans(tr, rot);
+  (*combi)->SetName(Form("%scombi", name));
+  (*combi)->RegisterYourself();
+}
+
+//______________________________________________________________________________
+void MakeXtruFromPoints(const char* name, const std::vector<TVector3>& vecs,
+                        TGeoXtru** xtru, TGeoCombiTrans** combi) {
+  // Create an Xtru object from nvert + 1 different points. v_1 to v_nvert are
+  // for the top surface and they must be clock-wise when seen from the top.
+  // n_(nvert + 1) for the bottom and it must corrspond to v1. It is assumed
+  // that the plane made of v1 to v_nvert is perpendiculr to v1 - v_(nvert + 1).
+  // Very small coordinates residual due to computation or the input CAD file
+  // is ignored.
+  std::size_t nvert = vecs.size() - 1;
+  TVector3 normal = vecs[0] - vecs[nvert];
+  Double_t dZ = normal.Mag() / 2.;
+  Double_t theta = normal.Theta();
+  Double_t phi = normal.Phi();
+
+  std::vector<TVector3> v;
+  for(std::size_t i = 0; i < nvert; ++i) {
+    v.push_back(vecs[i] - vecs[0]);
+  }
+  Double_t x[nvert], y[nvert];
+
+  for(std::size_t i = 0; i < nvert; ++i) {
+    v[i].RotateZ(-phi - TMath::Pi() / 2.); // in radian
+    v[i].RotateX(-theta); // in radian
+    x[i] = v[i].X();
+    y[i] = v[i].Y();
+  }
+
+  *xtru = new TGeoXtru(2); // nz = 2
+  (*xtru)->SetName(name);
+  (*xtru)->DefinePolygon(nvert, x, y);
+  (*xtru)->DefineSection(0, -dZ);
+  (*xtru)->DefineSection(1, +dZ);
+  TVector3 shift = vecs[0] - normal * .5;
+  TGeoTranslation tr(shift.X(), shift.Y(), shift.Z());
+  TGeoRotation rot = TGeoRotation("", 0, 0, phi * TMath::RadToDeg() + 90)
+    * TGeoRotation("", 0, theta * TMath::RadToDeg(), 0); // deg
+  *combi = new TGeoCombiTrans(tr, rot);
+  (*combi)->SetName(Form("%scombi", name));
+  (*combi)->RegisterYourself();
+}
+
+//______________________________________________________________________________
 void MakePointToPointBBox(const char* name, const TVector3& v1,
                           const TVector3& v2, Double_t dx, Double_t dy,
                           TGeoBBox** box, TGeoCombiTrans** combi) {
@@ -64,6 +146,13 @@ void MakePointToPointBBox(const char* name, const TVector3& v1,
 void MakePointToPointTube(const char* name, const TVector3& v1,
                           const TVector3& v2, Double_t radius, TGeoTube** tube,
                           TGeoCombiTrans** combi) {
+  MakePointToPointTube(name, v1, v2, 0, radius, tube, combi);
+}
+
+//______________________________________________________________________________
+void MakePointToPointTube(const char* name, const TVector3& v1,
+                          const TVector3& v2, Double_t rmin, Double_t rmax,
+                          TGeoTube** tube, TGeoCombiTrans** combi) {
   // Create a TGeoTube whose both ends are rotated to locate at v1 or v2 by
   // using combi
   /*
@@ -98,7 +187,7 @@ void MakePointToPointTube(const char* name, const TVector3& v1,
   Double_t theta = v4.Theta() * TMath::RadToDeg();
   Double_t phi = v4.Phi() * TMath::RadToDeg();
 
-  *tube = new TGeoTube(Form("%stube", name), 0., radius, v4.Mag());
+  *tube = new TGeoTube(Form("%stube", name), rmin, rmax, v4.Mag());
   *combi = new TGeoCombiTrans(TGeoTranslation(v3.X(), v3.Y(), v3.Z()),
                               TGeoRotation("", phi + 90, theta, 0));
   (*combi)->SetName(Form("%scombi", name));
