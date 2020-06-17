@@ -4,21 +4,7 @@ import unittest
 import ROOT
 import array
 import time
-
-# The following lines are only needed in PyROOT
-ROOT.PyConfig.StartGuiThread = 'inputhook' # for the OpenGL viewer thread
-ROOT.gSystem.Load("libGeom")
-ROOT.gSystem.Load("libROBAST")
-ROOT.gInterpreter.ProcessLine('#include "RVersion.h"') # load ROOT_VERSION
-
-# Hack to avoid a seg fault in ROOT6. To be removed at some point.
-# See https://groups.cern.ch/group/roottalk/Lists/Archive/Flat.aspx?RootFolder=%2Fgroup%2Froottalk%2FLists%2FArchive%2FPyROOT%20Seg%20fault%20with%20a%20custom%20class%20%28only%20in%20ROOT6%29&FolderCTID=0x01200200A201AF59FD011C4E9284C43BF0CDA2A4
-for i in range(ROOT.gClassTable.Classes()):
-    cname = ROOT.gClassTable.At(i)
-    if cname[:4] == 'TGeo' or (cname[:4] == 'AGeo' and cname != 'AGeoUtil') or \
-       cname in ('AOpticsManager', 'ALens', 'AMirror', 'AFocalSurface', 'AObscuration'):
-        getattr(getattr(ROOT, cname), '__init__')._creates = False
-# PyROOT hack ends
+import ctypes
 
 cm = ROOT.AOpticsManager.cm()
 mm = ROOT.AOpticsManager.mm()
@@ -40,6 +26,7 @@ ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> Al = std::make_shared<
 ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> TiO2 = std::make_shared<AFilmetrixDotCom>("TiO2.txt");');
 
 def makeTheWorld():
+    global world, worldbox # avoid automatic deletion and C++ seg fault
     manager = ROOT.AOpticsManager("manager", "manager")
     worldbox = ROOT.TGeoBBox("worldbox", 1*m, 1*m, 1*m)
     world = ROOT.AOpticalComponent("world", worldbox)
@@ -152,7 +139,7 @@ class TestROBAST(unittest.TestCase):
 
         angle = ROOT.std.complex(ROOT.double)(45 * deg)
         for wl in (200 * nm, 800 * nm):
-            ref, trans = ROOT.double(), ROOT.double()
+            ref, trans = ctypes.c_double(), ctypes.c_double()
             layer.CoherentTMMMixed(angle, wl, ref, trans)
 
             lens.SetRefractiveIndex(ROOT.TiO2)
@@ -167,9 +154,8 @@ class TestROBAST(unittest.TestCase):
             manager.TraceNonSequential(rays)
 
             n = rays.GetExited().GetLast() + 1
-            print(ref, n, N)
-            self.assertGreater(ref, (n - n**0.5*3)/N)
-            self.assertLess(ref, (n + n**0.5*3)/N)
+            self.assertGreater(ref.value, (n - n**0.5*3)/N)
+            self.assertLess(ref.value, (n + n**0.5*3)/N)
 
     def testMirrorReflection(self):
         manager = makeTheWorld()
@@ -258,15 +244,14 @@ class TestROBAST(unittest.TestCase):
             n_absorbed = rays.GetAbsorbed().GetEntries()
             self.assertEqual(n_exited + n_absorbed, N)
 
-            reflectance = ROOT.double()
-            transmittance = ROOT.double()
+            reflectance = ctypes.c_double()
+            transmittance = ctypes.c_double()
             ROOT.mirror_layer.CoherentTMMMixed(ROOT.std.complex(ROOT.double)(45 * deg), wl * nm, reflectance, transmittance)
 
-            expected = N * reflectance
+            expected = N * reflectance.value
             e = expected**0.5
             self.assertGreater(n_exited,  expected - 3*e)
             self.assertLess(n_exited, expected + 3*e)
-            print(wl, n_exited, n_absorbed)
 
     def testLensBoundaryMultilayer(self):
         manager = makeTheWorld()
@@ -297,15 +282,14 @@ class TestROBAST(unittest.TestCase):
             n_absorbed = rays.GetAbsorbed().GetEntries()
             self.assertEqual(n_exited + n_absorbed, N)
 
-            reflectance = ROOT.double()
-            transmittance = ROOT.double()
+            reflectance = ctypes.c_double()
+            transmittance = ctypes.c_double()
             ROOT.lens_layer.CoherentTMMMixed(ROOT.std.complex(ROOT.double)(45 * deg), wl * nm, reflectance, transmittance)
 
-            expected = N * reflectance
+            expected = N * reflectance.value
             e = expected**0.5
             self.assertGreater(n_exited,  expected - 3*e)
             self.assertLess(n_exited, expected + 3*e)
-            print(wl, n_exited, n_absorbed)
 
     def testMirrorScattaring(self):
         manager = makeTheWorld()
@@ -396,7 +380,7 @@ class TestROBAST(unittest.TestCase):
 
     def testSnellsLaw(self):
         manager = makeTheWorld()
-        manager.SetLimit(1000)
+        manager.DisableFresnelReflection(True)
 
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
         lens = ROOT.ALens("lens", lensbox)
@@ -418,10 +402,10 @@ class TestROBAST(unittest.TestCase):
         cost = ROOT.TMath.Cos(theta)
         ray = ROOT.ARay(0, 400*nm, 0*m, 0*m, 2*mm, 0, sint, 0, -cost)
         arr = ROOT.ARayArray()
-        arr.Add(ray)
+        #arr.Add(ray)
 
-        # calling TraceNonSequential(ARay*) causes a seg fault...
-        manager.TraceNonSequential(arr)
+        ## calling TraceNonSequential(ARay*) causes a seg fault...
+        manager.TraceNonSequential(ray)
 
         p = array.array("d", [0, 0, 0, 0])
         ray.GetDirection(p)
@@ -474,11 +458,13 @@ class TestROBAST(unittest.TestCase):
             if i == 0:
                 self.assertEqual(nfocused, N)
             elif i == 1:
-                sigma = (N*(1 - 0.5)*0.5)**0.5
-                self.assertLess(abs(nfocused - N/2.), 3*sigma)
+                p = 0.5
+                sigma = (N * (1 - p) * p)**0.5
+                self.assertLess(abs(nfocused - N * p), 3*sigma)
             else:
-                sigma = (N*(1 - 0.25)*0.25)**0.5
-                self.assertLess(abs(nfocused - N/4.), 3*sigma)
+                p = 0.25
+                sigma = (N * (1 - p) * p)**0.5
+                self.assertLess(abs(nfocused - N * p), 3*sigma)
 
     def testGlassCatalog(self):
         schott = ROOT.AGlassCatalog('../misc/schottzemax-20180601.agf')
@@ -554,17 +540,19 @@ class TestROBAST(unittest.TestCase):
         N = 10000000
         circ = ROOT.gRandom.Circle
         uni = ROOT.gRandom.Uniform
-        x, y, r = ROOT.Double(), ROOT.Double(), ROOT.Double()
+        x, y, r = ctypes.c_double(), ctypes.c_double(), ctypes.c_double()
 
         for i in range(N):
             circ(x, y, r0)
             scale = uni(0, 1)
-            h2.Fill(x*scale + x0, y*scale + y0)
+            h2.Fill(x.value * scale + x0, y.value * scale + y0)
 
         ROOT.AGeoUtil.ContainmentRadius(h2, 0.8, r, x, y)
-        self.assertAlmostEqual(x/x0, 1, 2) # 1% difference is acceptale
-        self.assertAlmostEqual(y/y0, 1, 2)
-        self.assertAlmostEqual(r/r0, 0.8, 2)
+        # 1.5% difference is acceptale
+        tor = 0.015
+        self.assertLessEqual(abs(x.value / x0 - 1.), tor)
+        self.assertLessEqual(abs(y.value / y0 - 1.), tor)
+        self.assertLessEqual(abs(r.value / r0 - 0.8)/0.8, tor)
 
     def testMixedRefractiveIndex(self):
         ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medA(new ARefractiveIndex(1., 1.));')
@@ -597,19 +585,19 @@ class TestROBAST(unittest.TestCase):
         rs, rp = 0.37273208839139516, 0.37016110373044969
         ts, tp = 0.22604491247079261, 0.22824374314132009
 
-        reflectance = ROOT.double()
-        transmittance = ROOT.double()
+        reflectance = ctypes.c_double()
+        transmittance = ctypes.c_double()
         multi.CoherentTMM(ROOT.AMultilayer.kS, th_0, lam_vac, reflectance, transmittance)
-        self.assertAlmostEqual(reflectance, rs)
-        self.assertAlmostEqual(transmittance, ts)
+        self.assertAlmostEqual(reflectance.value, rs)
+        self.assertAlmostEqual(transmittance.value, ts)
 
         multi.CoherentTMM(ROOT.AMultilayer.kP, th_0, lam_vac, reflectance, transmittance)
-        self.assertAlmostEqual(reflectance, rp)
-        self.assertAlmostEqual(transmittance, tp)
+        self.assertAlmostEqual(reflectance.value, rp)
+        self.assertAlmostEqual(transmittance.value, tp)
 
         multi.CoherentTMMMixed(th_0, lam_vac, reflectance, transmittance)
-        self.assertAlmostEqual(reflectance, (rs + rp) / 2.)
-        self.assertAlmostEqual(transmittance, (ts + tp) / 2.)
+        self.assertAlmostEqual(reflectance.value, (rs + rp) / 2.)
+        self.assertAlmostEqual(transmittance.value, (ts + tp) / 2.)
 
         wavelength_v = ROOT.vector('Double_t')()
         answer = []
@@ -617,7 +605,7 @@ class TestROBAST(unittest.TestCase):
         for i in range(300, 800):
             wavelength_v.push_back(i)
             multi.CoherentTMMMixed(th_0, wavelength_v.back(), reflectance, transmittance)
-            answer.append((float(reflectance), float(transmittance))) # need cast to copy the value
+            answer.append((reflectance.value, transmittance.value))
 
         reflectance_v = ROOT.vector('Double_t')()
         transmittance_v = ROOT.vector('Double_t')()
@@ -633,7 +621,7 @@ class TestROBAST(unittest.TestCase):
         for i in range(500):
             angle_v.push_back(ROOT.std.complex(ROOT.double)(i * ROOT.TMath.Pi() / 2000.))
             multi.CoherentTMMMixed(angle_v.back(), lam_vac, reflectance, transmittance)
-            answer.append((float(reflectance), float(transmittance)))
+            answer.append((reflectance.value, transmittance.value))
             
         multi.CoherentTMMMixed(angle_v, lam_vac, reflectance_v, transmittance_v)
 
