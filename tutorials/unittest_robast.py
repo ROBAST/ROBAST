@@ -25,14 +25,35 @@ ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> SiO2 = std::make_share
 ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> Al = std::make_shared<AFilmetrixDotCom>("Al.txt");');
 ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> TiO2 = std::make_shared<AFilmetrixDotCom>("TiO2.txt");');
 
+geo_obj = None
+
+def registerGeo(objs):
+    '''
+    Avoid conflict between ROOT ownership and Python garbage collection
+    https://root-forum.cern.ch/t/deletion-timing-of-geo-objects-in-new-pyroot/40607
+    '''
+    global geo_obj
+    if not geo_obj:
+        geo_obj = []
+
+    for obj in objs:
+        ROOT.SetOwnership(obj, False)
+        geo_obj.append(obj)
+        
+def cleanupGeo():
+    global geo_obj
+    geo_obj = None
+
 def makeTheWorld():
-    global world, worldbox # avoid automatic deletion and C++ seg fault
     manager = ROOT.AOpticsManager("manager", "manager")
     worldbox = ROOT.TGeoBBox("worldbox", 1*m, 1*m, 1*m)
     world = ROOT.AOpticalComponent("world", worldbox)
+    registerGeo((world, worldbox))
+
     manager.SetTopVolume(world)
     
     return manager
+
 
 class TestROBAST(unittest.TestCase):
     """
@@ -49,18 +70,19 @@ class TestROBAST(unittest.TestCase):
 
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 0.5*m)
         lens = ROOT.ALens("lens", lensbox)
+        registerGeo((lensbox, lens))
 
         manager.GetTopVolume().AddNode(lens, 1)
         manager.CloseGeometry()
+
         if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
            ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
         manager.SetMaxThreads(4)
-
+        
         # test absorption length evaluated from a TGraph
         wl = 400 * nm
         absl = 1 * mm
-
         ROOT.gROOT.ProcessLine('refidx = std::make_shared<ARefractiveIndex>();')
         ROOT.gROOT.ProcessLine('graph = std::make_shared<TGraph>();')
         ROOT.graph.SetPoint(0, wl, 1)
@@ -96,12 +118,15 @@ class TestROBAST(unittest.TestCase):
         self.assertGreater(1, p - 3*e)
         self.assertLess(1, p + 3*e)
 
+        cleanupGeo()
+
     def testFresnelReflection(self):
         manager = makeTheWorld()
         manager.DisableFresnelReflection(False) # enable
 
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 0.5*m)
         lens = ROOT.ALens("lens", lensbox)
+        registerGeo((lensbox, lens))
 
         wl = 400 * nm
         absl = 1 * um
@@ -157,13 +182,18 @@ class TestROBAST(unittest.TestCase):
             self.assertGreater(ref.value, (n - n**0.5*3)/N)
             self.assertLess(ref.value, (n + n**0.5*3)/N)
 
+        cleanupGeo()
+
     def testMirrorReflection(self):
         manager = makeTheWorld()
 
         mirrorbox = ROOT.TGeoBBox("mirrorbox", 0.5*m, 0.5*m, 0.5*m)
         mirror = ROOT.AMirror("mirror", mirrorbox)
+        registerGeo((mirrorbox, mirror))
+
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
+
         if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
            ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
@@ -216,6 +246,8 @@ class TestROBAST(unittest.TestCase):
         self.assertGreater(ref, (n - n**0.5*3)/N)
         self.assertLess(ref, (n + n**0.5*3)/N)
 
+        cleanupGeo()
+
     def testMirrorBoundaryMultilayer(self):
         manager = makeTheWorld()
 
@@ -223,8 +255,10 @@ class TestROBAST(unittest.TestCase):
         mirror = ROOT.AMirror("mirror", mirrorbox)
 
         condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror)
+        registerGeo((mirrorbox, mirror, condition))
+
         ROOT.gROOT.ProcessLine('auto mirror_layer = std::make_shared<AMultilayer>(air, Al)');
-        ROOT.mirror_layer.InsertLayer(ROOT.SiO2, 25.4 * nm)
+        ROOT.mirror_layer.InsertLayer(ROOT.SiO2, 25.4*nm)
 
         condition.SetMultilayer(ROOT.mirror_layer)
 
@@ -253,6 +287,8 @@ class TestROBAST(unittest.TestCase):
             self.assertGreater(n_exited,  expected - 3*e)
             self.assertLess(n_exited, expected + 3*e)
 
+        cleanupGeo()
+
     def testLensBoundaryMultilayer(self):
         manager = makeTheWorld()
 
@@ -260,6 +296,8 @@ class TestROBAST(unittest.TestCase):
         lens = ROOT.AMirror("lens", lensbox)
 
         condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), lens)
+        registerGeo((lensbox, lens, condition))
+
         ROOT.gROOT.ProcessLine('auto lens_layer = std::make_shared<AMultilayer>(air, Si)');
         ROOT.lens_layer.InsertLayer(ROOT.SiO2, 2000 * nm)
         ROOT.lens_layer.InsertLayer(ROOT.Si3N4, 33 * nm)
@@ -291,6 +329,8 @@ class TestROBAST(unittest.TestCase):
             self.assertGreater(n_exited,  expected - 3*e)
             self.assertLess(n_exited, expected + 3*e)
 
+        cleanupGeo()
+
     def testMirrorScattaring(self):
         manager = makeTheWorld()
 
@@ -298,11 +338,14 @@ class TestROBAST(unittest.TestCase):
         mirror = ROOT.AMirror("mirror", mirrorbox)
 
         condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror)
+        registerGeo((mirrorbox, mirror, condition))
+
         sigma = 1
         condition.SetGaussianRoughness(sigma * deg)
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
+
         if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
            ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
@@ -343,15 +386,19 @@ class TestROBAST(unittest.TestCase):
         self.assertGreater(2*sigma, p - 3*e) # reflected angle is 2 times larger
         self.assertLess(2*sigma, p + 3*e)
 
+        cleanupGeo()
+
     def testLimitForSuspended(self):
         manager = makeTheWorld()
         manager.SetLimit(1000)
 
         mirrorsphere = ROOT.TGeoSphere("mirrorsphere", 0.1*m, 0.2*m)
         mirror = ROOT.AMirror("mirror", mirrorsphere)
+        registerGeo((mirrorsphere, mirror))
 
         manager.GetTopVolume().AddNode(mirror, 1)
         manager.CloseGeometry()
+
         if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
            ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
@@ -364,8 +411,9 @@ class TestROBAST(unittest.TestCase):
         n = ray.GetNpoints()
         self.assertEqual(n, 1000)
 
+        cleanupGeo()
+
     def testRefractiveIndex(self):
-        manager = makeTheWorld()
         lensbox = ROOT.TGeoBBox("lensbox", 0.5*m, 0.5*m, 1*mm)
         lens = ROOT.ALens("lens", lensbox)
 
@@ -393,6 +441,8 @@ class TestROBAST(unittest.TestCase):
 
         focalbox = ROOT.TGeoBBox("focalbox", 0.5*m, 0.5*m, 0.1*mm)
         focal = ROOT.AFocalSurface("focal", focalbox)
+        registerGeo((lensbox, lens, focalbox, focal))
+
         lens.AddNode(focal, 1)
 
         manager.CloseGeometry()
@@ -416,11 +466,14 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(px, sint/idx)
         self.assertAlmostEqual(py, 0)
 
+        cleanupGeo()
+
     def testQE(self):
         manager = makeTheWorld()
 
         focalbox = ROOT.TGeoBBox("focalbox", 0.5*m, 0.5*m, 1*mm)
         focal = ROOT.AFocalSurface("focal", focalbox)
+        registerGeo((focalbox, focal))
 
         qe_lambda = ROOT.TGraph()
         qe_lambda.SetPoint(0, 300*nm, 0.0)
@@ -432,6 +485,7 @@ class TestROBAST(unittest.TestCase):
 
         manager.GetTopVolume().AddNode(focal, 1)
         manager.CloseGeometry()
+
         if ROOT.gInterpreter.ProcessLine('ROOT_VERSION_CODE;') < \
            ROOT.gInterpreter.ProcessLine('ROOT_VERSION(6, 2, 0);'):
             manager.SetMultiThread(True)
@@ -465,6 +519,8 @@ class TestROBAST(unittest.TestCase):
                 p = 0.25
                 sigma = (N * (1 - p) * p)**0.5
                 self.assertLess(abs(nfocused - N * p), 3*sigma)
+
+        cleanupGeo()
 
     def testGlassCatalog(self):
         schott = ROOT.AGlassCatalog('../misc/schottzemax-20180601.agf')
@@ -531,7 +587,7 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(nbk7.GetRefractiveIndex( 589.3*nm), f.Eval( 589.3*nm), 6) # nD
         self.assertAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
         self.assertAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
-
+    '''
     def testD80(self):
         x0 = 1
         y0 = -1
@@ -553,7 +609,7 @@ class TestROBAST(unittest.TestCase):
         self.assertLessEqual(abs(x.value / x0 - 1.), tor)
         self.assertLessEqual(abs(y.value / y0 - 1.), tor)
         self.assertLessEqual(abs(r.value / r0 - 0.8)/0.8, tor)
-
+    '''
     def testMixedRefractiveIndex(self):
         ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medA(new ARefractiveIndex(1., 1.));')
         ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medB(new ARefractiveIndex(2., 2.));')
