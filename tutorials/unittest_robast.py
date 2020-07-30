@@ -685,6 +685,19 @@ class TestROBAST(unittest.TestCase):
             self.assertAlmostEqual(answer[i][0], reflectance_v[i])
             self.assertAlmostEqual(answer[i][1], transmittance_v[i])
 
+        reflectance0 = ctypes.c_double()
+        transmittance0 = ctypes.c_double()
+        multi.CoherentTMMMixed(45 * deg, 600, reflectance0, transmittance0)
+
+        multi.PreCalculateTMM(801, 199.5, 1000.5, 90, -0.5 * deg, 89.5 * deg)
+
+        reflectance1 = ctypes.c_double()
+        transmittance1 = ctypes.c_double()
+        multi.CoherentTMMMixed(45 * deg, 600, reflectance1, transmittance1)
+
+        self.assertAlmostEqual(reflectance0.value, reflectance1.value)
+        self.assertAlmostEqual(transmittance0.value, transmittance1.value)
+
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
     suite = unittest.TestLoader().loadTestsFromTestCase(TestROBAST)

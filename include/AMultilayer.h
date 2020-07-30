@@ -187,19 +187,24 @@ class AMultilayer : public TObject {
     CoherentTMM(kS, th_0, lam_vac, reflectance, transmittance);
   }
   void PreCalculateTMM(Int_t lam_nbins, Double_t lam_min, Double_t lam_max,
-                            Int_t th_nbins, Double_t th_min, Double_t th_max) {
-    fPreCalculatedReflectanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
-    fPreCalculatedTransmittanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
+                       Int_t th_nbins, Double_t th_min, Double_t th_max) {
+    // make temporary objects because CoherentTMMMixed checks if fPreCalculstedXXX are
+    // null or not
+    auto preReflectanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
+    auto preTransmittanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
     for (Int_t j = 1; j <= th_nbins; ++j) {
-      Double_t th = fPreCalculatedReflectanceMixed->GetYaxis()->GetBinCenter(j);
+      Double_t th = preReflectanceMixed->GetYaxis()->GetBinCenter(j);
       for (Int_t i = 1; i <= lam_nbins; ++i) {
-        Double_t lam = fPreCalculatedReflectanceMixed->GetXaxis()->GetBinCenter(i);
+        Double_t lam = preReflectanceMixed->GetXaxis()->GetBinCenter(i);
         Double_t reflectance, transmittance;
         CoherentTMMMixed(th, lam, reflectance, transmittance);
-        fPreCalculatedReflectanceMixed->SetBinContent(i, j, reflectance);
-        fPreCalculatedTransmittanceMixed->SetBinContent(i, j, transmittance);
+        preReflectanceMixed->SetBinContent(i, j, reflectance);
+        preTransmittanceMixed->SetBinContent(i, j, transmittance);
       }
     }
+
+    fPreCalculatedReflectanceMixed = preReflectanceMixed;
+    fPreCalculatedTransmittanceMixed = preTransmittanceMixed;
   }
   const std::shared_ptr<const TH2D> GetPrecalculatedReflectanceMixed() const {
     return fPreCalculatedReflectanceMixed;
