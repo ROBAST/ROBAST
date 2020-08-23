@@ -19,7 +19,7 @@ ClassImp(ABorderSurfaceCondition);
 
 ABorderSurfaceCondition::ABorderSurfaceCondition(AOpticalComponent* component1,
                                                  AOpticalComponent* component2)
-    : fSigma(0), fMultilayer(0) {
+  : fSigma(0), fMultilayer(0), fLambertian(false) {
   fComponent[0] = component1;
   fComponent[1] = component2;
 

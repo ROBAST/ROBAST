@@ -26,6 +26,7 @@ class ABorderSurfaceCondition : public TObject {
   AOpticalComponent* fComponent[2];
   Double_t fSigma;
   std::shared_ptr<AMultilayer> fMultilayer;
+  Bool_t fLambertian;
 
  public:
   ABorderSurfaceCondition(AOpticalComponent* component1,
@@ -40,6 +41,8 @@ class ABorderSurfaceCondition : public TObject {
     fMultilayer = layer;
   }
   std::shared_ptr<AMultilayer> GetMultilayer() const { return fMultilayer; }
+  Bool_t IsLambertian() const {return fLambertian;}
+  void EnableLambertian(Bool_t enable) {fLambertian = enable;}
 
   ClassDef(ABorderSurfaceCondition, 1)
 };

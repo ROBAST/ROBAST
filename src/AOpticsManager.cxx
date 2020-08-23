@@ -177,7 +177,7 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav,
   TVector3 n = normal ? *normal : GetFacetNormal(nav, currentNode, nextNode);
   Double_t d1[3];
   ray.GetDirection(d1);
-  Double_t cos1 = d1[0] * n[0] + d1[1] * n[1] + d1[2] * n[2];
+  Double_t cos1 = d1[0] * n[0] + d1[1] * n[1] + d1[2] * n[2]; // should be positive
 
   AOpticalComponent* component1 = (AOpticalComponent*)currentNode->GetVolume();
   AOpticalComponent* component2 =
@@ -206,9 +206,29 @@ void AOpticsManager::DoReflection(Double_t n1, ARay& ray, TGeoNavigator* nav,
   }
 
   Double_t d2[3];
-  for (Int_t i = 0; i < 3; i++) {  // d2 = d1 - 2n*(d1*n)
-    d2[i] = d1[i] - 2 * n[i] * cos1;
+  if (condition and condition->IsLambertian()) {
+    // theta distribution must be weighted by sin(theta) * cos(theta)
+    // y (\theta) = \int _0 ^\theta \sin\theta' \cos\theta' d\theta'
+    //            = \frac{1}{2} \sin^2 \theta
+    // \theta (y) = \asin \sqrt{2y}
+    Double_t y = gRandom->Uniform(0, 0.5);
+    Double_t theta = TMath::ASin(TMath::Sqrt(2 * y)); // [0, pi/2]
+    Double_t phi = gRandom->Uniform(0., TMath::TwoPi());
+
+    Double_t theta_n = n.Theta() * TMath::RadToDeg();
+    Double_t phi_n = n.Phi() * TMath::RadToDeg();
+    TGeoRotation rot("", phi_n + 90, theta_n + 180, 0);
+    TVector3 v;
+    v.SetMagThetaPhi(1, theta, phi);
+    Double_t dir[3] = {v[0], v[1], v[2]};
+    rot.LocalToMaster(dir, d2);
+  } else {
+    // specular reflection
+    for (Int_t i = 0; i < 3; i++) {  // d2 = d1 - 2n*(d1*n)
+      d2[i] = d1[i] - 2 * n[i] * cos1;
+    }
   }
+
   if (not absorbed) {
     ray.SetDirection(d2);
   }
@@ -240,7 +260,10 @@ TVector3 AOpticsManager::GetFacetNormal(TGeoNavigator* nav,
   ABorderSurfaceCondition* condition =
       component1 ? component1->FindBorderSurfaceCondition(component2) : 0;
 
-  if (condition and condition->GetGaussianRoughness() != 0) {
+  if (condition and condition->IsLambertian()) {
+    // Lambertian distribution should be calculated in another place
+    return normal;
+  } else if (condition and condition->GetGaussianRoughness() != 0) {
     // The following method is based on G4OpBoundaryProcess::GetFacetNormal in
     // Geant4 optics
     TVector3 facetNormal;

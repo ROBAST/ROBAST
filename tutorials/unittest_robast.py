@@ -46,14 +46,13 @@ def cleanupGeo():
 
 def makeTheWorld():
     manager = ROOT.AOpticsManager("manager", "manager")
-    worldbox = ROOT.TGeoBBox("worldbox", 1*m, 1*m, 1*m)
+    worldbox = ROOT.TGeoBBox("worldbox", 20*m, 20*m, 20*m)
     world = ROOT.AOpticalComponent("world", worldbox)
     registerGeo((world, worldbox))
 
     manager.SetTopVolume(world)
     
     return manager
-
 
 class TestROBAST(unittest.TestCase):
     """
@@ -587,7 +586,7 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(nbk7.GetRefractiveIndex( 589.3*nm), f.Eval( 589.3*nm), 6) # nD
         self.assertAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), f.Eval(1014.0*nm), 6) # nt
         self.assertAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), f.Eval(2325.4*nm), 6) # n2325.4
-    '''
+
     def testD80(self):
         x0 = 1
         y0 = -1
@@ -609,7 +608,7 @@ class TestROBAST(unittest.TestCase):
         self.assertLessEqual(abs(x.value / x0 - 1.), tor)
         self.assertLessEqual(abs(y.value / y0 - 1.), tor)
         self.assertLessEqual(abs(r.value / r0 - 0.8)/0.8, tor)
-    '''
+
     def testMixedRefractiveIndex(self):
         ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medA(new ARefractiveIndex(1., 1.));')
         ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> medB(new ARefractiveIndex(2., 2.));')
@@ -697,6 +696,76 @@ class TestROBAST(unittest.TestCase):
 
         self.assertAlmostEqual(reflectance0.value, reflectance1.value)
         self.assertAlmostEqual(transmittance0.value, transmittance1.value)
+
+    def testLambertian(self):
+        manager = makeTheWorld()
+
+        mirrorbox = ROOT.TGeoBBox("mirrorbox", 5*cm, 5*cm, 1*um)
+        mirror = ROOT.AMirror("mirror", mirrorbox)
+        condition = ROOT.ABorderSurfaceCondition(manager.GetTopVolume(), mirror)
+        registerGeo((mirrorbox, mirror, condition))
+        condition.EnableLambertian(True)
+
+        manager.GetTopVolume().AddNode(mirror, 1)
+
+        focalbox = ROOT.TGeoBBox("focalbox", 0.5*cm, 0.5*cm, 1*um)
+        focal = ROOT.AFocalSurface("focal", focalbox)
+        registerGeo((focalbox, focal))
+
+        collimatorpgon = ROOT.TGeoPgon("focalboxcollimatorpgon", 0, 360, 4, 2)
+        collimatorpgon.DefineSection(0, -3*m, 0.5*cm, 0.51*cm)
+        collimatorpgon.DefineSection(1, -1*um, 0.5*cm, 0.51*cm)
+        collimator = ROOT.AObscuration("collimator", collimatorpgon)
+        registerGeo((collimatorpgon, collimator))
+
+        for i in range(90):
+            theta = i
+            rot = ROOT.TGeoRotation("", 0, theta, 0)
+            rot2 = ROOT.TGeoRotation("", 0, theta, 45)
+            cos = ROOT.TMath.Cos(theta * ROOT.TMath.Pi() / 180.)
+            sin = ROOT.TMath.Sin(theta * ROOT.TMath.Pi() / 180.)
+            tr = ROOT.TGeoTranslation(0, - 10 * m * sin, 10 * m * cos)
+            registerGeo((rot, rot2, tr))
+            manager.GetTopVolume().AddNode(focal, i + 1, ROOT.TGeoCombiTrans(tr, rot))
+            manager.GetTopVolume().AddNode(collimator, i + 1, ROOT.TGeoCombiTrans(tr, rot2))
+
+        manager.CloseGeometry()
+        manager.GetTopVolume().Draw("ogl")
+
+        h = ROOT.TH1D('h', ';Viewing Angle (deg);Number of Photons', 90, 0, 90)
+
+        for j in range(-500, 501):
+            rot = ROOT.TGeoRotation("", 0, 180, 0)
+            dy = j * mm / 10.
+            tr = ROOT.TGeoTranslation(0, dy, 2*um)
+
+            array = ROOT.ARayShooter.RandomSquare(400 * nm, 2 * cm, 1000000, rot, tr)
+            manager.TraceNonSequential(array)
+            objarray = ROOT.TObjArray()
+            objarray.Add(array) # to delete ARayArray inside C++
+            objarray.SetOwner(True)
+
+            focused = array.GetFocused()
+            for i in range(focused.GetLast() + 1):
+                ray = focused[i]
+                history = ray.GetNodeHistory()
+                angle = int(history.At(history.GetLast()).GetName().split('_')[1]) - 0.5
+                h.Fill(angle)
+
+                if i < 1000 and j == 0:
+                    pol = ray.MakePolyLine3D()
+                    pol.SetLineColor(2)
+                    pol.SetLineWidth(2)
+                    pol.Draw()
+                    registerGeo((pol,))
+                    ROOT.gPad.Modified()
+                    ROOT.gPad.Update()
+
+            del objarray
+
+        can = ROOT.TCanvas()
+        h.Draw()
+        h.Fit('pol0', '', '', 0, 50)
 
 if __name__=="__main__":
     ROOT.gRandom.SetSeed(int(time.time()))
