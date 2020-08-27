@@ -3,7 +3,8 @@
  * All rights reserved.                                                       *
  *****************************************************************************/
 
-// An example of a hexagonal Okumura cone
+// An example script of a hexagonal Okumura cone
+// See A. Okumura (2012) Astroparticle Physics 38 18-24
 
 #include "AFocalSurface.h"
 #include "AGeoBezierPgon.h"
@@ -27,12 +28,13 @@ static const Double_t mm = AOpticsManager::mm();
 static const Double_t um = AOpticsManager::um();
 static const Double_t nm = AOpticsManager::nm();
 static const Double_t m = AOpticsManager::m();
+static const Double_t deg = AOpticsManager::deg();
 
 TGraph* ConeTrace(Int_t mode, bool del) {
   // mode == 0: hex-hex Winston cone built with AGeoWinstonConePoly
   // mode == 1: hex-hex Okumura cone built with AGeoBezierPgon
 
-  AOpticsManager* manager = new AOpticsManager("manager", "SC");
+  AOpticsManager* manager = new AOpticsManager("manager", "manager");
 
   // Make the world
   TGeoBBox* worldbox = new TGeoBBox("worldbox", 10 * cm, 10 * cm, 10 * cm);
@@ -43,36 +45,36 @@ TGraph* ConeTrace(Int_t mode, bool del) {
   const Double_t kRout = 10 * mm;
   TGeoRotation* rot30 = new TGeoRotation("rot30", 30, 0, 0);
   rot30->RegisterYourself();
-  TGeoRotation* rot60 = new TGeoRotation("rot60", 60, 0, 0);
-  rot60->RegisterYourself();
-  TGeoRotation* rot120 = new TGeoRotation("rot120", 120, 0, 0);
-  rot120->RegisterYourself();
 
-  AGeoWinstonCone2D* coneV =
-      new AGeoWinstonCone2D("coneV", kRin, kRout, kRin * 1.733);
+  AGeoWinstonConePoly* hexWin = new AGeoWinstonConePoly("hexWin", kRin, kRout, 6);
+  const Double_t kDZ = hexWin->GetDZ();
+
+  // Make an outer shape of the cone
+  // The length is intentionally smaller than kDZ to avoid possible rounding errors
   TGeoPgon* pgon = new TGeoPgon("pgon", 0, 360, 6, 4);
-  pgon->DefineSection(0, -coneV->GetDZ() * 0.9999, 0, kRout * 1.1);
-  pgon->DefineSection(1, -coneV->GetDZ() * 0.5, 0, kRin * 0.9);
-  pgon->DefineSection(2, -coneV->GetDZ() * 0., 0, kRin * 1.001);
-  pgon->DefineSection(3, coneV->GetDZ() * 0.9999, 0, kRin * 1.001);
+  pgon->DefineSection(0, -kDZ * 0.9999, 0, kRout * 1.1);
+  pgon->DefineSection(1, -kDZ * 0.5, 0, kRin * 0.9);
+  pgon->DefineSection(2, -kDZ * 0., 0, kRin * 1.001);
+  pgon->DefineSection(3, kDZ * 0.9999, 0, kRin * 1.001);
 
-  AGeoWinstonConePoly* hexV = new AGeoWinstonConePoly("hexV", kRin, kRout, 6);
   TGeoCompositeShape* coneComp1 = 0;
 
   if (mode == 0) {
-    coneComp1 = new TGeoCompositeShape("coneComp1", "pgon:rot30 - hexV");
+    coneComp1 = new TGeoCompositeShape("coneComp1", "pgon:rot30 - hexWin");
   } else if (mode == 1) {
-    AGeoBezierPgon* hexB =
-        new AGeoBezierPgon("hexB", 0, 360, 6, 100, kRin, kRout, hexV->GetDZ());
-    hexB->SetControlPoints(0.39, 0.18, 0.87, 0.36);
-    coneComp1 = new TGeoCompositeShape("coneComp1", "pgon:rot30 - hexB:rot30");
-  }  // if
+    AGeoBezierPgon* hexBez =
+        new AGeoBezierPgon("hexBez", 0, 360, 6, 100, kRin, kRout, kDZ);
+    hexBez->SetControlPoints(0.39, 0.18, 0.87, 0.36);
+    coneComp1 = new TGeoCompositeShape("coneComp1", "pgon:rot30 - hexBez:rot30");
+  }
+
   AMirror* coneMirror = new AMirror("coneMirror", coneComp1);
   world->AddNode(coneMirror, 1);
 
+  // Here we assume a flat hexagonal PMT which is slightly bigger than the exit aperture
   TGeoPgon* pgonPMT = new TGeoPgon("pgonPMT", 0, 360, 6, 2);
-  pgonPMT->DefineSection(0, -coneV->GetDZ() - 0.01 * mm, 0, kRout * 1.01);
-  pgonPMT->DefineSection(1, -coneV->GetDZ(), 0, kRout * 1.01);
+  pgonPMT->DefineSection(0, - kDZ - 0.01 * mm, 0, kRout * 1.01);
+  pgonPMT->DefineSection(1, - kDZ, 0, kRout * 1.01);
   AFocalSurface* pmt = new AFocalSurface("pmt", pgonPMT);
   world->AddNode(pmt, 1, rot30);
 
@@ -85,23 +87,25 @@ TGraph* ConeTrace(Int_t mode, bool del) {
 
   TGraph* graAeff = new TGraph;
 
-  for (Double_t deg = 0.; deg < 40.; deg += 0.1) {
+  for (Double_t theta = 0.; theta < 40.; theta += 0.1) {
     Double_t Aeff = 0.;
     for (Double_t phi = 0.; phi < 30.; phi += 0.3) {
       TGeoTranslation* raytr = new TGeoTranslation(
-          "raytr", 50 * mm * TMath::Sin(deg * TMath::DegToRad()), 0,
-          50 * mm * TMath::Cos(deg * TMath::DegToRad()));
-      TGeoRotation* rayrot = new TGeoRotation("rayrot", 90 - phi, 180 + deg, 0);
+          "raytr", 50 * mm * TMath::Sin(theta * deg), 0,
+          50 * mm * TMath::Cos(theta * deg));
+      TGeoRotation* rayrot = new TGeoRotation("rayrot", 90 - phi, 180 + theta, 0);
 
       TVector3 dir(0, 0, 1);
-      Double_t lambda =
-          400 * nm;  // does not affect the results because we have no lens
+      // does not affect the results because we have no lenses
+      Double_t lambda = 400 * nm;
       // 1 photon per 1 mm^2
-      const int kN = 1000;
+      const int kNph = 1000;
       const double kD = 100 * mm;
       ARayArray* array =
-          ARayShooter::RandomSquare(lambda, kD, kN, rayrot, raytr, &dir);
-      Double_t dA = kD * kD / kN;
+          ARayShooter::RandomSquare(lambda, kD, kNph, rayrot, raytr, &dir);
+      // illuminated small area per input photon
+      // i.e., if 3 photons are detected, the effective area is 3 x dA
+      Double_t dA = kD * kD / kNph;
 
       manager->TraceNonSequential(*array);
       TObjArray* focused = array->GetFocused();
@@ -113,22 +117,22 @@ TGraph* ConeTrace(Int_t mode, bool del) {
         // Calculate the effective area from the number of focused photons
         Aeff += dA;
 
-        if (mode == 1 and TMath::Abs(deg - 20.) < 0.001 and j < 50 and
+        if (mode == 1 and TMath::Abs(theta - 20.) < 0.001 and j < 50 and
             phi == 0) {
           TPolyLine3D* pol = ray->MakePolyLine3D();
           pol->SetLineColor(3);
           pol->SetLineWidth(2);
           pol->Draw();
-        }  // if
-      }    // j
+        }
+      }
 
       delete array;
     }  // phi
 
-    graAeff->SetPoint(graAeff->GetN(), deg,
-                      Aeff / (2 * TMath::Sqrt(3) * kRin * kRin) /
-                          TMath::Cos(deg * TMath::DegToRad()));
-  }  // deg
+    Double_t hexA = 2 * TMath::Sqrt(3) * kRin * kRin;  // Area of the inputer aperture
+    Double_t eff = Aeff / hexA / TMath::Cos(theta * TMath::DegToRad());
+    graAeff->SetPoint(graAeff->GetN(), theta, eff);
+  }  // theta
 
   if (del) {
     delete manager;
