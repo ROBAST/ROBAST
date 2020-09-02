@@ -89,10 +89,14 @@ TGraph* ConeTrace(Int_t mode, bool del) {
 
   for (Double_t theta = 0.; theta < 40.; theta += 0.1) {
     Double_t Aeff = 0.;
+    Int_t nphis = 0;
     for (Double_t phi = 0.; phi < 30.; phi += 0.3) {
-      TGeoTranslation* raytr = new TGeoTranslation(
-          "raytr", 50 * mm * TMath::Sin(theta * deg), 0,
-          50 * mm * TMath::Cos(theta * deg));
+      nphis++;  // multiple phi directions will be averaged
+
+      Double_t x = 50 * mm * TMath::Sin(theta * deg) * TMath::Cos(phi * deg);
+      Double_t y = 50 * mm * TMath::Sin(theta * deg) * TMath::Sin(phi * deg);
+      Double_t z = 50 * mm * TMath::Cos(theta * deg);
+      TGeoTranslation* raytr = new TGeoTranslation("raytr", x, y, z);
       TGeoRotation* rayrot = new TGeoRotation("rayrot", 90 - phi, 180 + theta, 0);
 
       TVector3 dir(0, 0, 1);
@@ -130,8 +134,8 @@ TGraph* ConeTrace(Int_t mode, bool del) {
     }  // phi
 
     Double_t hexA = 2 * TMath::Sqrt(3) * kRin * kRin;  // Area of the inputer aperture
-    Double_t eff = Aeff / hexA / TMath::Cos(theta * TMath::DegToRad());
-    graAeff->SetPoint(graAeff->GetN(), theta, eff);
+    Double_t eff = (Aeff / nphis) / hexA / TMath::Cos(theta * TMath::DegToRad());
+    graAeff->SetPoint(graAeff->GetN(), theta, eff * 100);  // convert to percentage
   }  // theta
 
   if (del) {
