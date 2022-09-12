@@ -9,6 +9,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TMatrixDSym.h"
+
 #include "AMultilayer.h"
 #include "A2x2ComplexMatrix.h"
 #include "AOpticsManager.h"
@@ -21,12 +23,94 @@ static const Double_t inf = std::numeric_limits<Double_t>::infinity();
 
 ClassImp(AMultilayer);
 
+void interface_rt(AMultilayer::EPolarization polarization,
+                  std::complex<Double_t> n_i,
+                  std::complex<Double_t> n_f,
+                  std::complex<Double_t> th_i,
+                  std::complex<Double_t> th_f,
+                  std::complex<Double_t>& r,
+                  std::complex<Double_t>& t) {
+  /*
+  reflection amplitude (from Fresnel equations)
+  transmission amplitude (frem Fresnel equations)
+   
+  polarization is either "s" or "p" for polarization
+    
+  n_i, n_f are (complex) refractive index for incident and final
+
+  th_i, th_f are (complex) propegation angle for incident and final
+  (in radians, where 0=normal). "th" stands for "theta".
+  */
+  auto ii = n_i * std::cos(th_i);
+  if (polarization == AMultilayer::kS) {
+    auto ff = n_f * std::cos(th_f);
+    r = (ii - ff) / (ii + ff);
+    t = 2. * ii / (ii + ff);
+  } else {
+
+    auto fi = n_f * std::cos(th_i);
+    auto _if = n_i * std::cos(th_f);
+    r = (fi - _if) / (fi + _if);
+    t = 2. * ii / (fi + _if);
+  }
+}
+
+Double_t R_from_r(std::complex<Double_t> r) {
+  /*
+  Calculate reflected power R, starting with reflection amplitude r.
+  */
+  auto absr = std::abs(r);
+  return absr * absr;
+}
+      
+Double_t T_from_t(AMultilayer::EPolarization pol,
+                  std::complex<Double_t> t,
+                  std::complex<Double_t> n_i,
+                  std::complex<Double_t> n_f,
+                  std::complex<Double_t> th_i,
+                  std::complex<Double_t> th_f) {
+  /*
+  Calculate transmitted power T, starting with transmission amplitude t.
+
+  n_i,n_f are refractive indices of incident and final medium.
+
+  th_i, th_f are (complex) propegation angles through incident & final medium
+  (in radians, where 0=normal). "th" stands for "theta".
+
+  In the case that n_i,n_f,th_i,th_f are real, formulas simplify to
+  T=|t|^2 * (n_f cos(th_f)) / (n_i cos(th_i)).
+
+  See manual for discussion of formulas
+  */
+  if (pol == AMultilayer::kS) {
+    return std::abs(t*t) * (((n_f * std::cos(th_f)).real()) / (n_i * std::cos(th_i)).real());
+  } else {
+    return std::abs(t*t) * (((n_f * std::conj(std::cos(th_f))).real()) /
+                            (n_i * std::conj(std::cos(th_i))).real());
+  }
+}
+
+void interface_RT(AMultilayer::EPolarization polarization,
+                  std::complex<Double_t> n_i,
+                  std::complex<Double_t> n_f,
+                  std::complex<Double_t> th_i,
+                  std::complex<Double_t> th_f,
+                  Double_t& R,
+                  Double_t& T) {
+  std::complex<Double_t>r, t;
+  interface_rt(polarization, n_i, n_f, th_i, th_f, r, t);
+  R = R_from_r(r);
+  T = T_from_t(polarization, t, n_i, n_f, th_i, th_f);
+}
+
 AMultilayer::AMultilayer(std::shared_ptr<ARefractiveIndex> top,
                          std::shared_ptr<ARefractiveIndex> bottom)
     : fNthreads(1) {
   fRefractiveIndexList.push_back(bottom);
   fThicknessList.push_back(inf);
-  InsertLayer(top, inf);
+  Bool_t coherent = kFALSE;
+  fCoherentList.push_back(coherent); // the inf-thick layers are incoherent
+  InsertLayer(top, inf, coherent);
 }
 
 //______________________________________________________________________________
@@ -125,23 +209,39 @@ void AMultilayer::ListSnell(
 }
 
 //______________________________________________________________________________
+void AMultilayer::AddLayer(std::shared_ptr<ARefractiveIndex> idx,
+                              Double_t thickness, Bool_t coherent) {
+  // ----------------- Top inf material
+  // ----------------- <------------- Add a new layer here
+  // ----------------- 1st layer
+  // ----------------- 2nd layer
+  // ...
+  // ----------------- Bottom inf material
+  fRefractiveIndexList.insert(fRefractiveIndexList.begin() + 1, idx);
+  fThicknessList.insert(fThicknessList.begin() + 1, thickness);
+  fCoherentList.insert(fCoherentList.begin() + 1, coherent);
+}
+
+//______________________________________________________________________________
 void AMultilayer::InsertLayer(std::shared_ptr<ARefractiveIndex> idx,
-                              Double_t thickness) {
-  // ----------------- Top layer
+                              Double_t thickness, Bool_t coherent) {
+  // ----------------- Top inf material
   // ----------------- 1st layer
   // ----------------- 2nd layer
   // ...
   // ----------------- <------------- Insert a new layer here
-  // ----------------- Bottom layer
+  // ----------------- Bottom inf material
   fRefractiveIndexList.insert(fRefractiveIndexList.end() - 1, idx);
   fThicknessList.insert(fThicknessList.end() - 1, thickness);
+  fCoherentList.insert(fCoherentList.end() - 1, coherent);
 }
 
 //______________________________________________________________________________
-void AMultilayer::CoherentTMM(EPolarization polarization,
+void AMultilayer::CoherentTMM(AMultilayer::EPolarization polarization,
                               std::complex<Double_t> th_0, Double_t lam_vac,
                               Double_t& reflectance,
-                              Double_t& transmittance) const {
+                              Double_t& transmittance,
+                              Bool_t reverse) const {
   // Copied from tmm.ch_tmm
 
   // Main "coherent transfer matrix method" calc. Given parameters of a stack,
@@ -167,12 +267,22 @@ void AMultilayer::CoherentTMM(EPolarization polarization,
   //
   // lam_vac is vacuum wavelength of the light.
 
-  auto num_layers = fRefractiveIndexList.size();
+  auto reversedRefractiveIndexList = fRefractiveIndexList;
+  std::reverse(reversedRefractiveIndexList.begin(),
+               reversedRefractiveIndexList.end());
+  auto _RefractiveIndexList = reverse ? reversedRefractiveIndexList : fRefractiveIndexList;
+
+  auto reversedThicknessList = fThicknessList;
+  std::reverse(reversedThicknessList.begin(),
+               reversedThicknessList.end());
+  auto _ThicknessList = reverse ? reversedThicknessList : fThicknessList;
+
+  auto num_layers = _RefractiveIndexList.size();
   std::vector<std::complex<Double_t>> n_list(num_layers);
 
   {
     auto n_i = n_list.begin();
-    auto ref_i = fRefractiveIndexList.cbegin();
+    auto ref_i = _RefractiveIndexList.cbegin();
     for (std::size_t i = 0; i < num_layers; ++i) {
       *n_i = (*ref_i)->GetComplexRefractiveIndex(lam_vac);
       ++n_i;
@@ -216,7 +326,7 @@ void AMultilayer::CoherentTMM(EPolarization polarization,
   {
     auto delta_i = delta.begin();
     auto kz_i = kz_list.cbegin();
-    auto thickness_i = fThicknessList.cbegin();
+    auto thickness_i = _ThicknessList.cbegin();
     for (std::size_t i = 0; i < num_layers; ++i) {
       *delta_i = (*kz_i) * (*thickness_i);
       ++delta_i;
@@ -268,18 +378,13 @@ void AMultilayer::CoherentTMM(EPolarization polarization,
     auto cos_th_i = cos_th_list.cbegin();  // cos(th_i)
     auto cos_th_f = cos_th_list.cbegin();
     ++cos_th_f;  // increment to access cos(th_f)
+
     for (std::size_t i = 0; i < num_layers - 1; ++i) {
-      auto ii = *n_i * (*cos_th_i);
-      if (polarization == kS) {
-        auto ff = *n_f * (*cos_th_f);
-        *t_i = 2. * ii / (ii + ff);
-        *r_i = (ii - ff) / (ii + ff);
-      } else {
-        auto fi = *n_f * (*cos_th_i);
-        auto if_ = *n_i * (*cos_th_f);
-        *t_i = 2. * ii / (fi + if_);
-        *r_i = (fi - if_) / (fi + if_);
-      }
+      std::complex<Double_t> r, t;
+      interface_rt(polarization, *n_i, *n_f, *th_i, *th_f, r, t);
+      *r_i = r;
+      *t_i = t;
+
       ++t_i;
       ++r_i;
       ++th_i;
@@ -375,7 +480,257 @@ void AMultilayer::CoherentTMM(EPolarization polarization,
   }
 }
 
-//__________________________________________________________________________________
+//______________________________________________________________________________
+void AMultilayer::IncGroupLayers(std::vector<std::vector<Double_t>>& stack_d_list,
+                                 std::vector<std::vector<std::shared_ptr<ARefractiveIndex>>>& stack_n_list,
+                                 std::vector<std::size_t>& all_from_inc,
+                                 std::vector<std::size_t>& inc_from_all,
+                                 std::vector<std::vector<std::size_t>>& all_from_stack,
+                                 std::vector<std::vector<std::size_t>>& stack_from_all,
+                                 std::vector<std::size_t>& inc_from_stack,
+                                 std::vector<std::size_t>& stack_from_inc
+                                 ) const {
+  // C++ version of tmm.inc_group_layers
+
+  std::size_t inc_index = 0;
+  std::size_t stack_index = 0;
+  std::vector<Double_t> ongoing_stack_d_list;
+  std::vector<std::shared_ptr<ARefractiveIndex>> ongoing_stack_n_list;
+  std::size_t within_stack_index;
+  Bool_t stack_in_progress = kFALSE;
+
+  stack_d_list.resize(0);
+  stack_n_list.resize(0);
+  all_from_inc.resize(0);
+  inc_from_all.resize(0);
+  all_from_stack.resize(0);
+  stack_from_all.resize(0);
+  inc_from_stack.resize(0);
+  stack_from_inc.resize(0);
+
+  for (std::size_t alllayer_index = 0; alllayer_index < fRefractiveIndexList.size(); ++alllayer_index) {
+    if (fCoherentList[alllayer_index] == kTRUE) {
+      inc_from_all.push_back(std::nan(""));
+      if (!stack_in_progress) {
+        stack_in_progress = kTRUE;
+        ongoing_stack_d_list
+          = std::vector<Double_t>{inf, fThicknessList[alllayer_index]};
+        ongoing_stack_n_list
+          = std::vector<std::shared_ptr<ARefractiveIndex>>{
+          fRefractiveIndexList[alllayer_index - 1],
+          fRefractiveIndexList[alllayer_index]};
+        stack_from_all.push_back(std::vector<std::size_t>{stack_index, 1});
+        all_from_stack.push_back(std::vector<std::size_t>{alllayer_index - 1, alllayer_index});
+        inc_from_stack.push_back(inc_index - 1);
+        within_stack_index = 1;
+      } else {
+        ongoing_stack_d_list.push_back(fThicknessList[alllayer_index]);
+        ongoing_stack_n_list.push_back(fRefractiveIndexList[alllayer_index]);
+        within_stack_index += 1;
+        stack_from_all.push_back(std::vector<std::size_t>{stack_index, within_stack_index});
+        all_from_stack.back().push_back(alllayer_index);
+      }
+    } else {
+      stack_from_all.push_back(std::vector<std::size_t>{std::size_t(std::nan(""))});
+      inc_from_all.push_back(inc_index);
+      all_from_inc.push_back(alllayer_index);
+      if (!stack_in_progress) {  // previous layer was also incoherent
+        stack_from_inc.push_back(std::size_t(std::nan("")));
+      } else { // previous layer was coherent
+        stack_in_progress = kFALSE;
+        stack_from_inc.push_back(stack_index);
+        ongoing_stack_d_list.push_back(inf);
+        stack_d_list.push_back(ongoing_stack_d_list);
+        ongoing_stack_n_list.push_back(fRefractiveIndexList[alllayer_index]);
+        stack_n_list.push_back(ongoing_stack_n_list);
+        all_from_stack.back().push_back(alllayer_index);
+        stack_index += 1;
+      }
+      inc_index += 1;
+    }
+  }
+}
+
+//______________________________________________________________________________
+void AMultilayer::IncoherentTMM(AMultilayer::EPolarization polarization,
+                                std::complex<Double_t> th_0, Double_t lam_vac,
+                                Double_t& reflectance,
+                                Double_t& transmittance) const {
+  // Copied from tmm.inc_tmm
+
+  // Incoherent, or partly-incoherent-partly-coherent, transfer matrix method.
+  // See coh_tmm for definitions of pol, n_list, d_list, th_0, lam_vac.
+  // c_list is "coherency list". Each entry should be 'i' for incoherent or 'c'
+  // for 'coherent'.
+  // If an incoherent layer has real refractive index (no absorption), then its
+  // thickness doesn't affect the calculation results.
+  // See https://arxiv.org/abs/1603.02720 for physics background and some
+  // of the definitions.
+
+  auto num_layers = fRefractiveIndexList.size();
+  std::vector<std::complex<Double_t>> n_list(num_layers);
+
+  {
+    auto n_i = n_list.begin();
+    auto ref_i = fRefractiveIndexList.cbegin();
+    for (std::size_t i = 0; i < num_layers; ++i) {
+      *n_i = (*ref_i)->GetComplexRefractiveIndex(lam_vac);
+      ++n_i;
+      ++ref_i;
+    }
+  }
+
+  // Input test
+  if (std::abs((n_list[0] * std::sin(th_0)).imag()) >= 100 * EPSILON) {
+    Error("IncoherentTMM", "Error in n0 or th0!");
+  }
+
+  std::vector<std::vector<Double_t>> stack_d_list;
+  std::vector<std::vector<std::shared_ptr<ARefractiveIndex>>> stack_n_list;
+  std::vector<std::size_t> all_from_inc;
+  std::vector<std::size_t> inc_from_all;
+  std::vector<std::vector<std::size_t>> all_from_stack;
+  std::vector<std::vector<std::size_t>> stack_from_all;
+  std::vector<std::size_t> inc_from_stack;
+  std::vector<std::size_t> stack_from_inc;
+
+  IncGroupLayers(stack_d_list, stack_n_list, all_from_inc,
+                 inc_from_all, all_from_stack, stack_from_all, inc_from_stack,
+                 stack_from_inc);
+
+  // th_list is a list with, for each layer, the angle that the light travels
+  // through the layer. Computed with Snell's law. Note that the "angles" may be
+  // complex!
+  std::vector<std::complex<Double_t>> th_list;
+  ListSnell(th_0, n_list, th_list);
+
+  // coh_tmm_data_list[i] is the output of coh_tmm for the i'th stack
+  std::vector<std::pair<Double_t, Double_t>> coh_tmm_data_list;
+  // coh_tmm_bdata_list[i] is the same stack as coh_tmm_data_list[i] but
+  // with order of layers reversed
+  std::vector<std::pair<Double_t, Double_t>> coh_tmm_bdata_list;
+
+  for (std::size_t i = 0; i < all_from_stack.size(); ++i) {
+    Double_t R, T;
+    AMultilayer multi(stack_n_list[i][0], stack_n_list[i].back());
+
+    for (std::size_t j = 1; j < stack_n_list[i].size() - 1; ++j) {
+      multi.InsertLayer(stack_n_list[i][j], stack_d_list[i][j]);
+    }
+
+    multi.CoherentTMM(polarization, th_list[all_from_stack[i][0]], lam_vac, R, T);
+    coh_tmm_data_list.push_back(std::pair<Double_t, Double_t>{R, T});
+
+    Bool_t reverse = kTRUE;
+    multi.CoherentTMM(polarization, th_list[all_from_stack[i].back()], lam_vac, R, T, reverse);
+    coh_tmm_bdata_list.push_back(std::pair<Double_t, Double_t>{R, T});
+  }
+
+  // P_list[i] is fraction not absorbed in a single pass through i'th incoherent
+  // layer.
+  auto num_inc_layers = all_from_inc.size();
+  std::vector<Double_t> P_list(num_inc_layers);
+  P_list[0] = 0;
+
+  for (std::size_t inc_index = 1; inc_index < num_inc_layers - 1; ++inc_index) { // skip 0'th and last (infinite)
+    auto i = all_from_inc[inc_index];
+    auto n = fRefractiveIndexList[i]->GetComplexRefractiveIndex(lam_vac);
+    auto d = fThicknessList[i];
+    auto th = th_list[i];
+
+    P_list[inc_index] = TMath::Exp(-4 * TMath::Pi() * d
+                                   * (n * std::cos(th)).imag() / lam_vac);
+    // For a very opaque layer, reset P to avoid divide-by-0 and similar
+    // errors.
+    if (P_list[inc_index] < 1e-30) {
+      P_list[inc_index] = 1e-30;
+    }
+  }
+
+  // T_list[i,j] and R_list[i,j] are transmission and reflection powers,
+  // respectively, coming from the i'th incoherent layer, going to the j'th
+  // incoherent layer. Only need to calculate this when j=i+1 or j=i-1.
+  // (2D array is overkill but helps avoid confusion.)
+  // initialize these arrays
+  Double_t T_list[num_inc_layers][num_inc_layers];
+  Double_t R_list[num_inc_layers][num_inc_layers];
+  std::memset(T_list, 0, sizeof(T_list));
+  std::memset(R_list, 0, sizeof(R_list));
+
+  for (std::size_t inc_index = 0; inc_index < num_inc_layers - 1; ++inc_index){
+    // looking at interface i -> i+1
+    auto alllayer_index = all_from_inc[inc_index];
+    auto nextstack_index = stack_from_inc[inc_index + 1];
+    if (nextstack_index == std::size_t(std::nan(""))) { // next layer is incoherent
+      Double_t R, T;
+      interface_RT(polarization,
+                   n_list[alllayer_index],
+                   n_list[alllayer_index + 1],
+                   th_list[alllayer_index],
+                   th_list[alllayer_index + 1],
+                   R, T);
+
+      R_list[inc_index][inc_index + 1] = R;
+      T_list[inc_index][inc_index + 1] = T;
+
+      interface_RT(polarization,
+                   n_list[alllayer_index + 1],
+                   n_list[alllayer_index],
+                   th_list[alllayer_index + 1],
+                   th_list[alllayer_index],
+                   R, T);
+
+      R_list[inc_index + 1][inc_index] = R;
+      T_list[inc_index+1][inc_index] = T;
+    } else { // next layer is coherent
+      R_list[inc_index][inc_index + 1]
+        = coh_tmm_data_list[nextstack_index].first;
+      T_list[inc_index][inc_index + 1]
+        = coh_tmm_data_list[nextstack_index].second;
+      R_list[inc_index + 1][inc_index]
+        = coh_tmm_bdata_list[nextstack_index].first;
+      T_list[inc_index + 1][inc_index]
+        = coh_tmm_bdata_list[nextstack_index].second;
+    }
+  }
+
+  // L is the transfer matrix from the i'th to (i+1)st incoherent layer, see
+  // manual
+  std::vector<TMatrixT<Double_t>> L_list{TMatrixDSym(2)};
+  // L_0 is not defined because 0'th layer has no beginning.
+  L_list[0][0][0] = std::nan("");
+
+  TMatrixT<Double_t> Ltilde(2, 2);
+  Ltilde[0][0] = 1;
+  Ltilde[0][1] = -R_list[1][0];
+  Ltilde[1][0] = R_list[0][1];
+  Ltilde[1][1] = T_list[1][0] * T_list[0][1] - R_list[1][0] * R_list[0][1];
+  Ltilde *= 1 / T_list[0][1];
+
+  for (std::size_t i = 1; i < num_inc_layers - 1; ++i) {
+    TMatrixT<Double_t> L1(2, 2), L2(2, 2);
+
+    L1[0][0] = 1/P_list[i];
+    L1[0][1] = 0;
+    L1[1][0] = 0;
+    L1[1][1] = P_list[i];
+    L2[0][0] = 1;
+    L2[0][1] = -R_list[i + 1][i];
+    L2[1][0] = R_list[i][i + 1];
+    L2[1][1] = T_list[i + 1][i] * T_list[i][i + 1]
+      - R_list[i + 1][i] * R_list[i][i + 1];
+
+    auto L = L1 * L2 * (1 / T_list[i][i + 1]);
+    L_list.push_back(L);
+    auto tmp = Ltilde * L;
+    Ltilde = tmp;
+  }
+
+  transmittance = 1 / Ltilde[0][0];
+  reflectance = Ltilde[1][0] / Ltilde[0][0];
+}
+
+//______________________________________________________________________________
 void AMultilayer::PrintLayers(Double_t lambda) const {
   auto n = fRefractiveIndexList.size();
   for (std::size_t i = 0; i < n; ++i) {
@@ -388,7 +743,7 @@ void AMultilayer::PrintLayers(Double_t lambda) const {
   std::cout << "----------------------------------------" << std::endl;
 }
 
-//__________________________________________________________________________________
+//______________________________________________________________________________
 void AMultilayer::SetNthreads(std::size_t n) {
   // Note that having n larger than 1 frequently decreases the total
   // performance. Use this method only when you feed a very long vector.

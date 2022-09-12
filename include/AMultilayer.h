@@ -27,6 +27,7 @@ class AMultilayer : public TObject {
  private:
   std::vector<std::shared_ptr<ARefractiveIndex>> fRefractiveIndexList;
   std::vector<Double_t> fThicknessList;
+  std::vector<Double_t> fCoherentList;
   std::size_t fNthreads;
   std::shared_ptr<TH2D> fPreCalculatedReflectanceMixed;
   std::shared_ptr<TH2D> fPreCalculatedTransmittanceMixed;
@@ -65,13 +66,23 @@ class AMultilayer : public TObject {
       ++transmittance_it;
     }
   }
+  void IncGroupLayers(std::vector<std::vector<Double_t>>& stack_d_list,
+                      std::vector<std::vector<std::shared_ptr<ARefractiveIndex>>>& stack_n_list,
+                      std::vector<std::size_t>& all_from_inc,
+                      std::vector<std::size_t>& inc_from_all,
+                      std::vector<std::vector<std::size_t>>& all_from_stack,
+                      std::vector<std::vector<std::size_t>>& stack_from_all,
+                      std::vector<std::size_t>& inc_from_stack,
+                      std::vector<std::size_t>& stack_from_inc
+                      ) const;
 
  public:
   AMultilayer(std::shared_ptr<ARefractiveIndex> top,
               std::shared_ptr<ARefractiveIndex> bottom);
   virtual ~AMultilayer();
 
-  void InsertLayer(std::shared_ptr<ARefractiveIndex> idx, Double_t thickness);
+  void AddLayer(std::shared_ptr<ARefractiveIndex> idx, Double_t thickness, Bool_t coherent = kTRUE);
+  void InsertLayer(std::shared_ptr<ARefractiveIndex> idx, Double_t thickness, Bool_t coherent = kTRUE);
   void ChangeThickness(std::size_t i, Double_t thickness) {
     if (i < 1 || i > fThicknessList.size() - 2) {
       Error("ChangeThickness", "Cannot change the thickness of the %luth layer",
@@ -81,9 +92,25 @@ class AMultilayer : public TObject {
     }
   }
 
+  std::complex<Double_t> Snell(std::complex<Double_t> n1,
+                               std::complex<Double_t> n2,
+                               std::complex<Double_t> th) const {
+    auto th_2_guess = std::asin(n1 * std::sin(th) / n2);
+    if (IsForwardAngle(n2, th_2_guess)) {
+      return th_2_guess;
+    } else {
+      return TMath::Pi() - th_2_guess;
+    }
+  }
+                                      
   void CoherentTMM(EPolarization polarization, std::complex<Double_t> th_0,
                    Double_t lam_vac, Double_t& reflectance,
-                   Double_t& transmittance) const;
+                   Double_t& transmittance, Bool_t reverse = kFALSE) const;
+  void IncoherentTMM(EPolarization polarization,
+                     std::complex<Double_t> th_0, Double_t lam_vac,
+                     Double_t& reflectance,
+                     Double_t& transmittance) const;
+
   void CoherentTMMMixed(std::complex<Double_t> th_0, Double_t lam_vac,
                         Double_t& reflectance, Double_t& transmittance) const {
     if(fPreCalculatedReflectanceMixed and fPreCalculatedTransmittanceMixed) {
@@ -97,6 +124,25 @@ class AMultilayer : public TObject {
     r += reflectance;
     t += transmittance;
     CoherentTMMS(th_0, lam_vac, reflectance, transmittance);
+    r += reflectance;
+    t += transmittance;
+
+    reflectance = r / 2.;
+    transmittance = t / 2.;
+  }
+  void IncoherentTMMMixed(std::complex<Double_t> th_0, Double_t lam_vac,
+                        Double_t& reflectance, Double_t& transmittance) const {
+    if(fPreCalculatedReflectanceMixed and fPreCalculatedTransmittanceMixed) {
+      reflectance = fPreCalculatedReflectanceMixed->Interpolate(lam_vac, th_0.real());
+      transmittance = fPreCalculatedTransmittanceMixed->Interpolate(lam_vac, th_0.real());
+      return;
+    }
+    Double_t r = 0;
+    Double_t t = 0;
+    IncoherentTMMP(th_0, lam_vac, reflectance, transmittance);
+    r += reflectance;
+    t += transmittance;
+    IncoherentTMMS(th_0, lam_vac, reflectance, transmittance);
     r += reflectance;
     t += transmittance;
 
@@ -186,10 +232,18 @@ class AMultilayer : public TObject {
                     Double_t& reflectance, Double_t& transmittance) const {
     CoherentTMM(kS, th_0, lam_vac, reflectance, transmittance);
   }
-  void PreCalculateTMM(Int_t lam_nbins, Double_t lam_min, Double_t lam_max,
-                       Int_t th_nbins, Double_t th_min, Double_t th_max) {
-    // make temporary objects because CoherentTMMMixed checks if fPreCalculstedXXX are
-    // null or not
+  void IncoherentTMMP(std::complex<Double_t> th_0, Double_t lam_vac,
+                    Double_t& reflectance, Double_t& transmittance) const {
+    IncoherentTMM(kP, th_0, lam_vac, reflectance, transmittance);
+  }
+  void IncoherentTMMS(std::complex<Double_t> th_0, Double_t lam_vac,
+                    Double_t& reflectance, Double_t& transmittance) const {
+    IncoherentTMM(kS, th_0, lam_vac, reflectance, transmittance);
+  }
+  void PreCalculateCoherentTMM(Int_t lam_nbins, Double_t lam_min, Double_t lam_max,
+                               Int_t th_nbins, Double_t th_min, Double_t th_max) {
+    // make temporary objects because CoherentTMMMixed checks if
+    // fPreCalculstedXXX are null or not
     auto preReflectanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
     auto preTransmittanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
     for (Int_t j = 1; j <= th_nbins; ++j) {
@@ -198,6 +252,26 @@ class AMultilayer : public TObject {
         Double_t lam = preReflectanceMixed->GetXaxis()->GetBinCenter(i);
         Double_t reflectance, transmittance;
         CoherentTMMMixed(th, lam, reflectance, transmittance);
+        preReflectanceMixed->SetBinContent(i, j, reflectance);
+        preTransmittanceMixed->SetBinContent(i, j, transmittance);
+      }
+    }
+
+    fPreCalculatedReflectanceMixed = preReflectanceMixed;
+    fPreCalculatedTransmittanceMixed = preTransmittanceMixed;
+  }
+  void PreCalculateIncoherentTMM(Int_t lam_nbins, Double_t lam_min, Double_t lam_max,
+                                 Int_t th_nbins, Double_t th_min, Double_t th_max) {
+    // make temporary objects because CoherentTMMMixed checks if
+    // fPreCalculstedXXX are null or not
+    auto preReflectanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
+    auto preTransmittanceMixed = std::make_shared<TH2D>("", "", lam_nbins, lam_min, lam_max, th_nbins, th_min, th_max);
+    for (Int_t j = 1; j <= th_nbins; ++j) {
+      Double_t th = preReflectanceMixed->GetYaxis()->GetBinCenter(j);
+      for (Int_t i = 1; i <= lam_nbins; ++i) {
+        Double_t lam = preReflectanceMixed->GetXaxis()->GetBinCenter(i);
+        Double_t reflectance, transmittance;
+        IncoherentTMMMixed(th, lam, reflectance, transmittance);
         preReflectanceMixed->SetBinContent(i, j, reflectance);
         preTransmittanceMixed->SetBinContent(i, j, transmittance);
       }

@@ -654,6 +654,17 @@ class TestROBAST(unittest.TestCase):
         self.assertAlmostEqual(reflectance.value, (rs + rp) / 2.)
         self.assertAlmostEqual(transmittance.value, (ts + tp) / 2.)
 
+        reverse = ROOT.AMultilayer(ROOT.med4, ROOT.med1)
+        reverse.InsertLayer(ROOT.med3, 3)
+        reverse.InsertLayer(ROOT.med2, 2)
+        reverse.CoherentTMM(ROOT.AMultilayer.kS, th_0, lam_vac, reflectance, transmittance, True)
+        self.assertAlmostEqual(reflectance.value, rs)
+        self.assertAlmostEqual(transmittance.value, ts)
+
+        reverse.CoherentTMM(ROOT.AMultilayer.kP, th_0, lam_vac, reflectance, transmittance, True)
+        self.assertAlmostEqual(reflectance.value, rp)
+        self.assertAlmostEqual(transmittance.value, tp)
+
         wavelength_v = ROOT.vector('Double_t')()
         answer = []
 
@@ -696,6 +707,76 @@ class TestROBAST(unittest.TestCase):
 
         self.assertAlmostEqual(reflectance0.value, reflectance1.value)
         self.assertAlmostEqual(transmittance0.value, transmittance1.value)
+
+    def testIncoherentTMM(self):
+        '''
+        Compare with the output of tmm.inc_tmm for the following config
+
+        n0 = 1+0.1j
+        n1 = 2+0.2j
+        n2 = 3+0.004j
+        n3 = 4+0.2j
+        d1 = 100
+        d2 = 1000
+
+        n_list = [n0, n1, n2, n1, n2, n3, n1, n3, n1, n3]
+        d_list = [inf, d1, d2, d1, d1, d1, d2, d1, d1, inf]
+        c_list = ['i', 'c', 'i', 'c', 'c', 'c', 'i', 'c', 'c', 'i']
+        
+        lam_vac = 400
+
+        n00 = 1
+        th00 = pi/3
+        th0 = snell(n00, n0, th00)
+        
+        inc_data = inc_tmm('s', n_list, d_list, c_list, th0, lam_vac)
+        print(inc_data['R'], inc_data['T'])
+        inc_data = inc_tmm('p', n_list, d_list, c_list, th0, lam_vac)
+        print(inc_data['R'], inc_data['T'])
+        '''
+        
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> n0(new ARefractiveIndex(1., 0.1));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> n1(new ARefractiveIndex(2., 0.2));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> n2(new ARefractiveIndex(3., 0.004));')
+        ROOT.gROOT.ProcessLine('std::shared_ptr<ARefractiveIndex> n3(new ARefractiveIndex(4., 0.2));')
+
+        d1 = 100
+        d2 = 1000
+
+        multi = ROOT.AMultilayer(ROOT.n0, ROOT.n3)
+        multi.InsertLayer(ROOT.n1, d1)
+        multi.InsertLayer(ROOT.n2, d2, False)
+        multi.InsertLayer(ROOT.n1, d1)
+        multi.InsertLayer(ROOT.n2, d1)
+        multi.InsertLayer(ROOT.n3, d1)
+        multi.InsertLayer(ROOT.n1, d2, False)
+        multi.InsertLayer(ROOT.n3, d1)
+        multi.InsertLayer(ROOT.n1, d1)
+
+        lam_vac = 400
+
+        n00 = 1
+        th00 = ROOT.TMath.Pi() / 3.
+        n0 = ROOT.n0.GetComplexRefractiveIndex(lam_vac)
+        import numpy
+        th_0 = numpy.arcsin(n00 / n0 * ROOT.std.sin(th00))
+
+        # values calculated with tmm.py
+        rs = 0.3776110935131179
+        ts = 1.2856977234844612e-05
+        rp = 0.03199545463016445
+        tp = 2.0900281396463212e-05
+
+        reflectance = ctypes.c_double()
+        transmittance = ctypes.c_double()
+
+        multi.IncoherentTMM(ROOT.AMultilayer.kS, th_0, lam_vac, reflectance, transmittance)
+        self.assertAlmostEqual(reflectance.value, rs)
+        self.assertAlmostEqual(transmittance.value, ts)
+
+        multi.IncoherentTMM(ROOT.AMultilayer.kP, th_0, lam_vac, reflectance, transmittance)
+        self.assertAlmostEqual(reflectance.value, rp)
+        self.assertAlmostEqual(transmittance.value, tp)
 
     def testLambertian(self):
         manager = makeTheWorld()
