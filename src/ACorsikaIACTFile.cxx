@@ -219,32 +219,35 @@ void ACorsikaIACTFile::Open(const Char_t* fname) {
   **********************************/
 
   // Check if block type is CORSIKA run header
-  if (ReadNextBlock() == IO_TYPE_MC_RUNH) {
+  int ret = ReadNextBlock();
+  if (ret == IO_TYPE_MC_RUNH) {
     Float_t runh[273];
     read_tel_block(fIOBuffer, IO_TYPE_MC_RUNH, runh, 273);
     fRunHeader = new ACorsikaIACTRunHeader(runh);
   } else {
-    fprintf(stderr, "The first header is not IO_TYPE_MC_RUNH.\n");
+    fprintf(stderr, "The first header is not IO_TYPE_MC_RUNH but %d.\n", ret);
     Close();
     return;
   }
 
   // Check if block type is CORSIKA input configuration
-  if (ReadNextBlock() == IO_TYPE_MC_INPUTCFG) {
+  ret = ReadNextBlock();
+  if (ret == IO_TYPE_MC_INPUTCFG) {
     read_input_lines(fIOBuffer, &fCorsikaInputs);
   } else {
-    fprintf(stderr, "The second header is not IO_TYPE_MC_INPUTCFG.\n");
+    fprintf(stderr, "The second header is not IO_TYPE_MC_INPUTCFG but %d.\n", ret);
     Close();
     return;
   }
 
   // Check if block type is telescope information
-  if (ReadNextBlock() == IO_TYPE_MC_TELPOS) {
+  ret = ReadNextBlock();
+  if (ret == IO_TYPE_MC_TELPOS) {
     read_tel_pos(fIOBuffer, kMaxTelescopes, &fNumberOfTelescopes,
                  fTelescopePosition[0], fTelescopePosition[1],
                  fTelescopePosition[2], fTelescopePosition[3]);
   } else {
-    fprintf(stderr, "The third header is not IO_TYPE_MC_TELPOS.\n");
+    fprintf(stderr, "The third header is not IO_TYPE_MC_TELPOS but %d.\n", ret);
     Close();
     return;
   }
