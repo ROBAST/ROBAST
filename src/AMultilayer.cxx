@@ -744,6 +744,52 @@ void AMultilayer::PrintLayers(Double_t lambda) const {
 }
 
 //______________________________________________________________________________
+TGraph* AMultilayer::MakeIndexGraph(Double_t lambda, std::size_t stack_index) const {
+  std::vector<std::vector<Double_t>> stack_d_list;
+  std::vector<std::vector<std::shared_ptr<ARefractiveIndex>>> stack_n_list;
+  std::vector<std::size_t> all_from_inc;
+  std::vector<std::size_t> inc_from_all;
+  std::vector<std::vector<std::size_t>> all_from_stack;
+  std::vector<std::vector<std::size_t>> stack_from_all;
+  std::vector<std::size_t> inc_from_stack;
+  std::vector<std::size_t> stack_from_inc;
+
+  IncGroupLayers(stack_d_list, stack_n_list, all_from_inc,
+                 inc_from_all, all_from_stack, stack_from_all, inc_from_stack,
+                 stack_from_inc);
+
+  if (stack_index >= stack_n_list.size()) {
+    Error("MakeIndexGraph", "stack_index exceeds the number of stack groups.");
+    return 0;
+  }
+
+  auto n_list = stack_n_list[stack_index];
+  auto d_list = stack_d_list[stack_index];
+
+  auto g = new TGraph;
+  g->GetXaxis()->SetTitle("Thickness (nm)");
+  g->GetYaxis()->SetTitle(Form("Refractive index at %.0lf nm",
+                               lambda / AOpticsManager::nm()));
+  
+  Double_t total = 0.;
+
+  for (std::size_t i = 0; i < n_list.size(); ++i) {
+    auto n = n_list[i]->GetRefractiveIndex(lambda);
+    auto d = fThicknessList[i] / AOpticsManager::nm();
+
+    if (i == 0 or i == n_list.size() - 1) {
+      g->SetPoint(g->GetN(), total, n);
+    } else {
+      g->SetPoint(g->GetN(), total, n);
+      total += d;
+      g->SetPoint(g->GetN(), total, n);
+    }
+  }
+
+  return g;
+}
+
+//______________________________________________________________________________
 void AMultilayer::SetNthreads(std::size_t n) {
   // Note that having n larger than 1 frequently decreases the total
   // performance. Use this method only when you feed a very long vector.

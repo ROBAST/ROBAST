@@ -286,7 +286,15 @@ class AMultilayer : public TObject {
   const std::shared_ptr<const TH2D> GetPrecalculatedTransmittanceMixed() const {
     return fPreCalculatedTransmittanceMixed;
   }
+  Double_t GetThickness(std::size_t i) const {
+    if (i >= fThicknessList.size()) {
+      Error("GetThickness", "Index out of range");
+      return 0;
+    }
+    return fThicknessList[i];
+  }
   void PrintLayers(Double_t lambda) const;
+  TGraph* MakeIndexGraph(Double_t lambda, std::size_t stack_index = 0) const;
   void SetNthreads(std::size_t n);
 
   ClassDef(AMultilayer, 1)
