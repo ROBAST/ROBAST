@@ -758,6 +758,7 @@ class TestROBAST(unittest.TestCase):
         n00 = 1
         th00 = ROOT.TMath.Pi() / 3.
         n0 = ROOT.n0.GetComplexRefractiveIndex(lam_vac)
+        n0 = n0.real + n0.imag*(0 + 1j) # need conversion from C++ to Python
         import numpy
         th_0 = numpy.arcsin(n00 / n0 * ROOT.std.sin(th00))
 
