@@ -699,7 +699,7 @@ class TestROBAST(unittest.TestCase):
         transmittance0 = ctypes.c_double()
         multi.CoherentTMMMixed(45 * deg, 600, reflectance0, transmittance0)
 
-        multi.PreCalculateTMM(801, 199.5, 1000.5, 90, -0.5 * deg, 89.5 * deg)
+        multi.PreCalculateCoherentTMM(801, 199.5, 1000.5, 90, -0.5 * deg, 89.5 * deg)
 
         reflectance1 = ctypes.c_double()
         transmittance1 = ctypes.c_double()
