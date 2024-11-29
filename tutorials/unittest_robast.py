@@ -760,7 +760,7 @@ class TestROBAST(unittest.TestCase):
         n0 = ROOT.n0.GetComplexRefractiveIndex(lam_vac)
         n0 = n0.real + n0.imag*(0 + 1j) # need conversion from C++ to Python
         import numpy
-        th_0 = numpy.arcsin(n00 / n0 * ROOT.std.sin(th00))
+        th_0 = numpy.lib.scimath.arcsin(n00 / n0 * ROOT.std.sin(th00))
 
         # values calculated with tmm.py
         rs = 0.3776110935131179
