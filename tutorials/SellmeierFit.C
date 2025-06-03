@@ -37,7 +37,7 @@ void SellmeierFit() {
   graph->GetYaxis()->SetTitle("Refractive Index");
 
   // You will get best-fit parameters: B1, B2, B3, C1, C2, and C3
-  sellmaier->FitData(graph, "uvc200b");
+  sellmaier->FitData(graph, "uvc200b", "m");
 
   // You can get a refractive index at any wavelength you like
   std::cout << "Refractive Index at 400 nm: "
