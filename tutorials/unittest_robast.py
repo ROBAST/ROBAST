@@ -573,7 +573,7 @@ class TestROBAST(unittest.TestCase):
         self.assertNotAlmostEqual(nbk7.GetRefractiveIndex(1014.0*nm), 1.507310, 3) # nt
         self.assertNotAlmostEqual(nbk7.GetRefractiveIndex(2325.4*nm), 1.489210, 3) # n2325.4
 
-        f = nbk7.FitData(graph, "N-BK7", "")
+        f = nbk7.FitData(graph, "N-BK7", "m")
         graph.Draw("a*")
 
         # Will get an almost correct answers. "3" is due to an inperfect fitting result.
