@@ -1,3 +1,8 @@
+#include "TCanvas.h"
+#include "TFile.h"
+#include "TGraph.h"
+#include "TROOT.h"
+
 #include "AOpticsManager.h"
 #include "ASellmeierFormula.h"
 
